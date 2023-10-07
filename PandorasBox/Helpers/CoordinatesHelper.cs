@@ -1,5 +1,9 @@
-using Dalamud.Logging;
+using Dalamud.Game.Text;
+using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
+using PandorasBox.Helpers.Faloop;
 using ECommons.DalamudServices;
+using ECommons.Logging;
 using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Linq;
@@ -83,6 +87,48 @@ namespace PandorasBox.Helpers
             {
                 PluginLog.Error($"Cannot find nearest aetheryte of {maplinkMessage.PlaceName}({maplinkMessage.X}, {maplinkMessage.Y}).");
             }
+        }
+
+        public static SeString? CreateMapLink(uint zoneId, int zonePoiId, int? instance, FaloopSession session)
+        {
+            var zone = Svc.Data.GetExcelSheet<TerritoryType>()?.GetRow(zoneId);
+            var map = zone?.Map.Value;
+            if (zone == default || map == default)
+            {
+                PluginLog.Debug("CreateMapLink: zone == null || map == null");
+                return default;
+            }
+
+            var location = session.EmbedData.ZoneLocations.FirstOrDefault(x => x.Id == zonePoiId);
+            if (location == default)
+            {
+                PluginLog.Debug("CreateMapLink: location == null");
+                return default;
+            }
+
+            var n = 41 / (map.SizeFactor / 100.0);
+            var loc = location.Location.Split(new[] { ',' }, 2)
+                .Select(int.Parse)
+                .Select(x => (x / 2048.0 * n) + 1)
+                .Select(x => Math.Round(x, 1))
+                .Select(x => (float)x)
+                .ToList();
+
+            var mapLink = SeString.CreateMapLink(zone.RowId, zone.Map.Row, loc[0], loc[1]);
+
+            var instanceIcon = GetInstanceIcon(instance);
+            return instanceIcon != default ? mapLink.Append(instanceIcon) : mapLink;
+        }
+
+        private static TextPayload? GetInstanceIcon(int? instance)
+        {
+            return instance switch
+            {
+                1 => new TextPayload(SeIconChar.Instance1.ToIconString()),
+                2 => new TextPayload(SeIconChar.Instance2.ToIconString()),
+                3 => new TextPayload(SeIconChar.Instance3.ToIconString()),
+                _ => default,
+            };
         }
     }
 }
