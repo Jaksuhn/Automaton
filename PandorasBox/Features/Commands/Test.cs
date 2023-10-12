@@ -1,8 +1,7 @@
 using Automaton.FeaturesSetup;
-using System;
+using Automaton.Helpers;
 using System.Collections.Generic;
-using Automaton.IPC;
-using ECommons.DalamudServices;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace Automaton.Features.Commands
 {
@@ -13,11 +12,14 @@ namespace Automaton.Features.Commands
         public override string Description => "";
         public override bool isDebug => true;
 
-        public override FeatureType FeatureType => FeatureType.Commands;
+        public override FeatureType FeatureType => FeatureType.Disabled;
 
         protected override void OnCommand(List<string> args)
         {
-            return;
+            if (ECommons.GenericHelpers.TryGetAddonByName<AtkUnitBase>("RetainerList", out var addon))
+            {
+                addon->GetButtonNodeById(45)->ClickAddonButton((AtkComponentBase*)addon, 26);
+            }
         }
     }
 }

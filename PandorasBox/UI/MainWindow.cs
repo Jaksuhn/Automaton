@@ -129,6 +129,9 @@ internal class MainWindow : Window
                             case OpenWindow.Commands:
                                 DrawCommands(P.Features.Where(x => x.FeatureType == FeatureType.Commands && (!x.isDebug || Config.showDebugFeatures)).ToArray());
                                 break;
+                            case OpenWindow.About:
+                                DrawAbout();
+                                break;
                         }
                     }
                 }
@@ -141,6 +144,13 @@ internal class MainWindow : Window
             }
             ImGui.EndTable();
         }
+    }
+
+    private static void DrawAbout()
+    {
+        ImGui.Text("This is where I test features for Pandora's Box,\nlearn to break the game,\nor store features ill suited for anything else.");
+        ImGui.Spacing();
+        ImGui.Text("If any feature you see here is in Pandora's Box,\nit means I'm testing modifications to that feature.\nIf you enable it here, it will disable the Pandora version for you.");
     }
 
     private static void DrawCommands(BaseFeature[] features)
@@ -247,5 +257,6 @@ public enum OpenWindow
     Chat,
     Other,
     Achievements,
-    Commands
+    Commands,
+    About
 }
