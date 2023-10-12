@@ -51,14 +51,13 @@ namespace PandorasBox.Features.UI
         private List<int> SlotsFilled { get; set; } = new();
         public override void Enable()
         {
+            if (PandoraIPC.GetFeatureEnabled(nameof(AutoSelectGardening))) PandoraIPC.SetFeatureEnabled(nameof(AutoSelectGardening), false);
             Config = LoadConfig<Configs>() ?? new Configs();
             Seeds = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.Row == 82 && x.FilterGroup == 20).ToDictionary(x => x.RowId, x => x);
             Soils = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.Row == 82 && x.FilterGroup == 21).ToDictionary(x => x.RowId, x => x);
             Fertilizers = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.Row == 82 && x.FilterGroup == 22).ToDictionary(x => x.RowId, x => x);
             AddonText = Svc.Data.GetExcelSheet<Addon>().ToDictionary(x => x.RowId, x => x);
             Svc.Framework.Update += RunFeature;
-
-            if (PandoraIPC.GetFeatureEnabled(nameof(AutoSelectGardening))) PandoraIPC.SetFeatureEnabled(nameof(AutoSelectGardening), false);
             base.Enable();
         }
 

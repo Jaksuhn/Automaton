@@ -24,7 +24,7 @@ internal class MainWindow : Window
 
     public bool ThemePushed = false;
 
-    public MainWindow() : base($"{P.Name} {P.GetType().Assembly.GetName().Version}###PandorasBox")
+    public MainWindow() : base($"{P.Name} {P.GetType().Assembly.GetName().Version}###{P.Name}")
     {
         this.SizeConstraints = new WindowSizeConstraints
         {
@@ -124,7 +124,7 @@ internal class MainWindow : Window
 
         var topLeftSideHeight = region.Y;
 
-        if (ImGui.BeginTable("$PandorasBoxTableContainer", 2, ImGuiTableFlags.Resizable))
+        if (ImGui.BeginTable($"${P.Name}TableContainer", 2, ImGuiTableFlags.Resizable))
         {
             try
             {
@@ -232,7 +232,7 @@ internal class MainWindow : Window
                                 DrawFeatures(P.Features.Where(x => x.FeatureType == FeatureType.ChatFeature).ToArray());
                                 break;
                             case OpenWindow.Achievements:
-                                DrawCommands(P.Features.Where(x => x.FeatureType == FeatureType.Achievements).ToArray());
+                                DrawFeatures(P.Features.Where(x => x.FeatureType == FeatureType.Achievements).ToArray());
                                 break;
                             case OpenWindow.Commands:
                                 DrawCommands(P.Features.Where(x => x.FeatureType == FeatureType.Commands).ToArray());

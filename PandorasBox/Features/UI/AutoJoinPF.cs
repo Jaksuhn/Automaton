@@ -114,11 +114,10 @@ namespace PandorasBox.Features.UI
 
         public override void Enable()
         {
+            if (PandoraIPC.GetFeatureEnabled(nameof(AutoJoinPF))) PandoraIPC.SetFeatureEnabled(nameof(AutoJoinPF), false);
             Config = LoadConfig<Configs>() ?? new Configs();
             Common.OnAddonSetup += RunFeature;
             Common.OnAddonSetup += ConfirmYesNo;
-
-            if (PandoraIPC.GetFeatureEnabled(nameof(AutoJoinPF))) PandoraIPC.SetFeatureEnabled(nameof(AutoJoinPF), false);
             base.Enable();
         }
 

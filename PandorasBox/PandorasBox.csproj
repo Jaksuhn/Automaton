@@ -118,6 +118,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Features\Actions\" />
       <Folder Include="Features\Chat\" />
     </ItemGroup>
 </Project>

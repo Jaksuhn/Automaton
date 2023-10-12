@@ -5,7 +5,6 @@ using ECommons;
 using ECommons.Automation;
 using ECommons.DalamudServices;
 using PandorasBox.Features;
-using PandorasBox.IPC;
 using PandorasBox.UI;
 using PunishLib;
 using System.Collections.Generic;

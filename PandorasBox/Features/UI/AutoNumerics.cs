@@ -69,12 +69,12 @@ namespace PandorasBox.Features.UI
 
         public override void Enable()
         {
+            if (PandoraIPC.GetFeatureEnabled(nameof(AutoNumerics))) PandoraIPC.SetFeatureEnabled(nameof(AutoNumerics), false);
             Config = LoadConfig<Configs>() ?? new Configs();
             Common.OnAddonSetup += FillRegularNumeric;
             Common.OnAddonSetup += FillVentureNumeric;
             //Common.OnAddonSetup += FillBankNumeric;
 
-            if (PandoraIPC.GetFeatureEnabled(nameof(AutoNumerics))) PandoraIPC.SetFeatureEnabled(nameof(AutoNumerics), false);
             base.Enable();
         }
 
