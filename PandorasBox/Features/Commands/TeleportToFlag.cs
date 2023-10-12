@@ -9,7 +9,8 @@ namespace PandorasBox.Features.Commands
     public unsafe class TeleportToFlag : CommandFeature
     {
         public override string Name => "Teleport to Flag";
-        public override string Command { get; set; } = "/ptpf";
+        public override string Command { get; set; } = "/teleportflag";
+        public override string[] Alias => new string[] { "/tpf" };
         public override string Description => "Teleports you to the aetheryte nearest your <flag>";
 
         public override FeatureType FeatureType => FeatureType.Commands;

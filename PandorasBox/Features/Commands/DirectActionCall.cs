@@ -10,8 +10,8 @@ namespace PandorasBox.Features.Commands
     public unsafe class DirectActionCall : CommandFeature
     {
         public override string Name => "Direct Action Call";
-        public override string Command { get; set; } = "/pdirectaction";
-        public override string[] Alias => new string[] { "/paction", "/pda" };
+        public override string Command { get; set; } = "/directaction";
+        public override string[] Alias => new string[] { "/ada" };
         public override string Description => "Call any action directly.";
         public override List<string> Parameters => new() { "[<ActionType>]", "[<ID>]" };
 

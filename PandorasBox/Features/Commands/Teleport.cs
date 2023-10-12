@@ -13,8 +13,8 @@ namespace PandorasBox.Features.Commands
     public unsafe class Teleport : CommandFeature
     {
         public override string Name => "Teleport";
-        public override string Command { get; set; } = "/pteleport";
-        public override string[] Alias => new string[] { "/ptp" };
+        public override string Command { get; set; } = "/ateleport";
+        public override string[] Alias => new string[] { "/atp" };
         public override string Description => "";
         public override List<string> Parameters => new() { "<x offset>, <z offset>, <y offset>" };
 

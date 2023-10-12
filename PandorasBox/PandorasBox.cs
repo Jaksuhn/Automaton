@@ -39,7 +39,6 @@ public class PandorasBox : IDalamudPlugin
     private void Initialize()
     {
         ECommonsMain.Init(pi, P, ECommons.Module.DalamudReflector);
-        PunishLibMain.Init(pi, $"{Name}", new AboutPlugin() { Sponsor = "https://ko-fi.com/taurenkey" });
 
         Ws = new();
         MainWindow = new();

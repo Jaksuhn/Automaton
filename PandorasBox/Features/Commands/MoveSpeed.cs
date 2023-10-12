@@ -10,7 +10,8 @@ namespace PandorasBox.Features.Commands
     public unsafe class MoveSpeed : CommandFeature
     {
         public override string Name => "Modify Movement Speed";
-        public override string Command { get; set; } = "/pspeed";
+        public override string Command { get; set; } = "/movespeed";
+        public override string[] Alias => new string[] { "/move", "/speed" };
         public override string Description => "";
         public override List<string> Parameters => new() { "[<speed>]" };
 
