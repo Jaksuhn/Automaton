@@ -1,7 +1,7 @@
 using ImGuiNET;
 using System.Numerics;
 
-namespace PandorasBox.FeaturesSetup
+namespace Automaton.FeaturesSetup
 {
     public static class FeatureConfigEditor
     {

@@ -3,9 +3,9 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using PandorasBox.Helpers.Faloop.Model;
+using Automaton.Helpers.Faloop.Model;
 
-namespace PandorasBox.Helpers.Faloop;
+namespace Automaton.Helpers.Faloop;
 
 public class FaloopApiClient : IDisposable
 {

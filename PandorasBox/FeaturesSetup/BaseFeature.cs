@@ -17,19 +17,19 @@ using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
 using Newtonsoft.Json;
-using PandorasBox.FeaturesSetup;
-using PandorasBox.Helpers;
+using Automaton.FeaturesSetup;
+using Automaton.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace PandorasBox.Features
+namespace Automaton.Features
 {
     public abstract class BaseFeature
     {
-        protected PandorasBox P;
+        protected Automaton P;
         protected DalamudPluginInterface Pi;
         protected Configuration config;
         protected TaskManager TaskManager;
@@ -67,7 +67,9 @@ namespace PandorasBox.Features
 
         public virtual FeatureType FeatureType { get; }
 
-        public void InterfaceSetup(PandorasBox plugin, DalamudPluginInterface pluginInterface, Configuration config, FeatureProvider fp)
+        public virtual bool isDebug { get; }
+
+        public void InterfaceSetup(Automaton plugin, DalamudPluginInterface pluginInterface, Configuration config, FeatureProvider fp)
         {
             this.P = plugin;
             this.Pi = pluginInterface;
@@ -395,7 +397,7 @@ namespace PandorasBox.Features
             var message = new XivChatEntry
             {
                 Message = new SeStringBuilder()
-                .AddUiForeground($"[{P.Name}] ", 45)
+                .AddUiForeground($"[{Automaton.Name}] ", 45)
                 .AddUiForeground($"[{Name}] ", 62)
                 .AddText(msg)
                 .Build()
@@ -409,7 +411,7 @@ namespace PandorasBox.Features
             var message = new XivChatEntry
             {
                 Message = new SeStringBuilder()
-                .AddUiForeground($"[{P.Name}] ", 45)
+                .AddUiForeground($"[{Automaton.Name}] ", 45)
                 .AddUiForeground($"[{Name}] ", 62)
                 .Append(msg)
                 .Build()

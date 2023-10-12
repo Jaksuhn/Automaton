@@ -4,11 +4,11 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using ECommons.Logging;
-using PandorasBox.Helpers.Faloop.Model;
+using Automaton.Helpers.Faloop.Model;
 using SocketIOClient;
 using SocketIOClient.Transport;
 
-namespace PandorasBox.Helpers.Faloop;
+namespace Automaton.Helpers.Faloop;
 
 #nullable enable
 public class FaloopSocketIOClient : IDisposable

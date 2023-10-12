@@ -1,25 +1,19 @@
 using Dalamud.Logging;
-using ECommons.DalamudServices;
-using PandorasBox.FeaturesSetup;
+using Automaton.FeaturesSetup;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace PandorasBox.Features
+namespace Automaton.Features
 {
-    public class FeatureProvider : IDisposable
+    public class FeatureProvider(Assembly assembly) : IDisposable
     {
         public bool Disposed { get; protected set; } = false;
 
         public List<BaseFeature> Features { get; } = new();
 
-        public Assembly Assembly { get; init; } = null!;
-
-        public FeatureProvider(Assembly assembly)
-        {
-            Assembly = assembly;
-        }
+        public Assembly Assembly { get; init; } = assembly;
 
         public virtual void LoadFeatures()
         {
@@ -32,7 +26,7 @@ namespace PandorasBox.Features
                     feature.Setup();
                     if ((feature.Ready && Config.EnabledFeatures.Contains(t.Name)) || feature.FeatureType == FeatureType.Commands)
                     {
-                        if (feature.FeatureType == FeatureType.Disabled)
+                        if (feature.FeatureType == FeatureType.Disabled || (feature.isDebug && !Config.showDebugFeatures))
                             feature.Disable();
                         else
                             feature.Enable();

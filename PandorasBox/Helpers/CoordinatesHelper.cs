@@ -1,14 +1,14 @@
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
-using PandorasBox.Helpers.Faloop;
+using Automaton.Helpers.Faloop;
 using ECommons.DalamudServices;
 using ECommons.Logging;
 using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Linq;
 
-namespace PandorasBox.Helpers
+namespace Automaton.Helpers
 {
     public static class CoordinatesHelper
     {

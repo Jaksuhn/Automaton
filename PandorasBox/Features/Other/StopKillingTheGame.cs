@@ -5,13 +5,13 @@ using ECommons.Automation;
 using ECommons.DalamudServices;
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using PandorasBox.Features.UI;
-using PandorasBox.FeaturesSetup;
-using PandorasBox.IPC;
+using Automaton.Features.UI;
+using Automaton.FeaturesSetup;
+using Automaton.IPC;
 using System;
 using System.Runtime.InteropServices;
 
-namespace PandorasBox.Features.Other
+namespace Automaton.Features.Other
 {
     public unsafe class NoKill : Feature
     {
@@ -56,7 +56,7 @@ namespace PandorasBox.Features.Other
 
         public override void Enable()
         {
-            if (PandoraIPC.GetFeatureEnabled(nameof(NoKill))) PandoraIPC.SetFeatureEnabled(nameof(NoKill), false);
+            if ((bool)PandorasBoxIPC.GetFeatureEnabled.InvokeFunc(nameof(NoKill))) PandorasBoxIPC.SetFeatureEnabled.InvokeAction(nameof(NoKill), false);
             Config = LoadConfig<Configs>() ?? new Configs();
             lobbyErrorHandlerHook ??= Svc.Hook.HookFromSignature<LobbyErrorHandlerDelegate>("40 53 48 83 EC 30 48 8B D9 49 8B C8 E8 ?? ?? ?? ?? 8B D0", LobbyErrorHandlerDetour);
             try

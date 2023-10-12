@@ -1,11 +1,11 @@
 using Dalamud;
 using Dalamud.Logging;
 using ECommons.DalamudServices;
-using PandorasBox.FeaturesSetup;
+using Automaton.FeaturesSetup;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace PandorasBox.Features.Commands
+namespace Automaton.Features.Commands
 {
     public unsafe class MoveSpeed : CommandFeature
     {
@@ -14,6 +14,7 @@ namespace PandorasBox.Features.Commands
         public override string[] Alias => new string[] { "/move", "/speed" };
         public override string Description => "";
         public override List<string> Parameters => new() { "[<speed>]" };
+        public override bool isDebug => true;
 
         public override FeatureType FeatureType => FeatureType.Commands;
 

@@ -1,10 +1,10 @@
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-using PandorasBox.FeaturesSetup;
-using PandorasBox.Helpers;
+using Automaton.FeaturesSetup;
+using Automaton.Helpers;
 using System;
 using System.Collections.Generic;
 
-namespace PandorasBox.Features.Commands
+namespace Automaton.Features.Commands
 {
     public unsafe class TeleportToFlag : CommandFeature
     {

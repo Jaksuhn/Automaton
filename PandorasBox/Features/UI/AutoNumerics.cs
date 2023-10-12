@@ -10,10 +10,10 @@ using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
-using PandorasBox.FeaturesSetup;
-using PandorasBox.IPC;
+using Automaton.FeaturesSetup;
+using Automaton.IPC;
 
-namespace PandorasBox.Features.UI
+namespace Automaton.Features.UI
 {
     public unsafe class AutoNumerics : Feature
     {
@@ -69,7 +69,8 @@ namespace PandorasBox.Features.UI
 
         public override void Enable()
         {
-            if (PandoraIPC.GetFeatureEnabled(nameof(AutoNumerics))) PandoraIPC.SetFeatureEnabled(nameof(AutoNumerics), false);
+            if ((bool)PandorasBoxIPC.GetFeatureEnabled.InvokeFunc("Auto-Fill Numeric Dialogs"))
+                PandorasBoxIPC.SetFeatureEnabled.InvokeAction("Auto-Fill Numeric Dialogs", false);
             Config = LoadConfig<Configs>() ?? new Configs();
             Common.OnAddonSetup += FillRegularNumeric;
             Common.OnAddonSetup += FillVentureNumeric;

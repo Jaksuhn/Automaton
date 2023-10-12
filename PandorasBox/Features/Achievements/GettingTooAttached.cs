@@ -1,6 +1,6 @@
-using PandorasBox.FeaturesSetup;
-using PandorasBox.Helpers;
-using PandorasBox.UI;
+using Automaton.FeaturesSetup;
+using Automaton.Helpers;
+using Automaton.UI;
 using ClickLib.Clicks;
 using Dalamud.Interface;
 using ECommons.Automation;
@@ -17,7 +17,7 @@ using Dalamud.Game.ClientState.Conditions;
 using static ECommons.GenericHelpers;
 using Dalamud.Memory;
 
-namespace PandorasBox.Features.Achievements
+namespace Automaton.Features.Achievements
 {
     public unsafe class GettingTooAttached : Feature
     {

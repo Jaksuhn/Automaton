@@ -6,11 +6,10 @@
     "InternalName": "Automaton",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 9,
-    "IconUrl": "https://love.puni.sh/resources/pandora.png",
-    "RepoUrl": "https://github.com/PunishXIV/PandorasBox",
-    "DownloadLinkTesting": "https://love.puni.sh/plugins/Pandora/Testing/latest.zip",
+    "IconUrl": "https://i.imgur.com/AVSzkMB.png",
+    "RepoUrl": "https://github.com/croizat/",
     "Tags": [
-        "punish",
+        "automation",
         "plugin"
     ]
 }

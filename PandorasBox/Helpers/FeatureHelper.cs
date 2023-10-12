@@ -1,12 +1,12 @@
 using ECommons.DalamudServices;
 using ECommons.Reflection;
-using PandorasBox.Features;
-using PandorasBox.Features.UI;
+using Automaton.Features;
+using Automaton.Features.UI;
 using System;
 using System.Linq;
 using System.Reflection;
 
-namespace PandorasBox.Helpers
+namespace Automaton.Helpers
 {
     public static class FeatureHelper
     {

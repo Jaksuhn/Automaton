@@ -1,4 +1,4 @@
-namespace PandorasBox.Helpers.Faloop;
+namespace Automaton.Helpers.Faloop;
 
 public enum Jurisdiction
 {

@@ -1,7 +1,7 @@
 using Dalamud.Logging;
 using ECommons.Reflection;
 
-namespace PandorasBox.Helpers;
+namespace Automaton.Helpers;
 
 internal static class YesAlready
 {

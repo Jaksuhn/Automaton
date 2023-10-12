@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace PandorasBox.Helpers;
+namespace Automaton.Helpers;
 
 public static class ArrayExtensions
 {

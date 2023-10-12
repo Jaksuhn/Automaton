@@ -4,7 +4,7 @@ using System.Linq;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 
-namespace PandorasBox.Helpers
+namespace Automaton.Helpers
 {
     public enum AudioTrigger
     {

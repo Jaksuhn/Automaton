@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 
-namespace PandorasBox.Helpers
+namespace Automaton.Helpers
 {
     public static class NumberHelper
     {

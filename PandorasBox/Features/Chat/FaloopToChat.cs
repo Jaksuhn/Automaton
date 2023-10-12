@@ -7,18 +7,18 @@ using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
-using PandorasBox.Helpers.Faloop;
-using PandorasBox.Helpers.Faloop.Model;
+using Automaton.Helpers.Faloop;
+using Automaton.Helpers.Faloop.Model;
 using ECommons.DalamudServices;
 using ECommons.Logging;
 using Lumina.Excel.GeneratedSheets;
-using PandorasBox.FeaturesSetup;
-using PandorasBox.Helpers;
+using Automaton.FeaturesSetup;
+using Automaton.Helpers;
 using SocketIOClient;
 using ImGuiNET;
 using System.Runtime.InteropServices;
 
-namespace PandorasBox.Features.ChatFeature
+namespace Automaton.Features.ChatFeature
 {
     internal class FaloopToChat : Feature
     {

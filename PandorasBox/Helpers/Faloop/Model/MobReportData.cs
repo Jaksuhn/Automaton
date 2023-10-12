@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 #pragma warning disable CS8618
 
-namespace PandorasBox.Helpers.Faloop.Model;
+namespace Automaton.Helpers.Faloop.Model;
 
 public class MobReportData
 {

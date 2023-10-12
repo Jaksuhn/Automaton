@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Dalamud.Logging;
 
-namespace PandorasBox.Helpers.Faloop;
+namespace Automaton.Helpers.Faloop;
 
 public class FaloopSession : IDisposable
 {

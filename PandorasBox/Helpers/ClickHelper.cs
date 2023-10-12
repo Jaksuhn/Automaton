@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PandorasBox.Helpers
+namespace Automaton.Helpers
 {
     internal unsafe static class ClickHelper
     {

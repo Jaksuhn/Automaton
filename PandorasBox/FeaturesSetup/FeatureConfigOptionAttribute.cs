@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-namespace PandorasBox.FeaturesSetup
+namespace Automaton.FeaturesSetup
 {
     [AttributeUsage(AttributeTargets.All)]
     public class FeatureConfigOptionAttribute : Attribute

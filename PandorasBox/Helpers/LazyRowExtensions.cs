@@ -2,7 +2,7 @@ using Dalamud;
 using ECommons.DalamudServices;
 using Lumina.Excel;
 
-namespace PandorasBox.Helpers
+namespace Automaton.Helpers
 {
     public static class LazyRowExtensions
     {

@@ -10,7 +10,7 @@ using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using ValueType = FFXIVClientStructs.FFXIV.Component.GUI.ValueType;
 
-namespace PandorasBox;
+namespace Automaton;
 
 public static unsafe class Common
 {

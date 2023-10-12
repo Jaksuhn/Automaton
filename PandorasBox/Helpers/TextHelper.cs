@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace PandorasBox.Helpers
+namespace Automaton.Helpers
 {
     public static class TextHelper
     {

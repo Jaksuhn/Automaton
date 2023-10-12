@@ -1,4 +1,4 @@
-namespace PandorasBox.FeaturesSetup
+namespace Automaton.FeaturesSetup
 {
     public enum FeatureType
     {

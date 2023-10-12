@@ -5,7 +5,7 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using System;
 using System.Runtime.InteropServices;
 
-namespace PandorasBox.TemporaryFixes
+namespace Automaton.TemporaryFixes
 {
     [Addon("Repair")]
     [StructLayout(LayoutKind.Explicit, Size = 0xF7E8)]

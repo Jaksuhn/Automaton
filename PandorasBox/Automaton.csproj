@@ -91,21 +91,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\PandorasBox\Sounds\Light.wav">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-          <Visible>false</Visible>
-      </Content>
-      <Content Include="..\PandorasBox\Sounds\Strong.wav">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-          <Visible>false</Visible>
-      </Content>
-      <Content Include="..\PandorasBox\Sounds\Legendary.wav">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-          <Visible>false</Visible>
-      </Content>
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\ClickLib\ClickLib\ClickLib.csproj" />
         <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
         <ProjectReference Include="..\PunishLib\PunishLib\PunishLib.csproj" />

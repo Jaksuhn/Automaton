@@ -3,13 +3,13 @@ using Dalamud.Memory;
 using ECommons.Automation;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using PandorasBox.FeaturesSetup;
-using PandorasBox.IPC;
+using Automaton.FeaturesSetup;
+using Automaton.IPC;
 using System;
 using System.Linq;
 using static ECommons.GenericHelpers;
 
-namespace PandorasBox.Features.UI
+namespace Automaton.Features.UI
 {
     public unsafe class AutoJoinPF : Feature
     {
@@ -114,7 +114,7 @@ namespace PandorasBox.Features.UI
 
         public override void Enable()
         {
-            if (PandoraIPC.GetFeatureEnabled(nameof(AutoJoinPF))) PandoraIPC.SetFeatureEnabled(nameof(AutoJoinPF), false);
+            if ((bool)PandorasBoxIPC.GetFeatureEnabled.InvokeFunc(nameof(AutoJoinPF))) PandorasBoxIPC.SetFeatureEnabled.InvokeAction(nameof(AutoJoinPF), false);
             Config = LoadConfig<Configs>() ?? new Configs();
             Common.OnAddonSetup += RunFeature;
             Common.OnAddonSetup += ConfirmYesNo;

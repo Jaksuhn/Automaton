@@ -1,4 +1,4 @@
-namespace PandorasBox.Features
+namespace Automaton.Features
 {
     public abstract class FeatureConfig
     {

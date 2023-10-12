@@ -1,19 +1,19 @@
 using Dalamud.Game.Command;
 using ECommons.DalamudServices;
 using ECommons.Logging;
-using PandorasBox.FeaturesSetup;
+using Automaton.FeaturesSetup;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace PandorasBox.Features;
+namespace Automaton.Features;
 
 public abstract partial class CommandFeature : Feature
 {
     public abstract string Command { get; set; }
     public virtual string[] Alias => Array.Empty<string>();
-    public virtual string HelpMessage => $"[{P.Name} {Name}]";
+    public virtual string HelpMessage => $"[{Automaton.Name} {Name}]";
     public virtual bool ShowInHelp => false;
     public virtual List<string> Parameters => new();
     public override FeatureType FeatureType => FeatureType.Commands;

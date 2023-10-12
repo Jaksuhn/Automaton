@@ -1,6 +1,6 @@
-using PandorasBox.FeaturesSetup;
+using Automaton.FeaturesSetup;
 
-namespace PandorasBox.Features.UI
+namespace Automaton.Features.UI
 {
     public unsafe class AutoFocus : Feature
     {

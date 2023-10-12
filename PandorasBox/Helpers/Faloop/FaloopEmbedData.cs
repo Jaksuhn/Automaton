@@ -6,9 +6,9 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AngleSharp.Html.Parser;
-using PandorasBox.Helpers.Faloop.Model.Embed;
+using Automaton.Helpers.Faloop.Model.Embed;
 
-namespace PandorasBox.Helpers.Faloop;
+namespace Automaton.Helpers.Faloop;
 
 public class FaloopEmbedData(FaloopApiClient client)
 {

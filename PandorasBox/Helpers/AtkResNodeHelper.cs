@@ -2,7 +2,7 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using System;
 using System.Numerics;
 
-namespace PandorasBox.Helpers
+namespace Automaton.Helpers
 {
     internal static class AtkResNodeHelper
     {

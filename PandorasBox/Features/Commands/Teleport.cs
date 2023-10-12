@@ -2,13 +2,13 @@ using Dalamud.Logging;
 using ECommons;
 using ECommons.DalamudServices;
 using ImGuiNET;
-using PandorasBox.FeaturesSetup;
+using Automaton.FeaturesSetup;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
-namespace PandorasBox.Features.Commands
+namespace Automaton.Features.Commands
 {
     public unsafe class Teleport : CommandFeature
     {
@@ -17,6 +17,7 @@ namespace PandorasBox.Features.Commands
         public override string[] Alias => new string[] { "/atp" };
         public override string Description => "";
         public override List<string> Parameters => new() { "<x offset>, <z offset>, <y offset>" };
+        public override bool isDebug => true;
 
         public override FeatureType FeatureType => FeatureType.Commands;
 

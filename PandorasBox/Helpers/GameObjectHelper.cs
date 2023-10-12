@@ -3,7 +3,7 @@ using ECommons.DalamudServices;
 using System;
 using System.Numerics;
 
-namespace PandorasBox.Helpers
+namespace Automaton.Helpers
 {
     internal static class GameObjectHelper
     {

@@ -1,11 +1,12 @@
 using Dalamud.Logging;
+using ECommons;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using PandorasBox.FeaturesSetup;
+using Automaton.FeaturesSetup;
 using System;
 using System.Collections.Generic;
 
-namespace PandorasBox.Features.Commands
+namespace Automaton.Features.Commands
 {
     public unsafe class DirectActionCall : CommandFeature
     {
@@ -14,6 +15,7 @@ namespace PandorasBox.Features.Commands
         public override string[] Alias => new string[] { "/ada" };
         public override string Description => "Call any action directly.";
         public override List<string> Parameters => new() { "[<ActionType>]", "[<ID>]" };
+        public override bool isDebug => true;
 
         public override FeatureType FeatureType => FeatureType.Commands;
 
@@ -26,7 +28,7 @@ namespace PandorasBox.Features.Commands
                 PluginLog.Log($"Executing {Svc.Data.GetExcelSheet<Lumina.Excel.GeneratedSheets.Action>(Svc.ClientState.ClientLanguage).GetRow(actionID).Name.RawString}");
                 ActionManager.Instance()->UseActionLocation(actionType, actionID);
             }
-            catch { }
+            catch (Exception e) { e.Log(); }
         }
 
         private static ActionType ParseActionType(string input)

@@ -8,7 +8,7 @@ using System;
 using System.Runtime.InteropServices;
 using static ECommons.GenericHelpers;
 
-namespace PandorasBox.Helpers;
+namespace Automaton.Helpers;
 
 internal static class IslandSanctuaryHelper
 {

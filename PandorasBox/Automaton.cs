@@ -4,23 +4,24 @@ using Dalamud.Plugin;
 using ECommons;
 using ECommons.Automation;
 using ECommons.DalamudServices;
-using PandorasBox.Features;
-using PandorasBox.UI;
+using Automaton.Features;
+using Automaton.UI;
 using PunishLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Automaton.IPC;
 
-namespace PandorasBox;
+namespace Automaton;
 
-public class PandorasBox : IDalamudPlugin
+public class Automaton : IDalamudPlugin
 {
-    public string Name => "Automaton";
+    public static string Name => "Automaton";
     private const string CommandName = "/automaton";
     internal WindowSystem Ws;
     internal MainWindow MainWindow;
 
-    internal static PandorasBox P;
+    internal static Automaton P;
     internal static DalamudPluginInterface pi;
     internal static Configuration Config;
 
@@ -29,7 +30,7 @@ public class PandorasBox : IDalamudPlugin
     public IEnumerable<BaseFeature> Features => FeatureProviders.Where(x => !x.Disposed).SelectMany(x => x.Features).OrderBy(x => x.Name);
     internal TaskManager TaskManager;
 
-    public PandorasBox(DalamudPluginInterface pluginInterface)
+    public Automaton(DalamudPluginInterface pluginInterface)
     {
         P = this;
         pi = pluginInterface;
@@ -53,6 +54,8 @@ public class PandorasBox : IDalamudPlugin
             ShowInHelp = true
         });
 
+        PandorasBoxIPC.Init();
+
         Svc.PluginInterface.UiBuilder.Draw += Ws.Draw;
         Svc.PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
         Common.Setup();
@@ -73,6 +76,8 @@ public class PandorasBox : IDalamudPlugin
 
         provider.UnloadFeatures();
 
+        PandorasBoxIPC.Dispose();
+
         Svc.PluginInterface.UiBuilder.Draw -= Ws.Draw;
         Svc.PluginInterface.UiBuilder.OpenConfigUi -= DrawConfigUI;
         Ws.RemoveAllWindows();
@@ -87,6 +92,12 @@ public class PandorasBox : IDalamudPlugin
 
     private void OnCommand(string command, string args)
     {
+        if (args == "debug")
+        {
+            Config.showDebugFeatures ^= true;
+            Config.Save();
+            return;
+        }
         MainWindow.IsOpen = !MainWindow.IsOpen;
     }
 

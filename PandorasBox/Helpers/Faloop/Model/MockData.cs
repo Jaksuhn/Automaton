@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace PandorasBox.Helpers.Faloop.Model;
+namespace Automaton.Helpers.Faloop.Model;
 
 public static class MockData
 {

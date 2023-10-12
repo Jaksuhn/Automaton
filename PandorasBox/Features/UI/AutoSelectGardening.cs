@@ -10,14 +10,14 @@ using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
-using PandorasBox.FeaturesSetup;
-using PandorasBox.IPC;
+using Automaton.FeaturesSetup;
+using Automaton.IPC;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using static ECommons.GenericHelpers;
 
-namespace PandorasBox.Features.UI
+namespace Automaton.Features.UI
 {
     public unsafe class AutoSelectGardening : Feature
     {
@@ -51,7 +51,7 @@ namespace PandorasBox.Features.UI
         private List<int> SlotsFilled { get; set; } = new();
         public override void Enable()
         {
-            if (PandoraIPC.GetFeatureEnabled(nameof(AutoSelectGardening))) PandoraIPC.SetFeatureEnabled(nameof(AutoSelectGardening), false);
+            if ((bool)PandorasBoxIPC.GetFeatureEnabled.InvokeFunc(nameof(AutoSelectGardening))) PandorasBoxIPC.SetFeatureEnabled.InvokeAction(nameof(AutoSelectGardening), false);
             Config = LoadConfig<Configs>() ?? new Configs();
             Seeds = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.Row == 82 && x.FilterGroup == 20).ToDictionary(x => x.RowId, x => x);
             Soils = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.Row == 82 && x.FilterGroup == 21).ToDictionary(x => x.RowId, x => x);

@@ -1,8 +1,8 @@
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
-using PandorasBox.Features;
+using Automaton.Features;
 
-namespace PandorasBox.UI
+namespace Automaton.UI
 {
     internal class Overlays : Window
     {

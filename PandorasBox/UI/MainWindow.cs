@@ -3,26 +3,22 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Logging;
 using Dalamud.Utility;
 using ECommons;
-using ECommons.DalamudServices;
 using ECommons.ImGuiMethods;
 using ImGuiNET;
-using PandorasBox.Features;
-using PandorasBox.FeaturesSetup;
-using PunishLib.ImGuiMethods;
+using Automaton.Features;
+using Automaton.FeaturesSetup;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Numerics;
-using ThreadLoadImageHandler = ECommons.ImGuiMethods.ThreadLoadImageHandler;
 
-namespace PandorasBox.UI;
+namespace Automaton.UI;
 
 internal class MainWindow : Window
 {
     public OpenWindow OpenWindow { get; private set; } = OpenWindow.None;
 
-    public MainWindow() : base($"{P.Name} {P.GetType().Assembly.GetName().Version}###{P.Name}")
+    public MainWindow() : base($"{Name} {P.GetType().Assembly.GetName().Version}###{Name}")
     {
         this.SizeConstraints = new WindowSizeConstraints
         {
@@ -47,7 +43,7 @@ internal class MainWindow : Window
 
         var topLeftSideHeight = region.Y;
 
-        if (ImGui.BeginTable($"${P.Name}TableContainer", 2, ImGuiTableFlags.Resizable))
+        if (ImGui.BeginTable($"${Name}TableContainer", 2, ImGuiTableFlags.Resizable))
         {
             try
             {
@@ -56,19 +52,8 @@ internal class MainWindow : Window
 
                 var regionSize = ImGui.GetContentRegionAvail();
                 ImGui.PushStyleVar(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f));
-                if (ImGui.BeginChild($"###PandoraLeft", regionSize with { Y = topLeftSideHeight }, false, ImGuiWindowFlags.NoDecoration))
+                if (ImGui.BeginChild($"###{Name}Left", regionSize with { Y = topLeftSideHeight }, false, ImGuiWindowFlags.NoDecoration))
                 {
-                    var imagePath = Path.Combine(Svc.PluginInterface.AssemblyLocation.DirectoryName!, "pandora.png");
-
-                    if (ThreadLoadImageHandler.TryGetTextureWrap(imagePath, out var logo))
-                    {
-                        ImGuiEx.ImGuiLineCentered("###Logo", () => { ImGui.Image(logo.ImGuiHandle, new(125f.Scale(), 125f.Scale())); });
-
-                    }
-
-                    ImGui.Spacing();
-                    ImGui.Separator();
-
                     foreach (var window in Enum.GetValues(typeof(OpenWindow)))
                     {
                         if ((OpenWindow)window == OpenWindow.None) continue;
@@ -113,7 +98,7 @@ internal class MainWindow : Window
                 ImGui.EndChild();
                 ImGui.PopStyleVar();
                 ImGui.TableNextColumn();
-                if (ImGui.BeginChild($"###PandoraRight", Vector2.Zero, false, (false ? ImGuiWindowFlags.AlwaysVerticalScrollbar : ImGuiWindowFlags.None) | ImGuiWindowFlags.NoDecoration))
+                if (ImGui.BeginChild($"###{Name}Right", Vector2.Zero, false, (false ? ImGuiWindowFlags.AlwaysVerticalScrollbar : ImGuiWindowFlags.None) | ImGuiWindowFlags.NoDecoration))
                 {
                     if (FilteredFeatures.Count() > 0)
                     {
@@ -124,25 +109,25 @@ internal class MainWindow : Window
                         switch (OpenWindow)
                         {
                             case OpenWindow.Actions:
-                                DrawFeatures(P.Features.Where(x => x.FeatureType == FeatureType.Actions).ToArray());
+                                DrawFeatures(P.Features.Where(x => x.FeatureType == FeatureType.Actions && (!x.isDebug || Config.showDebugFeatures)).ToArray());
                                 break;
                             case OpenWindow.UI:
-                                DrawFeatures(P.Features.Where(x => x.FeatureType == FeatureType.UI).ToArray());
+                                DrawFeatures(P.Features.Where(x => x.FeatureType == FeatureType.UI && (!x.isDebug || Config.showDebugFeatures)).ToArray());
                                 break;
                             case OpenWindow.Other:
-                                DrawFeatures(P.Features.Where(x => x.FeatureType == FeatureType.Other).ToArray());
+                                DrawFeatures(P.Features.Where(x => x.FeatureType == FeatureType.Other && (!x.isDebug || Config.showDebugFeatures)).ToArray());
                                 break;
                             case OpenWindow.Targets:
-                                DrawFeatures(P.Features.Where(x => x.FeatureType == FeatureType.Targeting).ToArray());
+                                DrawFeatures(P.Features.Where(x => x.FeatureType == FeatureType.Targeting && (!x.isDebug || Config.showDebugFeatures)).ToArray());
                                 break;
                             case OpenWindow.Chat:
-                                DrawFeatures(P.Features.Where(x => x.FeatureType == FeatureType.ChatFeature).ToArray());
+                                DrawFeatures(P.Features.Where(x => x.FeatureType == FeatureType.ChatFeature && (!x.isDebug || Config.showDebugFeatures)).ToArray());
                                 break;
                             case OpenWindow.Achievements:
-                                DrawFeatures(P.Features.Where(x => x.FeatureType == FeatureType.Achievements).ToArray());
+                                DrawFeatures(P.Features.Where(x => x.FeatureType == FeatureType.Achievements && (!x.isDebug || Config.showDebugFeatures)).ToArray());
                                 break;
                             case OpenWindow.Commands:
-                                DrawCommands(P.Features.Where(x => x.FeatureType == FeatureType.Commands).ToArray());
+                                DrawCommands(P.Features.Where(x => x.FeatureType == FeatureType.Commands && (!x.isDebug || Config.showDebugFeatures)).ToArray());
                                 break;
                         }
                     }
