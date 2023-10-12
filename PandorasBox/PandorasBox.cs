@@ -16,8 +16,8 @@ namespace PandorasBox;
 
 public class PandorasBox : IDalamudPlugin
 {
-    public string Name => "Pandora's Box";
-    private const string CommandName = "/pandora";
+    public string Name => "Automaton";
+    private const string CommandName = "/automaton";
     internal WindowSystem Ws;
     internal MainWindow MainWindow;
 
@@ -40,7 +40,7 @@ public class PandorasBox : IDalamudPlugin
     private void Initialize()
     {
         ECommonsMain.Init(pi, P, ECommons.Module.DalamudReflector);
-        PunishLibMain.Init(pi, "Pandora's Box", new AboutPlugin() { Sponsor = "https://ko-fi.com/taurenkey" });
+        PunishLibMain.Init(pi, $"{Name}", new AboutPlugin() { Sponsor = "https://ko-fi.com/taurenkey" });
 
         Ws = new();
         MainWindow = new();
@@ -51,7 +51,7 @@ public class PandorasBox : IDalamudPlugin
 
         Svc.Commands.AddHandler(CommandName, new CommandInfo(OnCommand)
         {
-            HelpMessage = "Opens the Pandora menu.",
+            HelpMessage = $"Opens the {Name} menu.",
             ShowInHelp = true
         });
 

@@ -1,7 +1,9 @@
 using System;
 using System.Linq;
 using System.Text;
+using Dalamud.Game;
 using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Logging;
 using ECommons;
 using ECommons.Automation;
 using ECommons.DalamudServices;
@@ -9,6 +11,7 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using PandorasBox.FeaturesSetup;
+using PandorasBox.IPC;
 
 namespace PandorasBox.Features.UI
 {
@@ -57,56 +60,54 @@ namespace PandorasBox.Features.UI
             public int TransmuteMinOrMax = 0;
             public bool TransmuteExcludeSplit = true;
             public bool TransmuteConfirm = true;
+
+            public bool WorkOnVentures = false;
+            public int VentureMinOrMax = 1;
+            public bool VentureExcludeSplit = true;
+            public bool VentureConfirm = false;
         }
 
         public override void Enable()
         {
             Config = LoadConfig<Configs>() ?? new Configs();
-            Svc.Framework.Update += FillRegularNumeric;
-            //Svc.Framework.Update += FillBankNumeric;
+            Common.OnAddonSetup += FillRegularNumeric;
+            Common.OnAddonSetup += FillVentureNumeric;
+            //Common.OnAddonSetup += FillBankNumeric;
+
+            if (PandoraIPC.GetFeatureEnabled(nameof(AutoNumerics))) PandoraIPC.SetFeatureEnabled(nameof(AutoNumerics), false);
             base.Enable();
         }
 
-        private void FillRegularNumeric(IFramework framework)
+        private void FillRegularNumeric(SetupAddonArgs obj)
         {
-            var numeric = (AtkUnitBase*)Svc.GameGui.GetAddonByName("InputNumeric");
-            if (numeric == null) { hasDisabled = false; return; }
+            if (obj.AddonName != "InputNumeric") return;
+            if (ImGui.GetIO().KeyShift) return;
 
-            if (numeric->IsVisible && ECommons.GenericHelpers.IsAddonReady(numeric) && ImGui.GetIO().KeyShift) { hasDisabled = true; return; }
-
-            if (numeric->IsVisible && ECommons.GenericHelpers.IsAddonReady(numeric) && !hasDisabled)
+            try
             {
-                try
-                {
-                    var minValue = numeric->AtkValues[2].Int;
-                    var maxValue = numeric->AtkValues[3].Int;
-                    var numericTextNode = numeric->UldManager.NodeList[4]->GetAsAtkComponentNode()->Component->UldManager.NodeList[4]->GetAsAtkTextNode();
-                    var numericResNode = numeric->UldManager.NodeList[4]->GetAsAtkComponentNode()->Component->UldManager.NodeList[6];
+                var minValue = obj.Addon->AtkValues[2].Int;
+                var maxValue = obj.Addon->AtkValues[3].Int;
+                var numericTextNode = obj.Addon->UldManager.NodeList[4]->GetAsAtkComponentNode()->Component->UldManager.NodeList[4]->GetAsAtkTextNode();
+                var numericResNode = obj.Addon->UldManager.NodeList[4]->GetAsAtkComponentNode()->Component->UldManager.NodeList[6];
 
-                    if (Config.WorkOnTrading && Svc.Condition[ConditionFlag.TradeOpen])
-                        TryFill(numeric, minValue, maxValue, Config.TradeMinOrMax, Config.TradeExcludeSplit, Config.TradeConfirm);
+                if (Config.WorkOnTrading && Svc.Condition[ConditionFlag.TradeOpen])
+                    TryFill(obj.Addon, minValue, maxValue, Config.TradeMinOrMax, Config.TradeExcludeSplit, Config.TradeConfirm);
 
-                    if (Config.WorkOnFCChest && InFcChest())
-                        TryFill(numeric, minValue, maxValue, Config.FCChestMinOrMax, Config.FCExcludeSplit, Config.FCChestConfirm);
+                if (Config.WorkOnFCChest && InFcChest())
+                    TryFill(obj.Addon, minValue, maxValue, Config.FCChestMinOrMax, Config.FCExcludeSplit, Config.FCChestConfirm);
 
-                    if (Config.WorkOnRetainers && Svc.Condition[ConditionFlag.OccupiedSummoningBell] && !InFcChest())
-                        TryFill(numeric, minValue, maxValue, Config.RetainersMinOrMax, Config.RetainerExcludeSplit, Config.RetainersConfirm);
+                if (Config.WorkOnRetainers && Svc.Condition[ConditionFlag.OccupiedSummoningBell] && !InFcChest())
+                    TryFill(obj.Addon, minValue, maxValue, Config.RetainersMinOrMax, Config.RetainerExcludeSplit, Config.RetainersConfirm);
 
-                    if (Config.WorkOnMail && InMail())
-                        TryFill(numeric, minValue, maxValue, Config.MailMinOrMax, Config.MailExcludeSplit, Config.MailConfirm);
+                if (Config.WorkOnMail && InMail())
+                    TryFill(obj.Addon, minValue, maxValue, Config.MailMinOrMax, Config.MailExcludeSplit, Config.MailConfirm);
 
-                    if (Config.WorkOnTransmute && InTransmute())
-                        TryFill(numeric, minValue, maxValue, Config.TransmuteMinOrMax, Config.TransmuteExcludeSplit, Config.TransmuteConfirm);
-                }
-                catch (Exception ex)    
-                {
-                    ex.Log();
-                }
+                if (Config.WorkOnTransmute && InTransmute())
+                    TryFill(obj.Addon, minValue, maxValue, Config.TransmuteMinOrMax, Config.TransmuteExcludeSplit, Config.TransmuteConfirm);
             }
-            else
+            catch (Exception ex)
             {
-                TaskManager.Abort();
-                return;
+                ex.Log();
             }
         }
 
@@ -136,50 +137,77 @@ namespace PandorasBox.Features.UI
             }
         }
 
-        private void FillBankNumeric(IFramework framework)
+        private void FillBankNumeric(SetupAddonArgs obj)
         {
-            var bankNumeric = (AtkUnitBase*)Svc.GameGui.GetAddonByName("Bank");
-            if (bankNumeric == null) { hasDisabled = false; return; }
+            if (obj.AddonName != "Bank") return;
+            if (ImGui.GetIO().KeyShift) return;
+            if (!Config.WorkOnFCChest) return;
 
-            if (bankNumeric->IsVisible && ECommons.GenericHelpers.IsAddonReady(bankNumeric) && ImGui.GetIO().KeyShift) { hasDisabled = true; return; }
-
-            if (Config.WorkOnFCChest && bankNumeric->IsVisible && ECommons.GenericHelpers.IsAddonReady(bankNumeric) && !hasDisabled)
+            try
             {
-                try
-                {
-                    var bMinValue = bankNumeric->AtkValues[5].Int;
-                    var bMaxValue = bankNumeric->AtkValues[6].Int;
-                    var bNumericTextNode = bankNumeric->UldManager.NodeList[4]->GetAsAtkComponentNode()->Component->UldManager.NodeList[4]->GetAsAtkTextNode();
+                var bMinValue = obj.Addon->AtkValues[5].Int;
+                var bMaxValue = obj.Addon->AtkValues[6].Int;
+                var bNumericTextNode = obj.Addon->UldManager.NodeList[4]->GetAsAtkComponentNode()->Component->UldManager.NodeList[4]->GetAsAtkTextNode();
 
-                    if (Config.FCExcludeSplit && IsSplitAddon()) { return; }
-                    if (Config.FCChestMinOrMax == 0)
-                    {
-                        TaskManager.Enqueue(() => bNumericTextNode->SetText(ConvertToByte(bMinValue)));
-                        if (Config.FCChestConfirm)
-                            TaskManager.Enqueue(() => Callback.Fire(bankNumeric, true, 3, (uint)bMinValue));
-                    }
-                    if (Config.FCChestMinOrMax == 1)
-                    {
-                        TaskManager.Enqueue(() => bNumericTextNode->SetText(ConvertToByte(bMaxValue)));
-                        if (Config.FCChestConfirm)
-                            TaskManager.Enqueue(() => Callback.Fire(bankNumeric, true, 3, (uint)bMaxValue));
-                    }
-                    if (Config.FCChestMinOrMax == -1)
-                    {
-                        var currentAmt = bNumericTextNode->NodeText.ToString();
-                        if (int.TryParse(currentAmt, out var num) && num > 0 && bankNumeric->AtkValues[4].Int > 0)
-                            TaskManager.Enqueue(() => Callback.Fire(bankNumeric, true, 0));
-                    }
-                }
-                catch
+                if (Config.FCExcludeSplit && IsSplitAddon()) { return; }
+                if (Config.FCChestMinOrMax == 0)
                 {
-                    return;
+                    TaskManager.Enqueue(() => bNumericTextNode->SetText(ConvertToByte(bMinValue)));
+                    if (Config.FCChestConfirm)
+                        TaskManager.Enqueue(() => Callback.Fire(obj.Addon, true, 3, (uint)bMinValue));
+                }
+                if (Config.FCChestMinOrMax == 1)
+                {
+                    TaskManager.Enqueue(() => bNumericTextNode->SetText(ConvertToByte(bMaxValue)));
+                    if (Config.FCChestConfirm)
+                        TaskManager.Enqueue(() => Callback.Fire(obj.Addon, true, 3, (uint)bMaxValue));
+                }
+                if (Config.FCChestMinOrMax == -1)
+                {
+                    var currentAmt = bNumericTextNode->NodeText.ToString();
+                    if (int.TryParse(currentAmt, out var num) && num > 0 && obj.Addon->AtkValues[4].Int > 0)
+                        TaskManager.Enqueue(() => Callback.Fire(obj.Addon, true, 0));
                 }
             }
-            else
+            catch
             {
-                TaskManager.Abort();
                 return;
+            }
+        }
+
+        private void FillVentureNumeric(SetupAddonArgs obj)
+        {
+            if (obj.AddonName != "ShopExchangeCurrencyDialog") return;
+            if (ImGui.GetIO().KeyShift) return;
+            if (!Config.WorkOnVentures) return;
+
+            try
+            {
+                var minValue = 1;
+                var maxAvailable = obj.Addon->AtkValues[5].UInt - obj.Addon->AtkValues[4].UInt;
+                var maxAfford = obj.Addon->AtkValues[1].UInt / obj.Addon->AtkValues[2].UInt;
+                var maxValue = maxAvailable > maxAfford ? maxAfford : maxAvailable;
+
+                var numericTextNode = obj.Addon->UldManager.NodeList[8]->GetAsAtkComponentNode()->Component->UldManager.NodeList[4]->GetAsAtkTextNode();
+
+                if (Config.VentureMinOrMax == 0)
+                {
+                    TaskManager.Enqueue(() => numericTextNode->SetText(ConvertToByte(minValue)));
+                    if (Config.VentureConfirm)
+                        TaskManager.Enqueue(() => Callback.Fire(obj.Addon, true, 0, minValue));
+                }
+                if (Config.VentureMinOrMax == 1)
+                {
+                    TaskManager.Enqueue(() => numericTextNode->SetText(ConvertToByte((int)maxValue)));
+                    if (Config.VentureConfirm)
+                        TaskManager.Enqueue(() => Callback.Fire(obj.Addon, true, 0, maxValue));
+                }
+
+                // No way to detect manually entered amounts
+            }
+            catch (Exception ex)
+            {
+                ex.Log();
             }
         }
 
@@ -225,8 +253,9 @@ namespace PandorasBox.Features.UI
         public override void Disable()
         {
             SaveConfig(Config);
-            Svc.Framework.Update -= FillRegularNumeric;
-            //Svc.Framework.Update -= FillBankNumeric;
+            Common.OnAddonSetup -= FillRegularNumeric;
+            Common.OnAddonSetup -= FillVentureNumeric;
+            //Common.OnAddonSetup -= FillBankNumeric;
             base.Disable();
         }
 
@@ -237,13 +266,12 @@ namespace PandorasBox.Features.UI
             DrawConfigsForAddon("Retainers", ref Config.WorkOnRetainers, ref Config.RetainersMinOrMax, ref Config.RetainerExcludeSplit, ref Config.RetainersConfirm);
             DrawConfigsForAddon("Mail", ref Config.WorkOnMail, ref Config.MailMinOrMax, ref Config.MailExcludeSplit, ref Config.MailConfirm);
             DrawConfigsForAddon("Materia Transmutation", ref Config.WorkOnTransmute, ref Config.TransmuteMinOrMax, ref Config.TransmuteExcludeSplit, ref Config.TransmuteConfirm);
+            DrawConfigsForAddon("Venture Purchase", ref Config.WorkOnVentures, ref Config.VentureMinOrMax, ref Config.VentureExcludeSplit, ref Config.VentureConfirm);
         };
 
-        private void DrawConfigsForAddon(string addonName, ref bool workOnAddon, ref int minOrMax, ref bool excludeSplit, ref bool autoConfirm)
+        private static void DrawConfigsForAddon(string addonName, ref bool workOnAddon, ref int minOrMax, ref bool excludeSplit, ref bool autoConfirm)
         {
-            if (ImGui.Checkbox($"Work on {addonName}", ref workOnAddon))
-                SaveConfig(Config);
-
+            ImGui.Checkbox($"Work on {addonName}", ref workOnAddon);
             if (workOnAddon)
             {
                 ImGui.PushID(addonName);
@@ -251,22 +279,21 @@ namespace PandorasBox.Features.UI
                 if (ImGui.RadioButton($"Auto fill highest amount possible", minOrMax == 1))
                 {
                     minOrMax = 1;
-                    SaveConfig(Config);
                 }
                 if (ImGui.RadioButton($"Auto fill lowest amount possible", minOrMax == 0))
                 {
                     minOrMax = 0;
-                    SaveConfig(Config);
                 }
-                if (ImGui.RadioButton($"Auto OK on manually entered amounts", minOrMax == -1))
+                if (addonName != "Venture Purchase")
                 {
-                    minOrMax = -1;
-                    SaveConfig(Config);
-                }
-               if (ImGui.Checkbox("Exclude Split Dialog", ref excludeSplit))
-                    SaveConfig(Config);
+                    if (ImGui.RadioButton($"Auto OK on manually entered amounts", minOrMax == -1))
+                    {
+                        minOrMax = -1;
+                    }
 
-                if (minOrMax != -1) { if (ImGui.Checkbox("Auto Confirm", ref autoConfirm)) { SaveConfig(Config); } }
+                    ImGui.Checkbox("Exclude Split Dialog", ref excludeSplit);
+                }
+                if (minOrMax != -1) ImGui.Checkbox("Auto Confirm", ref autoConfirm);
                 ImGui.Unindent();
                 ImGui.PopID();
             }

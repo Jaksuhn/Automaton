@@ -11,6 +11,7 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using PandorasBox.FeaturesSetup;
+using PandorasBox.IPC;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,6 +57,8 @@ namespace PandorasBox.Features.UI
             Fertilizers = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.Row == 82 && x.FilterGroup == 22).ToDictionary(x => x.RowId, x => x);
             AddonText = Svc.Data.GetExcelSheet<Addon>().ToDictionary(x => x.RowId, x => x);
             Svc.Framework.Update += RunFeature;
+
+            if (PandoraIPC.GetFeatureEnabled(nameof(AutoSelectGardening))) PandoraIPC.SetFeatureEnabled(nameof(AutoSelectGardening), false);
             base.Enable();
         }
 
