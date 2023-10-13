@@ -69,8 +69,8 @@ namespace Automaton.Features.UI
 
         public override void Enable()
         {
-            if ((bool)PandorasBoxIPC.GetFeatureEnabled.InvokeFunc("Auto-Fill Numeric Dialogs"))
-                PandorasBoxIPC.SetFeatureEnabled.InvokeAction("Auto-Fill Numeric Dialogs", false);
+            if ((bool)PandorasBoxIPC.GetFeatureEnabled.InvokeFunc(Name))
+                PandorasBoxIPC.SetFeatureEnabled.InvokeAction(Name, false);
             Config = LoadConfig<Configs>() ?? new Configs();
             Common.OnAddonSetup += FillRegularNumeric;
             Common.OnAddonSetup += FillVentureNumeric;

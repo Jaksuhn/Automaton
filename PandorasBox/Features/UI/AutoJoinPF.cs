@@ -114,7 +114,7 @@ namespace Automaton.Features.UI
 
         public override void Enable()
         {
-            if ((bool)PandorasBoxIPC.GetFeatureEnabled.InvokeFunc(nameof(AutoJoinPF))) PandorasBoxIPC.SetFeatureEnabled.InvokeAction(nameof(AutoJoinPF), false);
+            if ((bool)PandorasBoxIPC.GetFeatureEnabled.InvokeFunc(Name)) PandorasBoxIPC.SetFeatureEnabled.InvokeAction(Name, false);
             Config = LoadConfig<Configs>() ?? new Configs();
             Common.OnAddonSetup += RunFeature;
             Common.OnAddonSetup += ConfirmYesNo;
