@@ -9,6 +9,7 @@ using ECommons;
 using Dalamud.Game.ClientState.Objects.Types;
 using System.Numerics;
 using ImGuiNET;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace Automaton.Features.Other
 {
@@ -23,12 +24,16 @@ namespace Automaton.Features.Other
         public Configs Config { get; private set; }
         public class Configs : FeatureConfig
         {
-            [FeatureConfigOption("Distance to Keep", "", 2, IntMin = 0, IntMax = 30, EditorSize = 300)]
+            [FeatureConfigOption("Distance to Keep", "", 1, IntMin = 0, IntMax = 30, EditorSize = 300)]
             public int distanceToKeep = 3;
+
+            [FeatureConfigOption("Function only in duty", "", 2, IntMin = 0, IntMax = 30, EditorSize = 300)]
+            public bool OnlyInDuty = false;
         }
 
         protected override DrawConfigDelegate DrawConfigTree => (ref bool hasChanged) =>
         {
+            if (ImGui.Checkbox("Function Only in Duty", ref Config.OnlyInDuty)) hasChanged = true;
             ImGui.PushItemWidth(300);
             if (ImGui.SliderInt("Distance to Keep (yalms)", ref Config.distanceToKeep, 0, 30)) hasChanged = true;
 
@@ -102,6 +107,7 @@ namespace Automaton.Features.Other
         {
             if (master == null) { movement.Enabled = false; return; }
             if (Vector3.Distance(Svc.ClientState.LocalPlayer.Position, master.Position) <= Config.distanceToKeep) { movement.Enabled = false; return; }
+            if (Config.OnlyInDuty && GameMain.Instance()->CurrentContentFinderConditionId == 0) { movement.Enabled = false; return; }
 
             movement.Enabled = true;
             movement.DesiredPosition = master.Position;
