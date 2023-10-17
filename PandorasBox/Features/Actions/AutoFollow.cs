@@ -11,7 +11,7 @@ using System.Numerics;
 using ImGuiNET;
 using FFXIVClientStructs.FFXIV.Client.Game;
 
-namespace Automaton.Features.Other
+namespace Automaton.Features.Actions
 {
     public unsafe class AutoFollow : Feature
     {

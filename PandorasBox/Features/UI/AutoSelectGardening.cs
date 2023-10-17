@@ -219,7 +219,7 @@ namespace Automaton.Features.UI
             {
                 var slot = i - 1;
 
-                PluginLog.Debug($"{slot}");
+                Svc.Log.Debug($"{slot}");
                 var values = stackalloc AtkValue[5];
                 values[0] = new AtkValue()
                 {
@@ -283,7 +283,7 @@ namespace Automaton.Features.UI
 
 
                 contextMenu->FireCallback(5, values, (void*)2476827163393);
-                PluginLog.Debug($"Filled slot {i}");
+                Svc.Log.Debug($"Filled slot {i}");
                 SlotsFilled.Add(i);
                 return true;
             }

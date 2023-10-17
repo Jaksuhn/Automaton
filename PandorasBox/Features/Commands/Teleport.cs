@@ -26,7 +26,7 @@ namespace Automaton.Features.Commands
             try
             {
                 var curPos = Svc.ClientState.LocalPlayer.Position;
-                PluginLog.Log($"Moving from {curPos.X}, {curPos.Y}, {curPos.Z}");
+                Svc.Log.Info($"Moving from {curPos.X}, {curPos.Y}, {curPos.Z}");
 
                 if (args[0].IsNullOrEmpty())
                 {
@@ -39,7 +39,7 @@ namespace Automaton.Features.Commands
                 float.TryParse(args.ElementAtOrDefault(2), out var y);
 
                 var newPos = curPos + new Vector3(x, z, y);
-                PluginLog.Log($"Moving to {newPos.X}, {newPos.Y}, {newPos.Z}");
+                Svc.Log.Info($"Moving to {newPos.X}, {newPos.Y}, {newPos.Z}");
                 SetPos(newPos);
             }
             catch { }
