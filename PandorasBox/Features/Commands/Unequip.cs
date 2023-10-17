@@ -19,7 +19,7 @@ namespace Automaton.Features.Commands
         public override List<string> Parameters => new() { "[<head/body/arms/legs/feet/earring/necklace/bracelet/Lring/Rring>]", "[<destination>]" };
         public override bool isDebug => true;
 
-        public override FeatureType FeatureType => FeatureType.Commands;
+        public override FeatureType FeatureType => FeatureType.Disabled;
 
         private enum EquippedSlots
         {

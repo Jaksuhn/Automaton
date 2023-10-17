@@ -114,6 +114,7 @@ namespace Automaton.Features.UI
 
         public override void Enable()
         {
+            PandorasBoxIPC.Init();
             if ((bool)PandorasBoxIPC.GetFeatureEnabled.InvokeFunc(Name)) PandorasBoxIPC.SetFeatureEnabled.InvokeAction(Name, false);
             Config = LoadConfig<Configs>() ?? new Configs();
             Common.OnAddonSetup += RunFeature;

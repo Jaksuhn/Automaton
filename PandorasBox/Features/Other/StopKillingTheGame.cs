@@ -56,6 +56,7 @@ namespace Automaton.Features.Other
 
         public override void Enable()
         {
+            PandorasBoxIPC.Init();
             if ((bool)PandorasBoxIPC.GetFeatureEnabled.InvokeFunc(Name)) PandorasBoxIPC.SetFeatureEnabled.InvokeAction(Name, false);
             Config = LoadConfig<Configs>() ?? new Configs();
             lobbyErrorHandlerHook ??= Svc.Hook.HookFromSignature<LobbyErrorHandlerDelegate>("40 53 48 83 EC 30 48 8B D9 49 8B C8 E8 ?? ?? ?? ?? 8B D0", LobbyErrorHandlerDetour);

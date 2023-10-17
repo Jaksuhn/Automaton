@@ -51,6 +51,7 @@ namespace Automaton.Features.UI
         private List<int> SlotsFilled { get; set; } = new();
         public override void Enable()
         {
+            PandorasBoxIPC.Init();
             if ((bool)PandorasBoxIPC.GetFeatureEnabled.InvokeFunc(Name)) PandorasBoxIPC.SetFeatureEnabled.InvokeAction(Name, false);
             Config = LoadConfig<Configs>() ?? new Configs();
             Seeds = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.Row == 82 && x.FilterGroup == 20).ToDictionary(x => x.RowId, x => x);

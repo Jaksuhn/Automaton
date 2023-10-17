@@ -15,7 +15,7 @@ namespace Automaton.Features.Actions
 
         public override string Description => "Like those other games.";
 
-        public override FeatureType FeatureType => FeatureType.Actions;
+        public override FeatureType FeatureType => FeatureType.Disabled;
 
         public Configs Config { get; private set; }
         public class Configs : FeatureConfig
