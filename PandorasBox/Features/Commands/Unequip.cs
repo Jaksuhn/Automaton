@@ -52,7 +52,7 @@ namespace Automaton.Features.Commands
                 
 
                 var slot = Svc.Data.GetExcelSheet<ItemUICategory>(Svc.ClientState.ClientLanguage).First(x => x.Name.RawString.Contains(args[0], StringComparison.CurrentCultureIgnoreCase));
-                foreach (var container in im->Inventories)
+                //foreach (var container in im->Inventories)
                 var dest = args[1] == "i" ? InventoryType.Inventory1 : InventoryType.ArmoryBody;
                 //InventoryManager.Instance()->MoveItemSlot(InventoryType.EquippedItems, 0, InventoryType.ArmoryHead, 0);
             }
