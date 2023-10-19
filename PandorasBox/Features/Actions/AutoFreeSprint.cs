@@ -19,11 +19,6 @@ namespace Automaton.Features.Actions
 
         public override FeatureType FeatureType => FeatureType.Disabled;
 
-        protected override DrawConfigDelegate DrawConfigTree => (ref bool hasChanged) =>
-        {
-        };
-        private readonly OverrideMovement movement = new();
-
         public override void Enable()
         {
             Svc.Framework.Update += Sprint;
