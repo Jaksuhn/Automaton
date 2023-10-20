@@ -38,26 +38,35 @@ namespace Automaton.Features.Actions
             if (ImGui.SliderInt("Distance to Keep (yalms)", ref Config.distanceToKeep, 0, 30)) hasChanged = true;
 
             ImGui.Text($"Current Master: {(master != null ? master.Name : "null")}");
-            ImGui.Text($"Your Position: x: {Svc.ClientState.LocalPlayer.Position.X}, y: {Svc.ClientState.LocalPlayer.Position.Y}, z: {Svc.ClientState.LocalPlayer.Position.Z}");
-            ImGui.Text($"Master Position: x: {(master != null ? master.Position.X : "null")}, y: {(master != null ? master.Position.Y : "null")}, z: {(master != null ? master.Position.Z : "null")}");
-            ImGui.Text($"Distance to Master: {(master != null ? Vector3.Distance(Svc.ClientState.LocalPlayer.Position, master.Position) : "null")}");
 
-            if (ImGui.Button("Set")) { master = Svc.Targets.Target; }
+            if (Svc.ClientState.LocalPlayer == null)
+                ImGui.Text($"Your Position: x: null, y: null, z: null");
+            else
+                ImGui.Text($"Your Position: x: {Svc.ClientState.LocalPlayer.Position.X}, y: {Svc.ClientState.LocalPlayer.Position.Y}, z: {Svc.ClientState.LocalPlayer.Position.Z}");
+
+            ImGui.Text($"Master Position: x: {(master != null ? master.Position.X : "null")}, y: {(master != null ? master.Position.Y : "null")}, z: {(master != null ? master.Position.Z : "null")}");
+            ImGui.Text($"Distance to Master: {(master != null && Svc.ClientState.LocalPlayer != null ? Vector3.Distance(Svc.ClientState.LocalPlayer.Position, master.Position) : "null")}");
+
+            if (ImGui.Button("Set")) { SetMaster(); }
             ImGui.SameLine();
-            if (ImGui.Button("Clear")) { master = null; }
+            if (ImGui.Button("Clear")) { ClearMaster(); }
         };
 
         public string Command { get; set; } = "/autofollow";
         private readonly List<string> registeredCommands = new();
 
-        private GameObject master;
         private readonly OverrideMovement movement = new();
+        private GameObject? master;
+        private uint? masterObjectID;
 
         protected void OnCommand(List<string> args)
         {
             try
             {
-                master = Svc.Targets.Target;
+                if (Svc.Targets.Target != null)
+                    SetMaster();
+                else
+                    ClearMaster();
             }
             catch (Exception e) { e.Log(); }
         }
@@ -103,8 +112,22 @@ namespace Automaton.Features.Actions
             base.Disable();
         }
 
+        private void SetMaster()
+        {
+            master = Svc.Targets.Target;
+            masterObjectID = Svc.Targets.Target.ObjectId;
+        }
+
+        private void ClearMaster()
+        {
+            master = null;
+            masterObjectID = null;
+        }
+
         private void Follow(IFramework framework)
         {
+            master = Svc.Objects.FirstOrDefault(x => x.ObjectId == masterObjectID);
+
             if (master == null) { movement.Enabled = false; return; }
             if (Vector3.Distance(Svc.ClientState.LocalPlayer.Position, master.Position) <= Config.distanceToKeep) { movement.Enabled = false; return; }
             if (Config.OnlyInDuty && GameMain.Instance()->CurrentContentFinderConditionId == 0) { movement.Enabled = false; return; }
