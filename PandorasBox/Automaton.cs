@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Automaton.IPC;
+using ImGuiNET;
 
 namespace Automaton;
 
@@ -20,10 +21,11 @@ public class Automaton : IDalamudPlugin
     private const string CommandName = "/automaton";
     internal WindowSystem Ws;
     internal MainWindow MainWindow;
+    internal DebugWindow DebugWindow;
 
     internal static Automaton P;
     internal static DalamudPluginInterface pi;
-    internal static Configuration Config;
+    public static Configuration Config;
 
     public List<FeatureProvider> FeatureProviders = new();
     private FeatureProvider provider;
@@ -43,7 +45,9 @@ public class Automaton : IDalamudPlugin
 
         Ws = new();
         MainWindow = new();
+        DebugWindow = new();
         Ws.AddWindow(MainWindow);
+        Ws.AddWindow(DebugWindow);
         TaskManager = new();
         Config = pi.GetPluginConfig() as Configuration ?? new Configuration();
         Config.Initialize(Svc.PluginInterface);
@@ -64,7 +68,6 @@ public class Automaton : IDalamudPlugin
         FeatureProviders.Add(provider);
     }
 
-
     public void Dispose()
     {
         Svc.Commands.RemoveHandler(CommandName);
@@ -81,6 +84,7 @@ public class Automaton : IDalamudPlugin
         Svc.PluginInterface.UiBuilder.OpenConfigUi -= DrawConfigUI;
         Ws.RemoveAllWindows();
         MainWindow = null;
+        DebugWindow = null;
         Ws = null;
         ECommonsMain.Dispose();
         PunishLibMain.Dispose();
@@ -91,10 +95,9 @@ public class Automaton : IDalamudPlugin
 
     private void OnCommand(string command, string args)
     {
-        if (args == "debug")
+        if (args is "debug" or "d")
         {
-            Config.showDebugFeatures ^= true;
-            Config.Save();
+            DebugWindow.IsOpen = !DebugWindow.IsOpen;
             return;
         }
         MainWindow.IsOpen = !MainWindow.IsOpen;
@@ -103,6 +106,25 @@ public class Automaton : IDalamudPlugin
     public void DrawConfigUI()
     {
         MainWindow.IsOpen = !MainWindow.IsOpen;
+
+        if (Svc.PluginInterface.IsDevMenuOpen && (Svc.PluginInterface.IsDev || Config.showDebugFeatures))
+        {
+            if (ImGui.BeginMainMenuBar())
+            {
+                if (ImGui.MenuItem(Name))
+                {
+                    if (ImGui.GetIO().KeyShift)
+                    {
+                        DebugWindow.IsOpen = !DebugWindow.IsOpen;
+                    }
+                    else
+                    {
+                        MainWindow.IsOpen = !MainWindow.IsOpen;
+                    }
+                }
+                ImGui.EndMainMenuBar();
+            }
+        }
     }
 }
 

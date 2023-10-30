@@ -2,7 +2,6 @@ using Automaton.FeaturesSetup;
 using Automaton.Helpers;
 using Automaton.UI;
 using ClickLib.Clicks;
-using Dalamud.Interface;
 using ECommons.Automation;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Component.GUI;

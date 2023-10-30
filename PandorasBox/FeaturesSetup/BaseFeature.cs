@@ -1,5 +1,4 @@
 using ClickLib.Clicks;
-using Dalamud.Game;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -24,6 +23,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Dalamud.Interface.Components;
 
 namespace Automaton.Features
 {
@@ -271,6 +271,8 @@ namespace Automaton.Features
                         ImGui.Text($"Invalid Auto Field Type: {f.Name}");
                     }
 
+                    if (attr.HelpText != null)
+                        ImGuiComponents.HelpMarker(attr.HelpText);
                 }
 
                 if (configChanged)

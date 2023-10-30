@@ -39,4 +39,22 @@ internal static class YesAlready
     {
         return !IsEnabled();
     }
+
+    internal static void Tick()
+    {
+        if (FeatureHelper.IsBusy)
+        {
+            if (IsEnabled())
+            {
+                DisableIfNeeded();
+            }
+        }
+        else
+        {
+            if (Reenable)
+            {
+                EnableIfNeeded();
+            }
+        }
+    }
 }

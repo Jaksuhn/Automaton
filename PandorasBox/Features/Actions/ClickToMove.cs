@@ -1,10 +1,7 @@
 using ECommons.DalamudServices;
 using Automaton.FeaturesSetup;
-using System;
 using Automaton.Helpers;
 using ImGuiNET;
-using System.Runtime.InteropServices;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using Dalamud.Game.ClientState.Keys;
 
 namespace Automaton.Features.Actions

@@ -1,12 +1,10 @@
-using Dalamud.Logging;
 using ECommons;
 using ECommons.DalamudServices;
-using ImGuiNET;
 using Automaton.FeaturesSetup;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using Automaton.Features.Debugging;
 
 namespace Automaton.Features.Commands
 {
@@ -30,7 +28,7 @@ namespace Automaton.Features.Commands
 
                 if (args[0].IsNullOrEmpty())
                 {
-                    SetPosToMouse();
+                    PositionDebug.SetPosToMouse();
                     return;
                 }
 
@@ -40,31 +38,9 @@ namespace Automaton.Features.Commands
 
                 var newPos = curPos + new Vector3(x, z, y);
                 Svc.Log.Info($"Moving to {newPos.X}, {newPos.Y}, {newPos.Z}");
-                SetPos(newPos);
+                PositionDebug.SetPos(newPos);
             }
             catch { }
         }
-
-        public static void SetPosToMouse()
-        {
-            if (Svc.ClientState.LocalPlayer == null) return;
-
-            var mousePos = ImGui.GetIO().MousePos;
-            Svc.GameGui.ScreenToWorld(mousePos, out var pos, 100000f);
-            PluginLog.Log($"Moving from {pos.X}, {pos.Z}, {pos.Y}");
-            SetPos(pos);
-        }
-
-        public static void SetPos(Vector3 pos) => SetPos(pos.X, pos.Z, pos.Y);
-
-        public static unsafe void SetPos(float x, float y, float z)
-        {
-            if (SetPosFunPtr != IntPtr.Zero && Svc.ClientState.LocalPlayer != null)
-            {
-                ((delegate* unmanaged[Stdcall]<long, float, float, float, long>)SetPosFunPtr)(Svc.ClientState.LocalPlayer.Address, x, z, y);
-            }
-        }
-
-        private static nint SetPosFunPtr => Svc.SigScanner.TryScanText("E8 ?? ?? ?? ?? 83 4B 70 01", out var ptr) ? ptr : IntPtr.Zero;
     }
 }

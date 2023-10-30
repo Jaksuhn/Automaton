@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Automaton
 {
     [Serializable]
-    public class Configuration : IPluginConfiguration
+    public partial class Configuration : IPluginConfiguration
     {
         public int Version { get; set; } = 0;
 
@@ -24,7 +24,7 @@ namespace Automaton
 
         public void Save()
         {
-            this.pluginInterface!.SavePluginConfig(this);
+            pluginInterface!.SavePluginConfig(this);
         }
     }
 }

@@ -1,4 +1,3 @@
-using ECommons.DalamudServices;
 using ECommons.Reflection;
 using Automaton.Features;
 using Automaton.Features.UI;
@@ -10,6 +9,8 @@ namespace Automaton.Helpers
 {
     public static class FeatureHelper
     {
+
+        internal static bool IsBusy => P.TaskManager.IsBusy || WorkshopTurnin.active;
         private static bool IsEnabled(BaseFeature feature)
         {
             return Config.EnabledFeatures.Contains(feature.GetType().Name);

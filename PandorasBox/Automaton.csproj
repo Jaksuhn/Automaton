@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Authors>Puni.sh</Authors>
-        <Version>69.0.4</Version>
+        <Version>69.1.0</Version>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -97,6 +97,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Update="UI\DebugWindow.cs">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Compile>
       <Compile Update="UI\MainWindow.cs">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Compile>

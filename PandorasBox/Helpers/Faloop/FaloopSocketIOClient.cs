@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using ECommons.Logging;
 using Automaton.Helpers.Faloop.Model;
 using SocketIOClient;
 using SocketIOClient.Transport;

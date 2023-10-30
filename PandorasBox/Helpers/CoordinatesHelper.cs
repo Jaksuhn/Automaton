@@ -7,6 +7,7 @@ using ECommons.Logging;
 using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Linq;
+using System.Numerics;
 
 namespace Automaton.Helpers
 {
@@ -50,7 +51,6 @@ namespace Automaton.Helpers
                     }
                     var AethersX = ConvertMapMarkerToMapCoordinate(mapMarker.X, scale);
                     var AethersY = ConvertMapMarkerToMapCoordinate(mapMarker.Y, scale);
-                    PluginLog.Log($"Aetheryte: {data.PlaceName.Value.Name} ({AethersX} ,{AethersY})");
                     var temp_distance = Math.Pow(AethersX - maplinkMessage.X, 2) + Math.Pow(AethersY - maplinkMessage.Y, 2);
                     if (aetheryteName == "" || temp_distance < distance)
                     {
@@ -60,6 +60,23 @@ namespace Automaton.Helpers
                 }
             }
             return aetheryteName;
+        }
+
+        public static unsafe string GetNearestAetheryte(Vector3 pos, TerritoryType map)
+        {
+            var MapLink = new MapLinkPayload(map.RowId, map.Map.Row, (int)pos.X * 1000, (int)pos.Z * 1000);
+            var fauxMapLinkMessage = new MapLinkMessage(
+                0,
+                "",
+                "",
+                MapLink.XCoord,
+                MapLink.YCoord,
+                100,
+                map.RowId,
+                "",
+                DateTime.Now
+            );
+            return GetNearestAetheryte(fauxMapLinkMessage);
         }
 
         private static float ConvertMapMarkerToMapCoordinate(int pos, float scale)

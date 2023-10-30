@@ -1,9 +1,7 @@
-using Dalamud;
-using Dalamud.Logging;
 using ECommons.DalamudServices;
 using Automaton.FeaturesSetup;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
+using Automaton.Features.Debugging;
 
 namespace Automaton.Features.Commands
 {
@@ -16,7 +14,7 @@ namespace Automaton.Features.Commands
         public override List<string> Parameters => new() { "[<speed>]" };
         public override bool isDebug => true;
 
-        public override FeatureType FeatureType => FeatureType.Commands;
+        public override FeatureType FeatureType => FeatureType.Disabled;
 
         // why is this not normalised to 1?!?!
         internal static float offset = 6;
@@ -25,24 +23,13 @@ namespace Automaton.Features.Commands
         {
             try
             {
-                if (args.Count == 0) { SetSpeed(offset); return; }
+                if (args.Count == 0) { PositionDebug.SetSpeed(offset); return; }
 
                 var speed = float.Parse(args[0]);
-                SetSpeed(speed * offset);
-                PluginLog.Log($"Setting move speed to {speed}");
+                PositionDebug.SetSpeed(speed * offset);
+                Svc.Log.Info($"Setting move speed to {speed}");
             }
             catch { }
         }
-
-        public static void SetSpeed(float speedBase)
-        {
-            Svc.SigScanner.TryScanText("f3 ?? ?? ?? ?? ?? ?? ?? e8 ?? ?? ?? ?? 48 ?? ?? ?? ?? ?? ?? 0f ?? ?? e8 ?? ?? ?? ?? f3 ?? ?? ?? ?? ?? ?? ?? f3 ?? ?? ?? ?? ?? ?? ?? f3 ?? ?? ?? f3", out var address);
-            address = address + 4 + Marshal.ReadInt32(address + 4) + 4;
-            SafeMemory.Write(address + 20, speedBase);
-            SetMoveControlData(speedBase);
-        }
-
-        private static unsafe void SetMoveControlData(float speed) =>
-            SafeMemory.Write(((delegate* unmanaged[Stdcall]<byte, nint>)Svc.SigScanner.ScanText("E8 ?? ?? ?? ?? 48 ?? ?? 74 ?? 83 ?? ?? 75 ?? 0F ?? ?? ?? 66"))(1) + 8, speed);
     }
 }

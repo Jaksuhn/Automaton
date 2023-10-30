@@ -1,4 +1,3 @@
-using Dalamud.Logging;
 using ECommons;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game;
