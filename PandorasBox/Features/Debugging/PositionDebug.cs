@@ -91,6 +91,10 @@ public unsafe class PositionDebug : DebugHelper
         if (ImGui.Button("Set")) SetSpeed(speedMultiplier * 6);
         ImGui.SameLine();
         if (ImGui.Button("Reset")) { speedMultiplier = 1; SetSpeed(speedMultiplier * 6); }
+        ImGui.SameLine();
+        if (ImGui.Button("set 2")) playerController->MoveControllerWalk.BaseMovementSpeed = speedMultiplier * 6;
+        ImGui.SameLine();
+        if (ImGui.Button("reset 2")) { speedMultiplier = 1;  playerController->MoveControllerWalk.BaseMovementSpeed = speedMultiplier * 6; }
 
         ImGui.Separator();
 
