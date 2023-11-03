@@ -91,10 +91,6 @@ public unsafe class PositionDebug : DebugHelper
         if (ImGui.Button("Set")) SetSpeed(speedMultiplier * 6);
         ImGui.SameLine();
         if (ImGui.Button("Reset")) { speedMultiplier = 1; SetSpeed(speedMultiplier * 6); }
-        ImGui.SameLine();
-        if (ImGui.Button("set 2")) playerController->MoveControllerWalk.BaseMovementSpeed = speedMultiplier * 6;
-        ImGui.SameLine();
-        if (ImGui.Button("reset 2")) { speedMultiplier = 1;  playerController->MoveControllerWalk.BaseMovementSpeed = speedMultiplier * 6; }
 
         ImGui.Separator();
 
@@ -104,7 +100,7 @@ public unsafe class PositionDebug : DebugHelper
             var targetPos = Svc.Targets.Target != null ? Svc.Targets.Target.Position : Svc.Targets.PreviousTarget.Position;
             var str = Svc.Targets.Target != null ? "Target" : "Last Target";
 
-            ImGui.Text($"{str} Position: x: {targetPos.X}, y: {targetPos.Y}, z: {targetPos.Z}");
+            ImGui.Text($"{str} Position: x: {targetPos.X:f3}, y: {targetPos.Y:f3}, z: {targetPos.Z:f3}");
             if (ImGui.Button($"TP to {str}")) SetPos(targetPos);
             ImGui.Text($"Distance to {str}: {Vector3.Distance(Svc.ClientState.LocalPlayer.Position, targetPos)}");
 
@@ -112,7 +108,7 @@ public unsafe class PositionDebug : DebugHelper
         }
 
         Svc.GameGui.ScreenToWorld(ImGui.GetIO().MousePos, out var pos, 100000f);
-        ImGui.Text($"Mouse Position: x: {pos.X}, y: {pos.Y}, z: {pos.Z}");
+        ImGui.Text($"Mouse Position: x: {pos.X:f3}, y: {pos.Y:f3}, z: {pos.Z:f3}");
         
         ImGui.Separator();
 
@@ -198,7 +194,8 @@ public unsafe class PositionDebug : DebugHelper
         var mousePos = ImGui.GetIO().MousePos;
         Svc.GameGui.ScreenToWorld(mousePos, out var pos, 100000f);
         Svc.Log.Info($"Moving from {pos.X}, {pos.Z}, {pos.Y}");
-        SetPos(pos);
+        if (pos != Vector3.Zero)
+            SetPos(pos);
     }
 
     public static void SetPos(Vector3 pos) => SetPos(pos.X, pos.Z, pos.Y);

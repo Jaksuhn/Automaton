@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using Automaton.Helpers;
 using Dalamud.Hooking;
 using Dalamud.Logging;
 using Dalamud.Memory;
@@ -182,6 +184,53 @@ public static unsafe class Common
 
         return null;
     }
+
+    public static AtkResNode* GetNodeByID(AtkUldManager* uldManager, uint nodeId, NodeType? type = null) => GetNodeByID<AtkResNode>(uldManager, nodeId, type);
+    public static T* GetNodeByID<T>(AtkUldManager* uldManager, uint nodeId, NodeType? type = null) where T : unmanaged
+    {
+        for (var i = 0; i < uldManager->NodeListCount; i++)
+        {
+            var n = uldManager->NodeList[i];
+            if (n->NodeID != nodeId || (type != null && n->Type != type.Value)) continue;
+            return (T*)n;
+        }
+        return null;
+    }
+
+    public static HookWrapper<T> Hook<T>(string signature, T detour, int addressOffset = 0) where T : Delegate
+    {
+        var addr = Svc.SigScanner.ScanText(signature);
+        var h = Svc.Hook.HookFromAddress(addr + addressOffset, detour);
+        var wh = new HookWrapper<T>(h);
+        HookList.Add(wh);
+        return wh;
+    }
+
+    public static HookWrapper<T> Hook<T>(void* address, T detour) where T : Delegate
+    {
+        var h = Svc.Hook.HookFromAddress(new nint(address), detour);
+        var wh = new HookWrapper<T>(h);
+        HookList.Add(wh);
+        return wh;
+    }
+
+    public static HookWrapper<T> Hook<T>(nuint address, T detour) where T : Delegate
+    {
+        var h = Svc.Hook.HookFromAddress((nint)address, detour);
+        var wh = new HookWrapper<T>(h);
+        HookList.Add(wh);
+        return wh;
+    }
+
+    public static HookWrapper<T> Hook<T>(nint address, T detour) where T : Delegate
+    {
+        var h = Svc.Hook.HookFromAddress(address, detour);
+        var wh = new HookWrapper<T>(h);
+        HookList.Add(wh);
+        return wh;
+    }
+
+    public static List<IHookWrapper> HookList = new();
 }
 
 public unsafe class SetupAddonArgs

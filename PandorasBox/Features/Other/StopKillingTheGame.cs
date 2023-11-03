@@ -6,7 +6,6 @@ using ECommons.DalamudServices;
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Automaton.FeaturesSetup;
-using Automaton.IPC;
 using System;
 using System.Runtime.InteropServices;
 
@@ -15,11 +14,12 @@ namespace Automaton.Features.Other
     public unsafe class NoKill : Feature
     {
         public override string Name => "Prevent Lobby Error Crashes";
-
         public override string Description => "Prevents the game from closing itself when it gets a lobby error";
 
         public override FeatureType FeatureType => FeatureType.Other;
 
+        public Configs Config { get; private set; }
+        public override bool UseAutoConfig => true;
         public class Configs : FeatureConfig
         {
             [FeatureConfigOption("Skip Authentication Errors")]
@@ -37,10 +37,6 @@ namespace Automaton.Features.Other
             [FeatureConfigOption("Try to Login After")]
             public bool AttemptLogin = true;
         }
-
-        public Configs Config { get; private set; }
-
-        public override bool UseAutoConfig => true;
 
         internal IntPtr StartHandler;
         internal IntPtr LoginHandler;

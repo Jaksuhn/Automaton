@@ -67,7 +67,7 @@ namespace Automaton.Helpers
                 return new(r);
             }
 
-            public bool AlmostEqual(Angle other, float epsRad)
+            public readonly bool AlmostEqual(Angle other, float epsRad)
             {
                 var delta = Math.Abs(Rad - other.Rad);
                 return delta <= epsRad || delta >= (2 * MathF.PI) - epsRad;

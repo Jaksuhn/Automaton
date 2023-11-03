@@ -148,9 +148,11 @@ internal class MainWindow : Window
 
     private static void DrawAbout()
     {
-        ImGui.Text("This is where I test features for Pandora's Box,\nlearn to break the game,\nor store features ill suited for anything else.");
+        ImGui.TextWrapped("This is where I test features for Pandora's Box, learn to break the game, or store features ill suited for anything else.");
         ImGui.Spacing();
-        ImGui.Text("If any feature you see here is in Pandora's Box,\nit means I'm testing modifications to that feature.\nIf you enable it here, it will disable the Pandora version for you.");
+        ImGui.TextWrapped("If any feature you see here is in Pandora's Box, it means I'm testing modifications to that feature. If you enable it here, make sure the Pandora version is disabled or there will probably be problems.");
+
+        ImGui.Text("Icon by Kadmas");
     }
 
     private static void DrawCommands(BaseFeature[] features)
