@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <Authors>Puni.sh</Authors>
+        <Authors>croizat</Authors>
         <Version>0.0.0.0</Version>
     </PropertyGroup>
 
@@ -23,6 +23,9 @@
         <RootNamespace>$(PluginName)</RootNamespace>
         <Nullable>disable</Nullable>
         <NoWarn>CS1591</NoWarn>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
+        <UseWindowsForms>true</UseWindowsForms>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'Release'">
@@ -35,8 +38,6 @@
 
     <PropertyGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))'">
         <DalamudLibPath>$(DALAMUD_HOME)/</DalamudLibPath>
-        <EnableWindowsTargeting>true</EnableWindowsTargeting>
-        <UseWindowsForms>true</UseWindowsForms>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(OS)' != 'Windows_NT' OR '$(CI)' == 'true'">
