@@ -79,16 +79,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Icon.png">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="pandora.png">
+      <None Update="automaton.png">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="Automaton.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="pandora_g.png">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>
@@ -106,9 +100,5 @@
       <Compile Update="UI\MainWindow.cs">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Features\Chat\" />
     </ItemGroup>
 </Project>
