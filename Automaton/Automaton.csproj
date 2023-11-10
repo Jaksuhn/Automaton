@@ -35,6 +35,8 @@
 
     <PropertyGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))'">
         <DalamudLibPath>$(DALAMUD_HOME)/</DalamudLibPath>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
+        <UseWindowsForms>true</UseWindowsForms>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(OS)' != 'Windows_NT' OR '$(CI)' == 'true'">
