@@ -14,7 +14,7 @@ namespace Automaton.Features.Commands
         public override List<string> Parameters => new() { "[<speed>]" };
         public override bool isDebug => true;
 
-        public override FeatureType FeatureType => FeatureType.Disabled;
+        public override FeatureType FeatureType => FeatureType.Commands;
 
         // why is this not normalised to 1?!?!
         internal static float offset = 6;

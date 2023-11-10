@@ -2,11 +2,13 @@ using Automaton.Debugging;
 using Automaton.Helpers;
 using Dalamud;
 using ECommons.DalamudServices;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Automaton.Features.Debugging;
 
@@ -17,6 +19,11 @@ public unsafe class PositionDebug : DebugHelper
     private float playerPositionX;
     private float playerPositionY;
     private float playerPositionZ;
+
+    private bool noclip;
+    private float displacementFactor = 0.10f;
+    private readonly float cameriaH;
+    private readonly float cameriaV;
 
     private Vector3 lastTargetPos;
 
@@ -52,6 +59,19 @@ public unsafe class PositionDebug : DebugHelper
         [FieldOffset(0x9C)] public float AngularAscent;
     }
 
+    [StructLayout(LayoutKind.Explicit, Size = 0x2B0)]
+    public unsafe struct CameraEx
+    {
+        [FieldOffset(0x130)] public float DirH; // 0 is north, increases CW
+        [FieldOffset(0x134)] public float DirV; // 0 is horizontal, positive is looking up, negative looking down
+        [FieldOffset(0x138)] public float InputDeltaHAdjusted;
+        [FieldOffset(0x13C)] public float InputDeltaVAdjusted;
+        [FieldOffset(0x140)] public float InputDeltaH;
+        [FieldOffset(0x144)] public float InputDeltaV;
+        [FieldOffset(0x148)] public float DirVMin; // -85deg by default
+        [FieldOffset(0x14C)] public float DirVMax; // +45deg by default
+    }
+
     public override void Draw()
     {
         ImGui.Text($"{Name}");
@@ -81,8 +101,25 @@ public unsafe class PositionDebug : DebugHelper
             ImGui.SameLine();
             DrawPositionModButtons("z");
 
+            if (ImGui.Checkbox("No Clip Mode", ref noclip))
+            {
+                if (noclip)
+                    Svc.Framework.Update += NoClipMode;
+                else
+                    Svc.Framework.Update -= NoClipMode;
+            }
+            if (ImGui.IsItemHovered()) ImGui.SetTooltip("Hold CTRL");
+            ImGui.SameLine();
+            ImGui.InputFloat("Displacement Factor", ref displacementFactor);
+
             ImGui.Separator();
         }
+
+        var camera = (CameraEx*)CameraManager.Instance()->GetActiveCamera();
+        ImGui.Text($"Camera H: {camera->DirH:f3}");
+        ImGui.Text($"Camera V: {camera->DirV:f3}");
+
+        ImGui.Separator();
 
         ImGui.Text($"Movement Speed: {playerController->MoveControllerWalk.BaseMovementSpeed}");
         ImGui.PushItemWidth(150);
@@ -119,6 +156,21 @@ public unsafe class PositionDebug : DebugHelper
         
         if (Svc.ClientState.LocalPlayer != null)
             ImGui.Text($"Nearest Aetheryte: {CoordinatesHelper.GetNearestAetheryte(Svc.ClientState.LocalPlayer.Position, map)}");
+    }
+
+    private void NoClipMode(IFramework framework)
+    {
+        if (!noclip) return;
+
+        var camera = (CameraEx*)CameraManager.Instance()->GetActiveCamera();
+        var xDisp = -Math.Sin(camera->DirH);
+        var zDisp = -Math.Cos(camera->DirH);
+        var yDisp = Math.Sin(camera->DirV);
+
+        var curPos = Svc.ClientState.LocalPlayer.Position;
+        var newPos = Vector3.Multiply(displacementFactor, new Vector3((float)xDisp, (float)yDisp, (float)zDisp));
+        if (ImGui.GetIO().KeyCtrl)
+            SetPos(curPos + newPos);
     }
 
     private static void DrawPositionModButtons(string coord)

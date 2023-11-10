@@ -95,7 +95,7 @@ public class Automaton : IDalamudPlugin
 
     private void OnCommand(string command, string args)
     {
-        if (args is "debug" or "d")
+        if (args is "debug" or "d" && Config.showDebugFeatures)
         {
             DebugWindow.IsOpen = !DebugWindow.IsOpen;
             return;

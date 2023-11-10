@@ -1,8 +1,10 @@
 using Automaton.Debugging;
 using Automaton.Helpers;
+using ECommons.Automation;
 using ECommons.DalamudServices;
 using ECommons.ImGuiMethods;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
 using Lumina.Excel;
 using Lumina.Excel.GeneratedSheets;
@@ -12,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using static ECommons.GenericHelpers;
 
 namespace Automaton.Features.Debugging;
 
@@ -35,6 +38,9 @@ public unsafe class QuestDebug : DebugHelper
     {
         ImGui.Text($"{Name}");
         ImGui.Separator();
+
+        if (ImGui.Button("Very Easy") && TryGetAddonByName<AtkUnitBase>("DifficultySelectYesNo", out var addon))
+            Callback.Fire(addon, true, 0, 2);
 
         ImGui.InputText("###QuestNameInput", ref questName, 500);
         if (questName != "")
@@ -72,7 +78,6 @@ public unsafe class QuestDebug : DebugHelper
             }
         }
         return "";
-
     }
 
     private Quest TrySearchQuest(string input)

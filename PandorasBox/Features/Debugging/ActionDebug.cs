@@ -4,6 +4,10 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
 using System.Linq;
 using System;
+using static ECommons.GenericHelpers;
+using FFXIVClientStructs.FFXIV.Component.GUI;
+using ECommons.Automation;
+using ECommons.DalamudServices;
 
 namespace Automaton.Features.Debugging;
 
@@ -46,6 +50,14 @@ public unsafe class ActionDebug : DebugHelper
             ImGui.EndCombo();
         }
 
+        if (ImGui.Button("mail delete") && TryGetAddonByName<AtkUnitBase>("LetterViewer", out var addon))
+        {
+            if (addon->UldManager.NodeList[2]->GetAsAtkComponentButton()->IsEnabled)
+                Svc.Log.Info("del button enabled");
+            else
+                Svc.Log.Info("disabled");
+            //Callback.Fire(addon, true, 2);
+        }
         // Now, you can access the selected ActionType using selectedTypeIndex
         
 

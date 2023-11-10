@@ -2,7 +2,6 @@ using Automaton.Debugging;
 using ImGuiNET;
 using System.Collections.Generic;
 using FFXIVClientStructs.FFXIV.Client.Game.MJI;
-using ECommons.Automation;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using FFXIVClientStructs.STD;
@@ -12,8 +11,7 @@ using System;
 using FFXIVClientStructs.Interop;
 using AtkValueType = FFXIVClientStructs.FFXIV.Component.GUI.ValueType;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-using System.Text;
-using System.Linq;
+using ECommons.ImGuiMethods;
 
 namespace Automaton.Features.Debugging;
 
@@ -40,7 +38,7 @@ public unsafe class IslandDebug : DebugHelper
 
         ImGui.Separator();
 
-        ImGui.Text($"Rest Cycles: {string.Join(", ", GetCurrentRestDays())}");
+        ImGuiEx.TextV($"Rest Cycles: {string.Join(", ", GetCurrentRestDays())}");
         ImGui.SameLine();
         if (ImGui.Button($"Void Second Rest")) SetRestCycles(8321u);
         if (AgentData != null)
