@@ -6,7 +6,6 @@ using ECommons.Automation;
 using ECommons.DalamudServices;
 using Automaton.Features;
 using Automaton.UI;
-using PunishLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -87,7 +86,6 @@ public class Automaton : IDalamudPlugin
         DebugWindow = null;
         Ws = null;
         ECommonsMain.Dispose();
-        PunishLibMain.Dispose();
         FeatureProviders.Clear();
         Common.Shutdown();
         P = null;
