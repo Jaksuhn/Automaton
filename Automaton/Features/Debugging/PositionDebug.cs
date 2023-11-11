@@ -167,10 +167,13 @@ public unsafe class PositionDebug : DebugHelper
         var zDisp = -Math.Cos(camera->DirH);
         var yDisp = Math.Sin(camera->DirV);
 
-        var curPos = Svc.ClientState.LocalPlayer.Position;
-        var newPos = Vector3.Multiply(displacementFactor, new Vector3((float)xDisp, (float)yDisp, (float)zDisp));
-        if (ImGui.GetIO().KeyCtrl)
-            SetPos(curPos + newPos);
+        if (Svc.ClientState.LocalPlayer != null)
+        {
+            var curPos = Svc.ClientState.LocalPlayer.Position;
+            var newPos = Vector3.Multiply(displacementFactor, new Vector3((float)xDisp, (float)yDisp, (float)zDisp));
+            if (ImGui.GetIO().KeyCtrl)
+                SetPos(curPos + newPos);
+        }
     }
 
     private static void DrawPositionModButtons(string coord)
