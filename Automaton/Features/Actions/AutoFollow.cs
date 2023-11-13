@@ -6,10 +6,11 @@ using System.Linq;
 using Dalamud.Game.Command;
 using System.Collections.Generic;
 using ECommons;
-using Dalamud.Game.ClientState.Objects.Types;
 using System.Numerics;
 using ImGuiNET;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using Dalamud.Game.Text;
+using Dalamud.Game.Text.SeStringHandling;
 
 namespace Automaton.Features.Actions
 {
@@ -27,8 +28,14 @@ namespace Automaton.Features.Actions
             [FeatureConfigOption("Distance to Keep", "", 1, IntMin = 0, IntMax = 30, EditorSize = 300)]
             public int distanceToKeep = 3;
 
-            [FeatureConfigOption("Function only in duty", "", 2, IntMin = 0, IntMax = 30, EditorSize = 300)]
+            [FeatureConfigOption("Don't follow if farther than this (yalms)", "", 2, IntMin = 0, IntMax = 30, EditorSize = 300)]
+            public int disableIfFurtherThan = 3;
+
+            [FeatureConfigOption("Function only in duty", "", 3, IntMin = 0, IntMax = 30, EditorSize = 300)]
             public bool OnlyInDuty = false;
+
+            [FeatureConfigOption("Change master on chat message", "", 3, IntMin = 0, IntMax = 30, EditorSize = 300, HelpText = "If a party chat message contains \"autofollow\", the current master will be switched to them.")]
+            public bool changeMasterOnChat = false;
         }
 
         protected override DrawConfigDelegate DrawConfigTree => (ref bool hasChanged) =>
@@ -56,7 +63,7 @@ namespace Automaton.Features.Actions
         private readonly List<string> registeredCommands = new();
 
         private readonly OverrideMovement movement = new();
-        private GameObject? master;
+        private Dalamud.Game.ClientState.Objects.Types.GameObject? master;
         private uint? masterObjectID;
 
         protected void OnCommand(List<string> args)
@@ -96,6 +103,7 @@ namespace Automaton.Features.Actions
             }
 
             Svc.Framework.Update += Follow;
+            Svc.Chat.ChatMessage += OnChatMessage;
             base.Enable();
         }
 
@@ -109,13 +117,18 @@ namespace Automaton.Features.Actions
             registeredCommands.Clear();
 
             Svc.Framework.Update -= Follow;
+            Svc.Chat.ChatMessage -= OnChatMessage;
             base.Disable();
         }
 
         private void SetMaster()
         {
-            master = Svc.Targets.Target;
-            masterObjectID = Svc.Targets.Target.ObjectId;
+            try
+            {
+                master = Svc.Targets.Target;
+                masterObjectID = Svc.Targets.Target.ObjectId;
+            }
+            catch { return; }
         }
 
         private void ClearMaster()
@@ -130,10 +143,29 @@ namespace Automaton.Features.Actions
 
             if (master == null) { movement.Enabled = false; return; }
             if (Vector3.Distance(Svc.ClientState.LocalPlayer.Position, master.Position) <= Config.distanceToKeep) { movement.Enabled = false; return; }
+            if (Vector3.Distance(Svc.ClientState.LocalPlayer.Position, master.Position) >= Config.disableIfFurtherThan) { movement.Enabled = false; return; }
             if (Config.OnlyInDuty && GameMain.Instance()->CurrentContentFinderConditionId == 0) { movement.Enabled = false; return; }
 
             movement.Enabled = true;
             movement.DesiredPosition = master.Position;
+        }
+
+        private void OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
+        {
+            if (type != XivChatType.Party) return;
+            if (message.TextValue.ToLowerInvariant().Contains("autofollow", StringComparison.CurrentCultureIgnoreCase))
+            {
+                foreach (var actor in Svc.Objects)
+                {
+                    if (actor == null) continue;
+                    if (actor.Name.TextValue.ToLowerInvariant().Contains(sender.TextValue) &&
+                        ((FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)actor.Address)->GetIsTargetable())
+                    {
+                        Svc.Targets.Target = actor;
+                        SetMaster();
+                    }
+                }
+            }
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Automaton.Features.Other
 
         public class Configs : FeatureConfig
         {
-            [FeatureConfigOption("SortaKinda", "", helpText:"Makes it work in PvP")]
+            [FeatureConfigOption("SortaKinda", "", HelpText = "Makes it work in PvP")]
             public bool SortaKinda = true;
         }
 

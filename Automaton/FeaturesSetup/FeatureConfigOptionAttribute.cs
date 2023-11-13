@@ -9,7 +9,7 @@ namespace Automaton.FeaturesSetup
 
         public string Name { get; }
 
-        public string HelpText { get; }
+        public string HelpText { get; set; } = "";
 
         public string LocalizeKey { get; }
 
@@ -56,13 +56,12 @@ namespace Automaton.FeaturesSetup
             Name = name;
         }
 
-        public FeatureConfigOptionAttribute(string name, string editorType, int priority = 0, string localizeKey = null, string helpText = null)
+        public FeatureConfigOptionAttribute(string name, string editorType, int priority = 0, string localizeKey = null)
         {
             Name = name;
             Priority = priority;
             LocalizeKey = localizeKey ?? name;
             Editor = typeof(FeatureConfigEditor).GetMethod($"{editorType}Editor", BindingFlags.Public | BindingFlags.Static);
-            HelpText = helpText;
         }
 
         public FeatureConfigOptionAttribute(string name, uint selectedValue = 0)
