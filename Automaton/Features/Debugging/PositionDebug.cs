@@ -171,7 +171,7 @@ public unsafe class PositionDebug : DebugHelper
         {
             var curPos = Svc.ClientState.LocalPlayer.Position;
             var newPos = Vector3.Multiply(displacementFactor, new Vector3((float)xDisp, (float)yDisp, (float)zDisp));
-            if (ImGui.GetIO().KeyCtrl)
+            if (ImGui.GetIO().KeyAlt)
                 SetPos(curPos + newPos);
         }
     }
