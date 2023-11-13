@@ -11,6 +11,8 @@ using ImGuiNET;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Interface.Components;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 
 namespace Automaton.Features.Actions
 {
@@ -28,8 +30,8 @@ namespace Automaton.Features.Actions
             [FeatureConfigOption("Distance to Keep", "", 1, IntMin = 0, IntMax = 30, EditorSize = 300)]
             public int distanceToKeep = 3;
 
-            [FeatureConfigOption("Don't follow if farther than this (yalms)", "", 2, IntMin = 0, IntMax = 30, EditorSize = 300)]
-            public int disableIfFurtherThan = 3;
+            [FeatureConfigOption("Don't follow if further than this (yalms)", "", 2, IntMin = 0, IntMax = 30, EditorSize = 300, HelpText = "Set to 0 to disable")]
+            public int disableIfFurtherThan = 0;
 
             [FeatureConfigOption("Function only in duty", "", 3, IntMin = 0, IntMax = 30, EditorSize = 300)]
             public bool OnlyInDuty = false;
@@ -41,8 +43,12 @@ namespace Automaton.Features.Actions
         protected override DrawConfigDelegate DrawConfigTree => (ref bool hasChanged) =>
         {
             if (ImGui.Checkbox("Function Only in Duty", ref Config.OnlyInDuty)) hasChanged = true;
+            if (ImGui.Checkbox("Change master on chat message", ref Config.changeMasterOnChat)) hasChanged = true;
+            ImGuiComponents.HelpMarker("If a party chat message contains \"autofollow\", the current master will be switched to them.");
             ImGui.PushItemWidth(300);
             if (ImGui.SliderInt("Distance to Keep (yalms)", ref Config.distanceToKeep, 0, 30)) hasChanged = true;
+            ImGui.PushItemWidth(300);
+            if (ImGui.SliderInt("Disable if Further Than (yalms)", ref Config.disableIfFurtherThan, 0, 300)) hasChanged = true;
 
             ImGui.Text($"Current Master: {(master != null ? master.Name : "null")}");
 
@@ -143,7 +149,7 @@ namespace Automaton.Features.Actions
 
             if (master == null) { movement.Enabled = false; return; }
             if (Vector3.Distance(Svc.ClientState.LocalPlayer.Position, master.Position) <= Config.distanceToKeep) { movement.Enabled = false; return; }
-            if (Vector3.Distance(Svc.ClientState.LocalPlayer.Position, master.Position) >= Config.disableIfFurtherThan) { movement.Enabled = false; return; }
+            if (Config.disableIfFurtherThan > 0 && Vector3.Distance(Svc.ClientState.LocalPlayer.Position, master.Position) > Config.disableIfFurtherThan) { movement.Enabled = false; return; }
             if (Config.OnlyInDuty && GameMain.Instance()->CurrentContentFinderConditionId == 0) { movement.Enabled = false; return; }
 
             movement.Enabled = true;
@@ -153,12 +159,14 @@ namespace Automaton.Features.Actions
         private void OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
         {
             if (type != XivChatType.Party) return;
+            var player = sender.Payloads.SingleOrDefault(x => x is PlayerPayload) as PlayerPayload;
             if (message.TextValue.ToLowerInvariant().Contains("autofollow", StringComparison.CurrentCultureIgnoreCase))
             {
                 foreach (var actor in Svc.Objects)
                 {
                     if (actor == null) continue;
-                    if (actor.Name.TextValue.ToLowerInvariant().Contains(sender.TextValue) &&
+                    Svc.Log.Info($"{actor.Name.TextValue} == {player.PlayerName} {actor.Name.TextValue.ToLowerInvariant().Equals(player.PlayerName)}");
+                    if (actor.Name.TextValue.Equals(player.PlayerName) &&
                         ((FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)actor.Address)->GetIsTargetable())
                     {
                         Svc.Targets.Target = actor;
