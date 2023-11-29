@@ -4,7 +4,6 @@ using ECommons.Automation;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Automaton.FeaturesSetup;
-using Automaton.IPC;
 using System;
 using System.Linq;
 using static ECommons.GenericHelpers;

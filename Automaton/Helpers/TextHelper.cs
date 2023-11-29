@@ -1,5 +1,7 @@
+using Dalamud.Memory;
 using Lumina.Text;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Automaton.Helpers
 {
@@ -17,5 +19,9 @@ namespace Automaton.Helpers
                 return source;
             return source.Substring(source.Length - tail_length);
         }
+
+        public static string FilterNonAlphanumeric(string input) => Regex.Replace(input, "[^\\p{L}\\p{N}]", string.Empty);
+
+        public static unsafe string AtkValueStringToString(byte* atkString) => MemoryHelper.ReadSeStringNullTerminated(new nint(atkString)).ToString();
     }
 }

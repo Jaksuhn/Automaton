@@ -3,7 +3,6 @@ using Automaton.Helpers;
 using Automaton.UI;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using System;
 using System.Numerics;
 using static ECommons.GenericHelpers;
 

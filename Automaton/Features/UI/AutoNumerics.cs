@@ -9,7 +9,6 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using Automaton.FeaturesSetup;
-using Automaton.IPC;
 
 namespace Automaton.Features.UI
 {

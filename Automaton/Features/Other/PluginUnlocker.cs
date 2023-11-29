@@ -4,7 +4,6 @@ using Automaton.FeaturesSetup;
 using System;
 using Dalamud.Plugin;
 using System.Reflection;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 

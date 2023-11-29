@@ -11,11 +11,14 @@ using System.Linq;
 using System.Reflection;
 using Automaton.IPC;
 using ImGuiNET;
+using Dalamud.IoC;
 
 namespace Automaton;
 
 public class Automaton : IDalamudPlugin
 {
+    [PluginService] public static IAddonLifecycle AddonLifecycle { get; private set; }
+
     public static string Name => "Automaton";
     private const string CommandName = "/automaton";
     internal WindowSystem Ws;
@@ -40,7 +43,7 @@ public class Automaton : IDalamudPlugin
 
     private void Initialize()
     {
-        ECommonsMain.Init(pi, P, ECommons.Module.DalamudReflector);
+        ECommonsMain.Init(pi, P, ECommons.Module.DalamudReflector, ECommons.Module.ObjectFunctions);
 
         Ws = new();
         MainWindow = new();

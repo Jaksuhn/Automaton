@@ -3,12 +3,13 @@ using Automaton.Helpers;
 using Dalamud;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using static System.Net.Mime.MediaTypeNames;
+using static Automaton.Helpers.Structs;
 
 namespace Automaton.Features.Debugging;
 
@@ -29,48 +30,6 @@ public unsafe class PositionDebug : DebugHelper
 
     private readonly PlayerController* playerController = (PlayerController*)Svc.SigScanner.GetStaticAddressFromSig("48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 3C 01 75 1E 48 8D 0D");
     private float speedMultiplier = 1;
-
-    [StructLayout(LayoutKind.Explicit)]
-    public unsafe struct PlayerController
-    {
-        [FieldOffset(0x10)] public PlayerMoveControllerWalk MoveControllerWalk;
-        [FieldOffset(0x150)] public PlayerMoveControllerFly MoveControllerFly;
-        [FieldOffset(0x559)] public byte ControlMode;
-    }
-
-    [StructLayout(LayoutKind.Explicit, Size = 0x140)]
-    public unsafe struct PlayerMoveControllerWalk
-    {
-        [FieldOffset(0x10)] public Vector3 MovementDir;
-        [FieldOffset(0x58)] public float BaseMovementSpeed;
-        [FieldOffset(0x90)] public float MovementDirRelToCharacterFacing;
-        [FieldOffset(0x94)] public byte Forced;
-        [FieldOffset(0xA0)] public Vector3 MovementDirWorld;
-        [FieldOffset(0xB0)] public float RotationDir;
-        [FieldOffset(0x110)] public uint MovementState;
-        [FieldOffset(0x114)] public float MovementLeft;
-        [FieldOffset(0x118)] public float MovementFwd;
-    }
-
-    [StructLayout(LayoutKind.Explicit, Size = 0xB0)]
-    public unsafe struct PlayerMoveControllerFly
-    {
-        [FieldOffset(0x66)] public byte IsFlying;
-        [FieldOffset(0x9C)] public float AngularAscent;
-    }
-
-    [StructLayout(LayoutKind.Explicit, Size = 0x2B0)]
-    public unsafe struct CameraEx
-    {
-        [FieldOffset(0x130)] public float DirH; // 0 is north, increases CW
-        [FieldOffset(0x134)] public float DirV; // 0 is horizontal, positive is looking up, negative looking down
-        [FieldOffset(0x138)] public float InputDeltaHAdjusted;
-        [FieldOffset(0x13C)] public float InputDeltaVAdjusted;
-        [FieldOffset(0x140)] public float InputDeltaH;
-        [FieldOffset(0x144)] public float InputDeltaV;
-        [FieldOffset(0x148)] public float DirVMin; // -85deg by default
-        [FieldOffset(0x14C)] public float DirVMax; // +45deg by default
-    }
 
     public override void Draw()
     {
@@ -108,14 +67,14 @@ public unsafe class PositionDebug : DebugHelper
                 else
                     Svc.Framework.Update -= NoClipMode;
             }
-            if (ImGui.IsItemHovered()) ImGui.SetTooltip("Hold CTRL");
+            if (ImGui.IsItemHovered()) ImGui.SetTooltip($"Hold ALT");
             ImGui.SameLine();
             ImGui.InputFloat("Displacement Factor", ref displacementFactor);
 
             ImGui.Separator();
         }
 
-        var camera = (CameraEx*)CameraManager.Instance()->GetActiveCamera();
+        var camera = (Structs.CameraEx*)CameraManager.Instance()->GetActiveCamera();
         ImGui.Text($"Camera H: {camera->DirH:f3}");
         ImGui.Text($"Camera V: {camera->DirV:f3}");
 
@@ -128,6 +87,7 @@ public unsafe class PositionDebug : DebugHelper
         if (ImGui.Button("Set")) SetSpeed(speedMultiplier * 6);
         ImGui.SameLine();
         if (ImGui.Button("Reset")) { speedMultiplier = 1; SetSpeed(speedMultiplier * 6); }
+        ImGui.Text($"IsMoving: {AgentMap.Instance()->IsPlayerMoving == 1}");
 
         ImGui.Separator();
 
@@ -162,7 +122,7 @@ public unsafe class PositionDebug : DebugHelper
     {
         if (!noclip) return;
 
-        var camera = (CameraEx*)CameraManager.Instance()->GetActiveCamera();
+        var camera = (Structs.CameraEx*)CameraManager.Instance()->GetActiveCamera();
         var xDisp = -Math.Sin(camera->DirH);
         var zDisp = -Math.Cos(camera->DirH);
         var yDisp = Math.Sin(camera->DirV);

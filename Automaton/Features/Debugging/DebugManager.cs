@@ -21,6 +21,7 @@ using Automaton.Debugging;
 using Automaton.Helpers;
 using Automaton.Features;
 using ECommons.DalamudServices;
+using Dalamud.Interface.Utility.Raii;
 
 namespace Automaton
 {
@@ -54,10 +55,6 @@ namespace Automaton.Debugging
         {
             get
             {
-                //if (FeatureProvider is CustomFeatureProvider ctp)
-                //{
-                //    return $"[{ctp.Assembly.GetName().Name}] {Name}";
-                //}
                 return Name;
             }
         }
@@ -182,52 +179,56 @@ namespace Automaton.Debugging
 
             }
 
-            if (ImGui.BeginChild($"###{Name}{nameof(DebugPages)}", new Vector2(SidebarSize, -1) * ImGui.GetIO().FontGlobalScale, true))
+            using (var table = ImRaii.Table($"{nameof(DebugManager)}Table", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.Resizable))
             {
-                var keys = DebugPages.Keys.ToList();
-                keys.Sort(((s, s1) => {
-                    if (s.StartsWith("[") && !s1.StartsWith("["))
-                    {
-                        return 1;
-                    }
-                    return string.CompareOrdinal(s, s1);
-                }));
+                if (!table.Success) return;
 
-                foreach (var k in keys)
+                ImGui.TableSetupColumn($"##{nameof(DebugManager)}SelectionColumn", ImGuiTableColumnFlags.WidthFixed, 200.0f * ImGuiHelpers.GlobalScale);
+                ImGui.TableSetupColumn($"##{nameof(DebugManager)}ContentsColumn", ImGuiTableColumnFlags.WidthStretch);
+
+                ImGui.TableNextColumn();
+                using (ImRaii.Child($"###{Name}{nameof(DebugPages)}", new Vector2(SidebarSize, -1) * ImGui.GetIO().FontGlobalScale, true))
                 {
-                    if (ImGui.Selectable($"{k}##{Name}{nameof(DebugPages)}{nameof(Config)}", Config.Debugging.SelectedPage == k))
+                    var keys = DebugPages.Keys.ToList();
+                    keys.Sort((s, s1) => {
+                        if (s.StartsWith("[") && !s1.StartsWith("["))
+                        {
+                            return 1;
+                        }
+                        return string.CompareOrdinal(s, s1);
+                    });
+
+                    foreach (var k in keys)
                     {
-                        Config.Debugging.SelectedPage = k;
-                        Config.Save();
+                        if (ImGui.Selectable($"{k}##{Name}{nameof(DebugPages)}{nameof(Config)}", Config.Debugging.SelectedPage == k))
+                        {
+                            Config.Debugging.SelectedPage = k;
+                            Config.Save();
+                        }
+                    }
+                }
+
+                ImGui.TableNextColumn();
+                using (ImRaii.Child($"###{Name}{nameof(DebugPages)}View", new Vector2(-1, -1), true, ImGuiWindowFlags.HorizontalScrollbar))
+                {
+                    if (string.IsNullOrEmpty(Config.Debugging.SelectedPage) || !DebugPages.ContainsKey(Config.Debugging.SelectedPage))
+                    {
+                        ImGui.Text("Select Debug Page");
+                    }
+                    else
+                    {
+                        try
+                        {
+                            DebugPages[Config.Debugging.SelectedPage]();
+                        }
+                        catch (Exception ex)
+                        {
+                            Svc.Log.Error(ex, "");
+                            ImGui.TextColored(new Vector4(1, 0, 0, 1), ex.ToString());
+                        }
                     }
                 }
             }
-
-            ImGui.EndChild();
-            ImGui.SameLine();
-
-            if (ImGui.BeginChild($"###{Name}{nameof(DebugPages)}View", new Vector2(-1, -1), true, ImGuiWindowFlags.HorizontalScrollbar))
-            {
-                if (string.IsNullOrEmpty(Config.Debugging.SelectedPage) || !DebugPages.ContainsKey(Config.Debugging.SelectedPage))
-                {
-                    ImGui.Text("Select Debug Page");
-                }
-                else
-                {
-                    try
-                    {
-                        DebugPages[Config.Debugging.SelectedPage]();
-                    }
-                    catch (Exception ex)
-                    {
-                        Svc.Log.Error(ex, "");
-                        ImGui.TextColored(new Vector4(1, 0, 0, 1), ex.ToString());
-                    }
-                }
-            }
-
-            ImGui.EndChild();
-
         }
 
         public static void Dispose()

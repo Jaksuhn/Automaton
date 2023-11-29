@@ -1,8 +1,4 @@
-using ECommons.DalamudServices;
 using Automaton.FeaturesSetup;
-using Automaton.Helpers;
-using ImGuiNET;
-using Dalamud.Game.ClientState.Keys;
 
 namespace Automaton.Features.Actions
 {

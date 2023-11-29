@@ -4,10 +4,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
 using System.Linq;
 using System;
-using static ECommons.GenericHelpers;
-using FFXIVClientStructs.FFXIV.Component.GUI;
-using ECommons.Automation;
-using ECommons.DalamudServices;
+using Dalamud.Interface.Utility.Raii;
 
 namespace Automaton.Features.Debugging;
 
@@ -20,6 +17,8 @@ public unsafe class ActionDebug : DebugHelper
 
     private ActionType actionType;
     private uint actionID;
+
+    private int selectedChannel = 0;
 
     public override void Draw()
     {
@@ -36,7 +35,7 @@ public unsafe class ActionDebug : DebugHelper
         var selectedType = prevType;
         var selectedTypeIndex = 0; // Initialize selectedTypeIndex with the index of the initial selection
 
-        if (ImGui.BeginCombo("Action Type", prevType.ToString()))
+        using (ImRaii.Combo("Action Type", prevType.ToString()))
         {
             for (var i = 0; i < actionTypes.Count; i++)
             {
@@ -46,20 +45,6 @@ public unsafe class ActionDebug : DebugHelper
                     selectedType = actionTypes[selectedTypeIndex];
                 }
             }
-
-            ImGui.EndCombo();
         }
-
-        if (ImGui.Button("mail delete") && TryGetAddonByName<AtkUnitBase>("LetterViewer", out var addon))
-        {
-            if (addon->UldManager.NodeList[2]->GetAsAtkComponentButton()->IsEnabled)
-                Svc.Log.Info("del button enabled");
-            else
-                Svc.Log.Info("disabled");
-            //Callback.Fire(addon, true, 2);
-        }
-        // Now, you can access the selected ActionType using selectedTypeIndex
-        
-
     }
 }

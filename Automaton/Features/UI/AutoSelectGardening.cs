@@ -10,7 +10,6 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using Automaton.FeaturesSetup;
-using Automaton.IPC;
 using System;
 using System.Collections.Generic;
 using System.Linq;

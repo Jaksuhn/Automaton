@@ -1,7 +1,5 @@
 using Automaton.FeaturesSetup;
-using Automaton.Helpers;
 using System.Collections.Generic;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using System;
 using Dalamud.Utility.Signatures;
