@@ -2,6 +2,7 @@ using ECommons.DalamudServices;
 using Automaton.FeaturesSetup;
 using System.Collections.Generic;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using Lumina.Excel.GeneratedSheets;
 
 namespace Automaton.Features.Commands
 {
@@ -21,13 +22,13 @@ namespace Automaton.Features.Commands
             switch (gc)
             {
                 case 1:
-                    Svc.Commands.ProcessCommand("/tp limsa");
+                    Svc.Commands.ProcessCommand($"/tp {Svc.Data.GetExcelSheet<Aetheryte>(Svc.ClientState.ClientLanguage).GetRow(8).PlaceName.Value.Name}");
                     break;
                 case 2:
-                    Svc.Commands.ProcessCommand("/tp gridania");
+                    Svc.Commands.ProcessCommand($"/tp {Svc.Data.GetExcelSheet<Aetheryte>(Svc.ClientState.ClientLanguage).GetRow(2).PlaceName.Value.Name}");
                     break;
                 case 3:
-                    Svc.Commands.ProcessCommand("/tp uldah");
+                    Svc.Commands.ProcessCommand($"/tp {Svc.Data.GetExcelSheet<Aetheryte>(Svc.ClientState.ClientLanguage).GetRow(9).PlaceName.Value.Name}");
                     break;
             }
         }

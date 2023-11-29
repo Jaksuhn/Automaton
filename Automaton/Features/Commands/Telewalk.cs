@@ -43,6 +43,8 @@ namespace Automaton.Features.Commands
 
         private void ModifyPOS(IFramework framework)
         {
+            if (!active) return;
+
             var camera = (CameraEx*)CameraManager.Instance()->GetActiveCamera();
             var xDisp = -Math.Sin(camera->DirH);
             var zDisp = -Math.Cos(camera->DirH);
@@ -51,19 +53,19 @@ namespace Automaton.Features.Commands
             if (Svc.ClientState.LocalPlayer != null)
             {
                 var curPos = Svc.ClientState.LocalPlayer.Position;
-                var newPos = Vector3.Multiply(displacementFactor, new Vector3((float)xDisp, Svc.ClientState.LocalPlayer.Position.Y, (float)zDisp));
+                var newPos = Vector3.Multiply(displacementFactor, new Vector3((float)xDisp, (float)yDisp, (float)zDisp));
                 if (Svc.KeyState[VirtualKey.W])
                 {
                     Svc.Log.Info("telewalking forwards");
                     PositionDebug.SetPos(curPos + newPos);
                 }
-                if (Svc.KeyState[VirtualKey.SPACE])
-                {
-                    if (!Svc.KeyState[VirtualKey.SHIFT])
-                        PositionDebug.SetPos(curPos + new Vector3(0, Svc.ClientState.LocalPlayer.Position.Y * displacementFactor, 0));
-                    else
-                        PositionDebug.SetPos(curPos + new Vector3(0, Svc.ClientState.LocalPlayer.Position.Y * -displacementFactor, 0));
-                }
+                //if (Svc.KeyState[VirtualKey.SPACE])
+                //{
+                //    if (!Svc.KeyState[VirtualKey.SHIFT])
+                //        PositionDebug.SetPos(curPos + new Vector3(0, Svc.ClientState.LocalPlayer.Position.Y * displacementFactor, 0));
+                //    else
+                //        PositionDebug.SetPos(curPos + new Vector3(0, Svc.ClientState.LocalPlayer.Position.Y * -displacementFactor, 0));
+                //}
             }
         }
     }
