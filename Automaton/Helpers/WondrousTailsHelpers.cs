@@ -1,9 +1,5 @@
-using Automaton.Helpers;
 using Dalamud;
-using Dalamud.Utility.Numerics;
-using Dalamud.Utility.Signatures;
 using ECommons.DalamudServices;
-using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.System.Memory;
 using FFXIVClientStructs.FFXIV.Component.GUI;
@@ -12,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.InteropServices;
 namespace Automaton.Helpers
 {
     internal static class WondrousTailsHelpers

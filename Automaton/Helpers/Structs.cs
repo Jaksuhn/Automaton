@@ -46,5 +46,11 @@ namespace Automaton.Helpers
             [FieldOffset(0x148)] public float DirVMin; // -85deg by default
             [FieldOffset(0x14C)] public float DirVMax; // +45deg by default
         }
+
+        [StructLayout(LayoutKind.Explicit, Size = 0x1BD0)]
+        public unsafe partial struct Character
+        {
+            [FieldOffset(0x60C)] public byte IsFlying;
+        }
     }
 }

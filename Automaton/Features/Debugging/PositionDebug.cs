@@ -97,15 +97,19 @@ public unsafe class PositionDebug : DebugHelper
             var targetPos = Svc.Targets.Target != null ? Svc.Targets.Target.Position : Svc.Targets.PreviousTarget.Position;
             var str = Svc.Targets.Target != null ? "Target" : "Last Target";
 
-            ImGui.Text($"{str} Position: x: {targetPos.X:f3}, y: {targetPos.Y:f3}, z: {targetPos.Z:f3}");
+            ImGui.Text($"{str} Position: {targetPos:f3}");
             if (ImGui.Button($"TP to {str}")) SetPos(targetPos);
             ImGui.Text($"Distance to {str}: {Vector3.Distance(Svc.ClientState.LocalPlayer.Position, targetPos)}");
-
+            try
+            {
+                ImGui.Text($"IsFlying: {((Character*)Svc.Targets.Target.Address)->IsFlying}");
+            }
+            catch { }
             ImGui.Separator();
         }
 
         Svc.GameGui.ScreenToWorld(ImGui.GetIO().MousePos, out var pos, 100000f);
-        ImGui.Text($"Mouse Position: x: {pos.X:f3}, y: {pos.Y:f3}, z: {pos.Z:f3}");
+        ImGui.Text($"Mouse Position: {pos:f3}");
         
         ImGui.Separator();
 

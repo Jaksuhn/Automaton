@@ -32,9 +32,11 @@ public unsafe class IslandDebug : DebugHelper
         ImGui.Text($"{Name}");
         ImGui.Separator();
 
+        ImGui.Text($"OnIsland State: {MJIManager.Instance()->IsPlayerInSanctuary}");
         ImGui.Text($"Current Rank: {MJIManager.Instance()->IslandState.CurrentRank}");
         ImGui.Text($"Total Farm Slots: {MJIManager.Instance()->GetFarmSlotCount()}");
         ImGui.Text($"Total Pasture Slots: {MJIManager.Instance()->GetPastureSlotCount()}");
+        ImGui.Text($"Current Mode: {MJIManager.Instance()->CurrentMode}");
 
         ImGui.Separator();
 

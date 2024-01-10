@@ -13,6 +13,8 @@ using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Interface.Components;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using Dalamud.Game.ClientState.Conditions;
 
 namespace Automaton.Features.Actions
 {
@@ -27,17 +29,20 @@ namespace Automaton.Features.Actions
         public Configs Config { get; private set; }
         public class Configs : FeatureConfig
         {
-            [FeatureConfigOption("Distance to Keep", "", 1, IntMin = 0, IntMax = 30, EditorSize = 300)]
+            [FeatureConfigOption("Distance to Keep", "", 1)]
             public int distanceToKeep = 3;
 
             [FeatureConfigOption("Don't follow if further than this (yalms)", "", 2, IntMin = 0, IntMax = 30, EditorSize = 300, HelpText = "Set to 0 to disable")]
             public int disableIfFurtherThan = 0;
 
-            [FeatureConfigOption("Function only in duty", "", 3, IntMin = 0, IntMax = 30, EditorSize = 300)]
+            [FeatureConfigOption("Function only in duty", "", 3)]
             public bool OnlyInDuty = false;
 
-            [FeatureConfigOption("Change master on chat message", "", 3, IntMin = 0, IntMax = 30, EditorSize = 300, HelpText = "If a party chat message contains \"autofollow\", the current master will be switched to them.")]
+            [FeatureConfigOption("Change master on chat message", "", 4, IntMin = 0, IntMax = 30, EditorSize = 300, HelpText = "If a party chat message contains \"autofollow\", the current master will be switched to them.")]
             public bool changeMasterOnChat = false;
+
+            [FeatureConfigOption("Mount & Fly (Experimental)", "", 5)]
+            public bool MountAndFly = true;
         }
 
         protected override DrawConfigDelegate DrawConfigTree => (ref bool hasChanged) =>
@@ -45,6 +50,8 @@ namespace Automaton.Features.Actions
             if (ImGui.Checkbox("Function Only in Duty", ref Config.OnlyInDuty)) hasChanged = true;
             if (ImGui.Checkbox("Change master on chat message", ref Config.changeMasterOnChat)) hasChanged = true;
             ImGuiComponents.HelpMarker("If a party chat message contains \"autofollow\", the current master will be switched to them.");
+            if (ImGui.Checkbox("Mount & Fly", ref Config.MountAndFly)) hasChanged = true;
+
             ImGui.PushItemWidth(300);
             if (ImGui.SliderInt("Distance to Keep (yalms)", ref Config.distanceToKeep, 0, 30)) hasChanged = true;
             ImGui.PushItemWidth(300);
@@ -148,13 +155,46 @@ namespace Automaton.Features.Actions
             master = Svc.Objects.FirstOrDefault(x => x.ObjectId == masterObjectID);
 
             if (master == null) { movement.Enabled = false; return; }
-            if (Vector3.Distance(Svc.ClientState.LocalPlayer.Position, master.Position) <= Config.distanceToKeep) { movement.Enabled = false; return; }
             if (Config.disableIfFurtherThan > 0 && Vector3.Distance(Svc.ClientState.LocalPlayer.Position, master.Position) > Config.disableIfFurtherThan) { movement.Enabled = false; return; }
             if (Config.OnlyInDuty && GameMain.Instance()->CurrentContentFinderConditionId == 0) { movement.Enabled = false; return; }
+            if (Svc.Condition[ConditionFlag.InFlight]) { TaskManager.Abort(); }
+
+            if (master.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player)
+            {
+                if (((Character*)master.Address)->IsMounted() && CanMount())
+                {
+                    movement.Enabled = false;
+                    ActionManager.Instance()->UseAction(ActionType.GeneralAction, 9);
+                    return;
+                }
+
+                if (Config.MountAndFly && ((Structs.Character*)master.Address)->IsFlying != 0 && !Svc.Condition[ConditionFlag.InFlight] && Svc.Condition[ConditionFlag.Mounted])
+                {
+                    movement.Enabled = false;
+                    TaskManager.Enqueue(() => ActionManager.Instance()->UseAction(ActionType.GeneralAction, 2));
+                    TaskManager.DelayNext(50);
+                    TaskManager.Enqueue(() => ActionManager.Instance()->UseAction(ActionType.GeneralAction, 2));
+                    return;
+                }
+
+                if (!((Character*)master.Address)->IsMounted() && Svc.Condition[ConditionFlag.Mounted])
+                {
+                    movement.Enabled = false;
+                    ((BattleChara*)master.Address)->GetStatusManager->RemoveStatus(10);
+                    ActionManager.Instance()->UseAction(ActionType.GeneralAction, 9);
+                    return;
+                }
+            }
+
+            // set dismount logic here
+
+            if (Vector3.Distance(Svc.ClientState.LocalPlayer.Position, master.Position) <= Config.distanceToKeep) { movement.Enabled = false; return; }
 
             movement.Enabled = true;
             movement.DesiredPosition = master.Position;
         }
+
+        private static bool CanMount() => !Svc.Condition[ConditionFlag.Mounted] && !Svc.Condition[ConditionFlag.Mounting] && !Svc.Condition[ConditionFlag.InCombat] && !Svc.Condition[ConditionFlag.Casting];
 
         private void OnChatMessage(XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
         {
