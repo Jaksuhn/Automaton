@@ -29,7 +29,7 @@ namespace Automaton.Features.Commands
             try
             {
                 if (uint.TryParse(args[0], out var itemID))
-                    EquipItem(uint.Parse(args[0]));
+                    EquipItem(itemID);
                 //else
                 //{
                 //    var parsedID = GetItemIDFromString(string.Join(" ", args));
