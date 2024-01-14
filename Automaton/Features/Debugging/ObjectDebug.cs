@@ -9,6 +9,8 @@ using System.Numerics;
 using ECommons.DalamudServices;
 using System.Linq;
 using ECommons.GameFunctions;
+using Lumina.Excel.GeneratedSheets;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace Automaton.Features.Debugging;
 
@@ -25,7 +27,8 @@ public unsafe class ObjectDebug : DebugHelper
 
         foreach (var obj in Svc.Objects.Where(o => o.IsHostile()))
         {
-            ImGui.Text($"{obj.Name} > {Vector3.Distance(Svc.ClientState.LocalPlayer.Position, obj.Position):f1}y");
+            var csObj = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)obj.Address;
+            ImGui.Text($"Name: {obj.Name} > {Vector3.Distance(Svc.ClientState.LocalPlayer.Position, obj.Position):f1}y > bnpcbase: {Svc.Data.GetExcelSheet<BNpcBase>().GetRow(obj.DataId).RowId} > {obj.Struct()->GetNpcID()}");
             ImGui.PushItemWidth(200);
             ImGui.SliderFloat($"Hitbox Radius###{obj.Name}{obj.ObjectId}", ref ((GameObject*)obj.Address)->HitboxRadius, 0, 100);
         }
