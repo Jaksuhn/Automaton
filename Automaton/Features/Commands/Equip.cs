@@ -17,7 +17,7 @@ namespace Automaton.Features.Commands
     {
         public override string Name => "Equip";
         public override string Command { get; set; } = "/equip";
-        public override string Description => "Equip an item via name/id";
+        public override string Description => "Equip an item via id";
         public override List<string> Parameters => new() { "" };
 
         public override FeatureType FeatureType => FeatureType.Commands;
