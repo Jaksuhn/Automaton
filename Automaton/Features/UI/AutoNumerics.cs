@@ -24,8 +24,6 @@ namespace Automaton.Features.UI
 
         private readonly string splitText = Svc.Data.GetExcelSheet<Addon>().Where(x => x.RowId == 533).First().Text.RawString;
 
-        private bool hasDisabled;
-
         public class Configs : FeatureConfig
         {
             public bool WorkOnTrading = false;

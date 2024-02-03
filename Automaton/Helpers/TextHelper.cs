@@ -1,5 +1,6 @@
 using Dalamud.Memory;
 using Lumina.Text;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Text.RegularExpressions;
 

@@ -177,11 +177,15 @@
       "clicklib": {
         "type": "Project",
         "dependencies": {
+          "ECommons": "[2.1.0.1, )",
           "ILRepack": "[2.0.18, )",
           "Reloaded.Memory": "[7.1.0, )"
         }
       },
       "ecommons": {
+        "type": "Project"
+      },
+      "speedlib": {
         "type": "Project"
       }
     }

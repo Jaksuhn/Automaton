@@ -23,8 +23,6 @@ public unsafe class PositionDebug : DebugHelper
 
     private bool noclip;
     private float displacementFactor = 0.10f;
-    private readonly float cameriaH;
-    private readonly float cameriaV;
 
     private Vector3 lastTargetPos;
 

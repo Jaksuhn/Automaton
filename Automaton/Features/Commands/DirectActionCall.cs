@@ -1,4 +1,3 @@
-using Dalamud.Logging;
 using ECommons;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -25,7 +24,7 @@ namespace Automaton.Features.Commands
             {
                 var actionType = ParseActionType(args[0]);
                 var actionID = uint.Parse(args[1]);
-                PluginLog.Log($"Executing {Svc.Data.GetExcelSheet<Lumina.Excel.GeneratedSheets.Action>(Svc.ClientState.ClientLanguage).GetRow(actionID).Name.RawString}");
+                Svc.Log.Info($"Executing {Svc.Data.GetExcelSheet<Lumina.Excel.GeneratedSheets.Action>(Svc.ClientState.ClientLanguage).GetRow(actionID).Name.RawString}");
                 ActionManager.Instance()->UseActionLocation(actionType, actionID);
             }
             catch (Exception e) { e.Log(); }

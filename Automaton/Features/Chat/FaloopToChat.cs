@@ -10,7 +10,6 @@ using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Automaton.Helpers.Faloop;
 using Automaton.Helpers.Faloop.Model;
 using ECommons.DalamudServices;
-using ECommons.Logging;
 using Lumina.Excel.GeneratedSheets;
 using Automaton.FeaturesSetup;
 using Automaton.Helpers;
@@ -194,24 +193,24 @@ namespace Automaton.Features.ChatFeature
         private void OnDisconnected(string cause)
         {
             PrintModuleMessage("Disconnected.");
-            PluginLog.Warning($"Disconnected. Reason: {cause}");
+            Svc.Log.Warning($"Disconnected. Reason: {cause}");
         }
 
-        private static void OnError(string error) => PluginLog.Error($"Disconnected = {error}");
+        private static void OnError(string error) => Svc.Log.Error($"Disconnected = {error}");
 
         private void OnMobReport(MobReportData data)
         {
             var mob = Svc.Data.GetExcelSheet<BNpcName>()?.GetRow(data.MobId);
             if (mob == default)
             {
-                PluginLog.Debug($"{nameof(OnMobReport)}: {nameof(mob)} == null");
+                Svc.Log.Debug($"{nameof(OnMobReport)}: {nameof(mob)} == null");
                 return;
             }
 
             var mobData = session.EmbedData.Mobs.FirstOrDefault(x => x.Id == data.MobId);
             if (mobData == default)
             {
-                PluginLog.Debug($"{nameof(OnMobReport)}: {nameof(mobData)} == null");
+                Svc.Log.Debug($"{nameof(OnMobReport)}: {nameof(mobData)} == null");
                 return;
             }
 
@@ -219,7 +218,7 @@ namespace Automaton.Features.ChatFeature
             var dataCenter = world?.DataCenter?.Value;
             if (world == default || dataCenter == default)
             {
-                PluginLog.Debug($"{nameof(OnMobReport)}: {nameof(world)} == null || {nameof(dataCenter)} == null");
+                Svc.Log.Debug($"{nameof(OnMobReport)}: {nameof(world)} == null || {nameof(dataCenter)} == null");
                 return;
             }
 
@@ -227,26 +226,26 @@ namespace Automaton.Features.ChatFeature
             var currentDataCenter = currentWorld?.DataCenter?.Value;
             if (currentWorld == default || currentDataCenter == default)
             {
-                PluginLog.Debug($"{nameof(OnMobReport)}: {nameof(currentWorld)} == null || {nameof(currentDataCenter)} == null");
+                Svc.Log.Debug($"{nameof(OnMobReport)}: {nameof(currentWorld)} == null || {nameof(currentDataCenter)} == null");
                 return;
             }
 
             var config = GetRankConfig(mobData.Rank);
             if (config == default)
             {
-                PluginLog.Debug($"{nameof(OnMobReport)}: {nameof(config)} == null");
+                Svc.Log.Debug($"{nameof(OnMobReport)}: {nameof(config)} == null");
                 return;
             }
 
             if (!config.MajorPatches.TryGetValue(mobData.Version, out var value) || !value)
             {
-                PluginLog.Debug($"{nameof(OnMobReport)}: {nameof(majorPatches)}");
+                Svc.Log.Debug($"{nameof(OnMobReport)}: {nameof(majorPatches)}");
                 return;
             }
 
             if (config.DisableInDuty && Svc.Condition[ConditionFlag.BoundByDuty])
             {
-                PluginLog.Debug($"{nameof(OnMobReport)}: in duty");
+                Svc.Log.Debug($"{nameof(OnMobReport)}: in duty");
                 return;
             }
 
@@ -258,7 +257,7 @@ namespace Automaton.Features.ChatFeature
                 case Jurisdiction.World when world.RowId == currentWorld.RowId:
                     break;
                 default:
-                    PluginLog.Verbose($"{nameof(OnMobReport)}: unmatched");
+                    Svc.Log.Verbose($"{nameof(OnMobReport)}: unmatched");
                     return;
             }
 
@@ -266,11 +265,11 @@ namespace Automaton.Features.ChatFeature
             {
                 case "spawn" when config.EnableSpawnReport:
                     OnSpawnMobReport(data, mob, world, config.Channel, mobData.Rank);
-                    PluginLog.Verbose($"{nameof(OnMobReport)}: {OnSpawnMobReport}");
+                    Svc.Log.Verbose($"{nameof(OnMobReport)}: {OnSpawnMobReport}");
                     break;
                 case "death" when config.EnableDeathReport:
                     OnDeathMobReport(data, mob, world, config.Channel, mobData.Rank, config.SkipOrphanReport);
-                    PluginLog.Verbose($"{nameof(OnMobReport)}: {OnDeathMobReport}");
+                    Svc.Log.Verbose($"{nameof(OnMobReport)}: {OnDeathMobReport}");
                     break;
             }
         }
@@ -280,7 +279,7 @@ namespace Automaton.Features.ChatFeature
             var spawn = data.Data.Deserialize<MobReportData.Spawn>();
             if (spawn == default)
             {
-                PluginLog.Debug($"{nameof(OnSpawnMobReport)}: {nameof(spawn)} == null");
+                Svc.Log.Debug($"{nameof(OnSpawnMobReport)}: {nameof(spawn)} == null");
                 return;
             }
 
@@ -323,13 +322,13 @@ namespace Automaton.Features.ChatFeature
             var death = data.Data.Deserialize<MobReportData.Death>();
             if (death == default)
             {
-                PluginLog.Debug($"{nameof(OnDeathMobReport)}: {nameof(death)} == null");
+                Svc.Log.Debug($"{nameof(OnDeathMobReport)}: {nameof(death)} == null");
                 return;
             }
 
             if (skipOrphanReport && SpawnHistories.RemoveAll(x => x.MobId == data.MobId && x.WorldId == data.WorldId) == 0)
             {
-                PluginLog.Debug($"{nameof(OnDeathMobReport)}: {nameof(skipOrphanReport)}");
+                Svc.Log.Debug($"{nameof(OnDeathMobReport)}: {nameof(skipOrphanReport)}");
                 return;
             }
 
@@ -348,19 +347,19 @@ namespace Automaton.Features.ChatFeature
             });
         }
 
-        private static void OnAny(string name, SocketIOResponse response) => PluginLog.Debug($"{nameof(OnAny)} Event {name} = {response}");
+        private static void OnAny(string name, SocketIOResponse response) => Svc.Log.Debug($"{nameof(OnAny)} Event {name} = {response}");
 
-        private static void OnReconnected(int count) => PluginLog.Debug($"Reconnected {count}");
+        private static void OnReconnected(int count) => Svc.Log.Debug($"Reconnected {count}");
 
-        private static void OnReconnectError(Exception exception) => PluginLog.Error($"Reconnect error {exception}");
+        private static void OnReconnectError(Exception exception) => Svc.Log.Error($"Reconnect error {exception}");
 
-        private static void OnReconnectAttempt(int count) => PluginLog.Debug($"Reconnect attempt {count}");
+        private static void OnReconnectAttempt(int count) => Svc.Log.Debug($"Reconnect attempt {count}");
 
-        private static void OnReconnectFailed() => PluginLog.Debug("Reconnect failed");
+        private static void OnReconnectFailed() => Svc.Log.Debug("Reconnect failed");
 
-        private static void OnPing() => PluginLog.Debug("Ping");
+        private static void OnPing() => Svc.Log.Debug("Ping");
 
-        private static void OnPong(TimeSpan span) => PluginLog.Debug($"Pong: {span}");
+        private static void OnPong(TimeSpan span) => Svc.Log.Debug($"Pong: {span}");
 
         public void Connect()
         {
@@ -381,7 +380,7 @@ namespace Automaton.Features.ChatFeature
                 }
                 catch (Exception exception)
                 {
-                    PluginLog.Error($"Connection Failed {exception}");
+                    Svc.Log.Error($"Connection Failed {exception}");
                 }
             });
         }
@@ -398,7 +397,7 @@ namespace Automaton.Features.ChatFeature
                 }
                 catch (Exception exception)
                 {
-                    PluginLog.Error(nameof(EmitMockData) + $" {exception}");
+                    Svc.Log.Error(nameof(EmitMockData) + $" {exception}");
                 }
             });
         }

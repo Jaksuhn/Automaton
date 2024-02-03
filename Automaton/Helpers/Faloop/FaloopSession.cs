@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
-using Dalamud.Logging;
+using ECommons.DalamudServices;
 
 namespace Automaton.Helpers.Faloop;
 
@@ -25,14 +25,14 @@ public class FaloopSession : IDisposable
         var initialSession = await client.RefreshAsync();
         if (initialSession is not { Success: true })
         {
-            PluginLog.Debug("LoginAsync: initialSession is not success");
+            Svc.Log.Debug("LoginAsync: initialSession is not success");
             return false;
         }
 
         var login = await client.LoginAsync(username, password, initialSession.SessionId, initialSession.Token);
         if (login is not { Success: true })
         {
-            PluginLog.Debug("LoginAsync: login is not success");
+            Svc.Log.Debug("LoginAsync: login is not success");
             return false;
         }
 
@@ -42,7 +42,7 @@ public class FaloopSession : IDisposable
         }
         catch (Exception exception)
         {
-            PluginLog.Error(exception, "LoginAsync: EmbedData.Initialize failed");
+            Svc.Log.Error(exception, "LoginAsync: EmbedData.Initialize failed");
             return false;
         }
 

@@ -3,7 +3,6 @@ using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Automaton.Helpers.Faloop;
 using ECommons.DalamudServices;
-using ECommons.Logging;
 using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Linq;
@@ -46,7 +45,7 @@ namespace Automaton.Helpers
                     var mapMarker = AetherytesMap.FirstOrDefault(m => m.DataType == 3 && m.DataKey == data.RowId);
                     if (mapMarker == null)
                     {
-                        PluginLog.Error($"Cannot find aetherytes position for {maplinkMessage.PlaceName}#{data.PlaceName.Value.Name}");
+                        Svc.Log.Error($"Cannot find aetherytes position for {maplinkMessage.PlaceName}#{data.PlaceName.Value.Name}");
                         continue;
                     }
                     var AethersX = ConvertMapMarkerToMapCoordinate(mapMarker.X, scale);
@@ -97,12 +96,12 @@ namespace Automaton.Helpers
             var aetheryteName = GetNearestAetheryte(maplinkMessage);
             if (aetheryteName != "")
             {
-                PluginLog.Log($"Teleporting to {aetheryteName}");
+                Svc.Log.Info($"Teleporting to {aetheryteName}");
                 Svc.Commands.ProcessCommand($"/tp {aetheryteName}");
             }
             else
             {
-                PluginLog.Error($"Cannot find nearest aetheryte of {maplinkMessage.PlaceName}({maplinkMessage.X}, {maplinkMessage.Y}).");
+                Svc.Log.Error($"Cannot find nearest aetheryte of {maplinkMessage.PlaceName}({maplinkMessage.X}, {maplinkMessage.Y}).");
             }
         }
 
@@ -112,14 +111,14 @@ namespace Automaton.Helpers
             var map = zone?.Map.Value;
             if (zone == default || map == default)
             {
-                PluginLog.Debug("CreateMapLink: zone == null || map == null");
+                Svc.Log.Debug("CreateMapLink: zone == null || map == null");
                 return default;
             }
 
             var location = session.EmbedData.ZoneLocations.FirstOrDefault(x => x.Id == zonePoiId);
             if (location == default)
             {
-                PluginLog.Debug("CreateMapLink: location == null");
+                Svc.Log.Debug("CreateMapLink: location == null");
                 return default;
             }
 

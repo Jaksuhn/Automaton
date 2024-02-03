@@ -1,5 +1,4 @@
 using ECommons.DalamudServices;
-using ECommons.Logging;
 using Automaton.FeaturesSetup;
 using System;
 using Dalamud.Plugin;
@@ -61,7 +60,7 @@ namespace Automaton.Features.Testing
             }
             catch (Exception e)
             {
-                PluginLog.Error($"{e.Message}\n{e.StackTrace}");
+                Svc.Log.Error($"{e.Message}\n{e.StackTrace}");
             }
         }
 
@@ -94,8 +93,8 @@ namespace Automaton.Features.Testing
             }
             catch (Exception e)
             {
-                PluginLog.Error($"Can't find {internalName} plugin: " + e.Message);
-                PluginLog.Error(e.StackTrace);
+                Svc.Log.Error($"Can't find {internalName} plugin: " + e.Message);
+                Svc.Log.Error(e.StackTrace);
                 return null;
             }
         }

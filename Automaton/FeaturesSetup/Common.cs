@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Automaton.Helpers;
 using Dalamud.Hooking;
-using Dalamud.Logging;
 using Dalamud.Memory;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.System.String;
@@ -59,7 +58,7 @@ public static unsafe class Common
         }
         catch (Exception ex)
         {
-            PluginLog.Error(ex, "AddonSetupError");
+            Svc.Log.Error(ex, "AddonSetupError");
         }
         var retVal = AddonSetupHook.Original(addon);
         try
@@ -71,7 +70,7 @@ public static unsafe class Common
         }
         catch (Exception ex)
         {
-            PluginLog.Error(ex, "AddonSetupError2");
+            Svc.Log.Error(ex, "AddonSetupError2");
         }
 
         return retVal;
@@ -88,7 +87,7 @@ public static unsafe class Common
         }
         catch (Exception ex)
         {
-            PluginLog.Error(ex, "FinalizeAddonError");
+            Svc.Log.Error(ex, "FinalizeAddonError");
         }
         FinalizeAddonHook?.Original(unitManager, atkUnitBase);
     }

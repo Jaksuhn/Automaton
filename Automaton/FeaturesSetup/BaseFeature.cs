@@ -2,7 +2,6 @@ using ClickLib.Clicks;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.Logging;
 using Dalamud.Memory;
 using Dalamud.Plugin;
 using ECommons;
@@ -86,7 +85,7 @@ namespace Automaton.Features
 
         public virtual void Enable()
         {
-            PluginLog.Debug($"Enabling {Name}");
+            Svc.Log.Debug($"Enabling {Name}");
             Svc.Framework.Update += CheckJob;
             Enabled = true;
         }
@@ -122,7 +121,7 @@ namespace Automaton.Features
             }
             catch (Exception ex)
             {
-                PluginLog.Error(ex, $"Failed to load config for feature {Name}");
+                Svc.Log.Error(ex, $"Failed to load config for feature {Name}");
                 return default;
             }
         }
@@ -141,7 +140,7 @@ namespace Automaton.Features
             }
             catch (Exception ex)
             {
-                PluginLog.Error(ex, $"Feature failed to write config {this.Name}");
+                Svc.Log.Error(ex, $"Feature failed to write config {this.Name}");
             }
         }
 
@@ -271,7 +270,7 @@ namespace Automaton.Features
                         ImGui.Text($"Invalid Auto Field Type: {f.Name}");
                     }
 
-                    if (attr.HelpText != null)
+                    if (!attr.HelpText.IsNullOrEmpty())
                         ImGuiComponents.HelpMarker(attr.HelpText);
                 }
 
@@ -436,14 +435,14 @@ namespace Automaton.Features
                         var text = MemoryHelper.ReadSeString(&textNode->NodeText).ExtractText();
                         if (compare(text))
                         {
-                            PluginLog.Verbose($"SelectYesno {text} addon {i} by predicate");
+                            Svc.Log.Verbose($"SelectYesno {text} addon {i} by predicate");
                             return addon;
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    PluginLog.Error("", e);
+                    Svc.Log.Error("", e);
                     return null;
                 }
             }
@@ -464,14 +463,14 @@ namespace Automaton.Features
                         var text = MemoryHelper.ReadSeString(&textNode->NodeText).ExtractText().Replace(" ", "");
                         if (text.EqualsAny(s.Select(x => x.Replace(" ", ""))))
                         {
-                            PluginLog.Verbose($"SelectYesno {s.Print()} addon {i}");
+                            Svc.Log.Verbose($"SelectYesno {s.Print()} addon {i}");
                             return addon;
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    PluginLog.Error("", e);
+                    Svc.Log.Error("", e);
                     return null;
                 }
             }
@@ -494,7 +493,7 @@ namespace Automaton.Features
                     if (index >= 0 && IsSelectItemEnabled(addon, index) && (Throttler?.Invoke() ?? GenericThrottle))
                     {
                         ClickSelectString.Using((nint)addon).SelectItem((ushort)index);
-                        PluginLog.Debug($"TrySelectSpecificEntry: selecting {entry}/{index} as requested by {text.Print()}");
+                        Svc.Log.Debug($"TrySelectSpecificEntry: selecting {entry}/{index} as requested by {text.Print()}");
                         return true;
                     }
                 }

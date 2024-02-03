@@ -82,25 +82,26 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="automaton.png">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="Automaton.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
+        <None Update="automaton.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Automaton.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ClickLib\ClickLib\ClickLib.csproj" />
-      <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
+        <ProjectReference Include="..\ClickLib\ClickLib\ClickLib.csproj" />
+        <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
+        <ProjectReference Include="..\SpeedLib\SpeedLib.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="UI\DebugWindow.cs">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Compile>
-      <Compile Update="UI\MainWindow.cs">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Compile>
+        <Compile Update="UI\DebugWindow.cs">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Compile>
+        <Compile Update="UI\MainWindow.cs">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Compile>
     </ItemGroup>
 </Project>

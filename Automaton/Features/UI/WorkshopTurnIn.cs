@@ -4,7 +4,6 @@ using ECommons;
 using ECommons.Automation;
 using ECommons.DalamudServices;
 using ECommons.GameFunctions;
-using ECommons.Logging;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
@@ -199,7 +198,7 @@ namespace Automaton.Features.UI
 
         private bool EndLoop(string msg)
         {
-            PluginLog.Log($"Cancelling... Reason: {msg}");
+            Svc.Log.Info($"Cancelling... Reason: {msg}");
             active = false;
             phaseActive = false;
             projectActive = false;
@@ -213,7 +212,7 @@ namespace Automaton.Features.UI
             if (TryGetAddonByName<AtkUnitBase>("SubmarinePartsMenu", out var addon) && addon->AtkValues[12].Type != 0)
             {
                 var requiredIngredients = GetRequiredItems();
-                if (requiredIngredients?.Count == 0) { PluginLog.Log("req is 0"); return true; }
+                if (requiredIngredients?.Count == 0) { Svc.Log.Info("req is 0"); return true; }
 
                 if (MustEndLoop(!IsSufficientlyLeveled(requiredIngredients), "Not high enough level to turn in items") ||
                     MustEndLoop(Svc.ClientState.LocalPlayer.ClassJob.Id is < 8 or > 15, "Must be a DoH to turn in items."))
@@ -419,7 +418,7 @@ namespace Automaton.Features.UI
             if (!SkipCutsceneStr.Contains(selectStrAddon->AtkUnitBase.UldManager.NodeList[3]->GetAsAtkTextNode()->NodeText.ToString())) return false;
             if (EzThrottler.Throttle($"{nameof(WorkshopTurnin)}.{nameof(ConfirmSkip)}"))
             {
-                PluginLog.Log("Selecting cutscene skipping");
+                Svc.Log.Info("Selecting cutscene skipping");
                 ClickSelectString.Using(addon).SelectItem(0);
                 return true;
             }

@@ -1,6 +1,5 @@
 using Dalamud.Game.Command;
 using ECommons.DalamudServices;
-using ECommons.Logging;
 using Automaton.FeaturesSetup;
 using System;
 using System.Collections.Generic;
@@ -32,7 +31,7 @@ public abstract partial class CommandFeature : Feature
     {
         if (Svc.Commands.Commands.ContainsKey(Command))
         {
-            PluginLog.Error($"Command '{Command}' is already registered.");
+            Svc.Log.Error($"Command '{Command}' is already registered.");
         }
         else
         {

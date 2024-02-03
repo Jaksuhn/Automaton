@@ -9,6 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClickLib", "ClickLib\ClickL
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automaton", "Automaton\Automaton.csproj", "{4A68DEED-4539-477E-87A2-32E30043FF0B}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeedLib", "SpeedLib\SpeedLib.csproj", "{D50A3B76-0D2A-4BE5-BAF5-1B440A1D4C07}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A67F6A48-BF53-43B3-83C5-F937B484299F}"
+	ProjectSection(SolutionItems) = preProject
+		.gitmodules = .gitmodules
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +48,14 @@ Global
 		{4A68DEED-4539-477E-87A2-32E30043FF0B}.Release|Any CPU.Build.0 = Release|x64
 		{4A68DEED-4539-477E-87A2-32E30043FF0B}.Release|x64.ActiveCfg = Release|x64
 		{4A68DEED-4539-477E-87A2-32E30043FF0B}.Release|x64.Build.0 = Release|x64
+		{D50A3B76-0D2A-4BE5-BAF5-1B440A1D4C07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D50A3B76-0D2A-4BE5-BAF5-1B440A1D4C07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D50A3B76-0D2A-4BE5-BAF5-1B440A1D4C07}.Debug|x64.ActiveCfg = Debug|x64
+		{D50A3B76-0D2A-4BE5-BAF5-1B440A1D4C07}.Debug|x64.Build.0 = Debug|x64
+		{D50A3B76-0D2A-4BE5-BAF5-1B440A1D4C07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D50A3B76-0D2A-4BE5-BAF5-1B440A1D4C07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D50A3B76-0D2A-4BE5-BAF5-1B440A1D4C07}.Release|x64.ActiveCfg = Release|x64
+		{D50A3B76-0D2A-4BE5-BAF5-1B440A1D4C07}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

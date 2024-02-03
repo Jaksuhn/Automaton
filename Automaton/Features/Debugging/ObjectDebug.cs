@@ -10,15 +10,12 @@ using ECommons.DalamudServices;
 using System.Linq;
 using ECommons.GameFunctions;
 using Lumina.Excel.GeneratedSheets;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace Automaton.Features.Debugging;
 
 public unsafe class ObjectDebug : DebugHelper
 {
     public override string Name => $"{nameof(ObjectDebug).Replace("Debug", "")} Debugging";
-
-    private float hbr;
 
     public override void Draw()
     {
