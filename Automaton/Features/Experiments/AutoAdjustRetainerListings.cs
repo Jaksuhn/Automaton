@@ -20,9 +20,9 @@ using System.Collections.Generic;
 
 namespace Automaton.Features.Testing;
 
-public partial class AutoRetainerPriceAdjust : Feature
+public partial class AutoAdjustRetainerListings : Feature
 {
-    public override string Name => "Auto Penny Pinch";
+    public override string Name => "Auto Adjust Retainer Listings";
     public override string Description => "Adjusts your retainers' items upon opening listings.";
     public override FeatureType FeatureType => FeatureType.UI;
 
@@ -80,7 +80,7 @@ public partial class AutoRetainerPriceAdjust : Feature
         if (Svc.KeyState[ConflictKey])
         {
             TaskManager.Abort();
-            Svc.PluginInterface.UiBuilder.AddNotification("ConflictKey-InterruptMessage", "Daily Routines", NotificationType.Success);
+            Svc.PluginInterface.UiBuilder.AddNotification($"{nameof(ConflictKey)} used on {nameof(AutoAdjustRetainerListings)}", $"{nameof(Automaton)}", NotificationType.Success);
         }
     }
 
@@ -258,7 +258,7 @@ public partial class AutoRetainerPriceAdjust : Feature
 
             if (CurrentMarketLowestPrice - Config.PriceReduction < Config.LowestAcceptablePrice)
             {
-                var message = GetSeString("AutoRetainerPriceAdjust-WarnMessageReachLowestPrice",
+                var message = GetSeString("Item is listed lower than minimum price, skipping",
                                                        SeString.CreateItemLink(
                                                            CurrentItemSearchItemID,
                                                            IsCurrentItemHQ
@@ -275,7 +275,7 @@ public partial class AutoRetainerPriceAdjust : Feature
 
             if (Config.MaxPriceReduction != 0 && CurrentItemPrice - CurrentMarketLowestPrice > Config.LowestAcceptablePrice)
             {
-                var message = GetSeString("AutoRetainerPriceAdjust-MaxPriceReductionMessage",
+                var message = GetSeString("Item has exceeded maximum acceptable reduction, skipping",
                                                        SeString.CreateItemLink(
                                                            CurrentItemSearchItemID,
                                                            IsCurrentItemHQ
@@ -309,7 +309,7 @@ public partial class AutoRetainerPriceAdjust : Feature
         var ssb = new SeStringBuilder();
         var lastIndex = 0;
 
-        ssb.AddUiForeground("[Daily Routines]", 34);
+        ssb.AddUiForeground($"[{nameof(Automaton)}]", 34);
         foreach (Match match in SeStringRegex().Matches(format))
         {
             ssb.AddUiForeground(format[lastIndex..match.Index], 2);
