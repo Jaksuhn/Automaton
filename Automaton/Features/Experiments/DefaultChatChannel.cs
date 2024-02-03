@@ -9,7 +9,7 @@ using ImGuiNET;
 using System;
 using System.Collections.Generic;
 
-namespace Automaton.Features.UI
+namespace Automaton.Features.Testing
 {
     public unsafe class DefaultChatChannel : Feature
     {

@@ -61,6 +61,7 @@ public class Automaton : IDalamudPlugin
         });
 
         PandorasBoxIPC.Init();
+        QoLBarIPC.Init();
 
         Svc.PluginInterface.UiBuilder.Draw += Ws.Draw;
         Svc.PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
@@ -81,6 +82,7 @@ public class Automaton : IDalamudPlugin
         provider.UnloadFeatures();
 
         PandorasBoxIPC.Dispose();
+        QoLBarIPC.Dispose();
 
         Svc.PluginInterface.UiBuilder.Draw -= Ws.Draw;
         Svc.PluginInterface.UiBuilder.OpenConfigUi -= DrawConfigUI;

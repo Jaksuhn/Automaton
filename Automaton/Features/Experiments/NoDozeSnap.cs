@@ -8,7 +8,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System.Runtime.InteropServices;
 using System.Numerics;
 
-namespace Automaton.Features.Commands
+namespace Automaton.Features.Testing
 {
     public unsafe class NoDozeSnap : CommandFeature
     {
@@ -19,12 +19,12 @@ namespace Automaton.Features.Commands
         public override FeatureType FeatureType => FeatureType.Disabled;
 
         [Signature("E8 ?? ?? ?? ?? 4C 8B 74 24 ?? 48 8B CE E8")]
-        private readonly delegate* unmanaged<IntPtr, ushort, IntPtr, byte, byte, void> useEmote = null!;
+        private readonly delegate* unmanaged<nint, ushort, nint, byte, byte, void> useEmote = null!;
 
         private delegate byte ShouldSnap(Character* a1, SnapPosition* a2);
 
         [Signature("E8 ?? ?? ?? ?? 84 C0 74 44 4C 8D 6D C7", DetourName = nameof(ShouldSnapDetour))]
-        private Hook<ShouldSnap>? ShouldSnapHook { get; init; } = null;
+        private Hook<ShouldSnap> ShouldSnapHook { get; init; } = null;
 
         private static byte ShouldSnapDetour(Character* a1, SnapPosition* a2) => 0;
 
@@ -58,7 +58,7 @@ namespace Automaton.Features.Commands
         protected override void OnCommand(List<string> args)
         {
             var agent = AgentModule.Instance()->GetAgentByInternalId(AgentId.Emote);
-            useEmote(new IntPtr(agent), 88, nint.Zero, 0, 0);
+            useEmote(new nint(agent), 88, nint.Zero, 0, 0);
         }
     }
 }

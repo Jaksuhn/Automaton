@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Automaton.Features.Debugging;
 using ImGuiNET;
 
-namespace Automaton.Features.Commands
+namespace Automaton.Features.Testing
 {
     public unsafe class ClickToTP : CommandFeature
     {
@@ -33,7 +33,7 @@ namespace Automaton.Features.Commands
                 Svc.Framework.Update -= ModifyPOS;
                 Svc.Log.Info($"Disabling {nameof(ClickToTP)}");
             }
-            
+
         }
 
         private void ModifyPOS(IFramework framework)

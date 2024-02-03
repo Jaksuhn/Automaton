@@ -1,6 +1,6 @@
 using Automaton.FeaturesSetup;
 
-namespace Automaton.Features.Actions
+namespace Automaton.Features.Testing
 {
     public unsafe class InstantGroundTarget : Feature
     {

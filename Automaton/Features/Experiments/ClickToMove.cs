@@ -4,7 +4,7 @@ using Automaton.Helpers;
 using ImGuiNET;
 using Dalamud.Game.ClientState.Keys;
 
-namespace Automaton.Features.Actions
+namespace Automaton.Features.Testing
 {
     public unsafe class ClickToMove : Feature
     {

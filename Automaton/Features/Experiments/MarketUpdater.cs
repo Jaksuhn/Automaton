@@ -12,7 +12,7 @@ using System;
 using System.Numerics;
 using static ECommons.GenericHelpers;
 
-namespace Automaton.Features.UI
+namespace Automaton.Features.Testing
 {
     public unsafe class MarketUpdater : Feature
     {
@@ -110,14 +110,14 @@ namespace Automaton.Features.UI
             if (TryGetAddonByName<AtkUnitBase>("RetainerList", out var retainerList) && IsAddonReady(retainerList))
             {
                 var list = new ReaderRetainerList(retainerList);
-                for (int i = 0; i < list.Retainers.Count; i++)
+                for (var i = 0; i < list.Retainers.Count; i++)
                 {
                     if (list.Retainers[i].Name == name)
                     {
                         if (GenericThrottle)
                         {
                             PluginLog.Debug($"Selecting retainer {list.Retainers[i].Name} with index {i}");
-                            ClickRetainerList.Using((IntPtr)retainerList).Retainer(i);
+                            ClickRetainerList.Using((nint)retainerList).Retainer(i);
                             return true;
                         }
                     }

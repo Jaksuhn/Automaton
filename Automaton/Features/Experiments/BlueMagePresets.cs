@@ -13,7 +13,7 @@ using ImGuiNET;
 using Dalamud.Interface.Components;
 using Dalamud.Interface;
 
-namespace Automaton.Features.Other
+namespace Automaton.Features.Testing
 {
     public unsafe class BlueMagePresets : Feature
     {
@@ -50,7 +50,7 @@ namespace Automaton.Features.Other
             public string Name { get; set; } = name;
             public uint[] Actions { get; set; } = new uint[24];
 
-            public static Loadout? FromPreset(string preset)
+            public static Loadout FromPreset(string preset)
             {
                 try
                 {

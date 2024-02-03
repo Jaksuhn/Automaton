@@ -30,7 +30,22 @@ namespace Automaton.Helpers
         [StructLayout(LayoutKind.Explicit, Size = 0xB0)]
         public unsafe struct PlayerMoveControllerFly
         {
+            [FieldOffset(0x10)] public float unk10; // x coord?
+            [FieldOffset(0x14)] public float unk14; // y coord?
+            [FieldOffset(0x18)] public float unk18; // z coord?
+            [FieldOffset(0x40)] public float unk40;
+            [FieldOffset(0x44)] public float unk44;
+            [FieldOffset(0x48)] public uint unk48;
+            [FieldOffset(0x4C)] public uint unk4C;
+            [FieldOffset(0x50)] public uint unk50;
+            [FieldOffset(0x58)] public float unk58;
+            [FieldOffset(0x5C)] public float unk5C;
             [FieldOffset(0x66)] public byte IsFlying;
+            [FieldOffset(0x88)] public uint unk88;
+            [FieldOffset(0x8C)] public uint unk8C;
+            [FieldOffset(0x90)] public uint unk90;
+            [FieldOffset(0x94)] public float unk94; // speed?
+            [FieldOffset(0x98)] public float unk98;
             [FieldOffset(0x9C)] public float AngularAscent;
         }
 

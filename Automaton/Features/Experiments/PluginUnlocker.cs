@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Linq;
 using System.Reflection.Emit;
 
-namespace Automaton.Features.Other
+namespace Automaton.Features.Testing
 {
     public unsafe class PluginUnlocker : Feature
     {

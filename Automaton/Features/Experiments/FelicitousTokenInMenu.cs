@@ -6,7 +6,7 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using System.Numerics;
 using static ECommons.GenericHelpers;
 
-namespace Automaton.Features.UI
+namespace Automaton.Features.Testing
 {
     public unsafe class FelicitousTokenInMenu : Feature
     {
@@ -56,7 +56,7 @@ namespace Automaton.Features.UI
             var iconPosition = baseIconPosition = new Vector2(currencyPositionNode->X, currencyPositionNode->Y);
         }
 
-        private void TryMakeIconNode(uint nodeId, Vector2 position, int icon, bool hqIcon, string? tooltipText = null)
+        private void TryMakeIconNode(uint nodeId, Vector2 position, int icon, bool hqIcon, string tooltipText = null)
         {
             var iconNode = Common.GetNodeByID(&AddonMJIHud->UldManager, nodeId);
             if (iconNode is null)
@@ -69,7 +69,7 @@ namespace Automaton.Features.UI
             }
         }
 
-        private void MakeIconNode(uint nodeId, Vector2 position, int icon, bool hqIcon, string? tooltipText = null)
+        private void MakeIconNode(uint nodeId, Vector2 position, int icon, bool hqIcon, string tooltipText = null)
         {
             var imageNode = UiHelper.MakeImageNode(nodeId, new UiHelper.PartInfo(0, 0, 36, 36));
             imageNode->AtkResNode.NodeFlags = NodeFlags.AnchorTop | NodeFlags.AnchorLeft | NodeFlags.Visible | NodeFlags.Enabled | NodeFlags.EmitsEvents;
