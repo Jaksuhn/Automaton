@@ -69,6 +69,9 @@ public class Automaton : IDalamudPlugin
         provider = new FeatureProvider(Assembly.GetExecutingAssembly());
         provider.LoadFeatures();
         FeatureProviders.Add(provider);
+#if (DEBUG)
+        MainWindow.IsOpen = !MainWindow.IsOpen;
+#endif
     }
 
     public void Dispose()

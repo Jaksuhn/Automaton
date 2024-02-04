@@ -10,7 +10,7 @@ namespace Automaton.Features.Testing
     {
         public override string Name => "Command on condition";
         public override string Description => "Execute a command when a condition is met.";
-        public override FeatureType FeatureType => FeatureType.Other;
+        public override FeatureType FeatureType => FeatureType.Disabled;
 
         public Configs Config { get; private set; }
         public override bool UseAutoConfig => false;
