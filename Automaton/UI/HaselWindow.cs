@@ -5,34 +5,33 @@
 //using System.Numerics;
 //using System.Reflection;
 //using System.Text.RegularExpressions;
+//using Automaton.Features;
 //using Dalamud.Interface.Internal;
-//using Dalamud.Interface.Utility;
 //using Dalamud.Interface.Utility.Raii;
 //using Dalamud.Interface.Windowing;
 //using ECommons.DalamudServices;
-//using HaselCommon.Structs;
-//using HaselCommon.Utils;
 //using ImGuiNET;
+//using static System.Net.Mime.MediaTypeNames;
 
 //namespace Automaton.UI;
 
-//public partial class PluginWindow : Window, IDisposable
+//public partial class PWindow : Window, IDisposable
 //{
 //    private const uint SidebarWidth = 250;
-//    private const string LogoManifestResource = "HaselTweaks.Assets.Logo.png";
+//    private const string LogoManifestResource = "Haselfeatures.Assets.Logo.png";
 
-//    private string _selectedTweak = string.Empty;
+//    private string _selectedfeature = string.Empty;
 //    private readonly IDalamudTextureWrap? _logoTextureWrap;
 //    private readonly Point _logoSize = new(425, 132);
 
 //    [GeneratedRegex("\\.0$")]
 //    private static partial Regex VersionPatchZeroRegex();
 
-//    public PluginWindow() : base("HaselTweaks")
+//    public PWindow() : base("Haselfeatures")
 //    {
-//        var width = SidebarWidth * 3 + ImGui.GetStyle().ItemSpacing.X + ImGui.GetStyle().FramePadding.X * 2;
+//        var width = (SidebarWidth * 3) + ImGui.GetStyle().ItemSpacing.X + ImGui.GetStyle().FramePadding.X * 2;
 
-//        Namespace = "HaselTweaksConfig";
+//        Namespace = "HaselfeaturesConfig";
 
 //        Size = new Vector2(width, 600);
 //        SizeConstraints = new()
@@ -70,19 +69,13 @@
 //        _logoTextureWrap?.Dispose();
 //    }
 
-//    private Tweak? SelectedTweak => Plugin.Tweaks.FirstOrDefault(t => t.InternalName == _selectedTweak);
+//    private Feature? Selectedfeature => (Feature)P.Features.FirstOrDefault(f => f.Name == _selectedfeature);
 
 //    public override void OnClose()
 //    {
-//        _selectedTweak = string.Empty;
+//        _selectedfeature = string.Empty;
 //        Flags &= ~ImGuiWindowFlags.MenuBar;
-
-//        foreach (var tweak in Plugin.Tweaks.Where(tweak => tweak.Enabled))
-//        {
-//            tweak.OnConfigWindowClose();
-//        }
-
-//        Svc.WindowManager.CloseWindow<PluginWindow>();
+//        base.OnClose();
 //    }
 
 //    public override void Draw()
@@ -104,17 +97,17 @@
 //            return;
 
 //        ImGui.TableSetupColumn("Checkbox", ImGuiTableColumnFlags.WidthFixed);
-//        ImGui.TableSetupColumn("Tweak Name", ImGuiTableColumnFlags.WidthStretch);
+//        ImGui.TableSetupColumn("feature Name", ImGuiTableColumnFlags.WidthStretch);
 
-//        foreach (var tweak in Plugin.Tweaks.OrderBy(t => t.Name))
+//        foreach (var feature in P.Features.OrderBy(t => t.Name))
 //        {
 //            ImGui.TableNextRow();
 //            ImGui.TableNextColumn();
 
-//            var enabled = tweak.Enabled;
+//            var enabled = feature.Enabled;
 //            var fixY = false;
 
-//            if (!tweak.Ready || tweak.Outdated)
+//            if (!feature.Ready || feature.Outdated)
 //            {
 //                var startPos = ImGui.GetCursorPos();
 //                var drawList = ImGui.GetWindowDrawList();
@@ -127,11 +120,12 @@
 
 //                if (ImGui.IsItemHovered())
 //                {
-//                    var (status, color) = GetTweakStatus(tweak);
+//                    var (status, color) = GetfeatureStatus(feature);
 //                    using var tooltip = ImRaii.Tooltip();
 //                    if (tooltip.Success)
 //                    {
-//                        ImGuiUtils.TextUnformattedColored(color, status);
+//                        using (ImRaii.PushColor(ImGuiCol.Text, color))
+//                            ImGui.TextUnformatted(status);
 //                    }
 //                }
 
@@ -153,26 +147,26 @@
 //            }
 //            else
 //            {
-//                if (ImGui.Checkbox($"##Enabled_{tweak.InternalName}", ref enabled))
+//                if (ImGui.Checkbox($"##Enabled_{feature.Name}", ref enabled))
 //                {
 //                    if (!enabled)
 //                    {
-//                        tweak.DisableInternal();
+//                        feature.Disable();
 
-//                        if (Plugin.Config.EnabledTweaks.Contains(tweak.InternalName))
+//                        if (P.Features.Where(f => f.Enabled).Contains(feature.Name))
 //                        {
-//                            Plugin.Config.EnabledTweaks.Remove(tweak.InternalName);
-//                            Plugin.Config.Save();
+//                            P.Config.Enabledfeatures.Remove(feature.Name);
+//                            P.Config.Save();
 //                        }
 //                    }
 //                    else
 //                    {
-//                        tweak.EnableInternal();
+//                        feature.EnableInternal();
 
-//                        if (!Plugin.Config.EnabledTweaks.Contains(tweak.InternalName))
+//                        if (!P.Config.Enabledfeatures.Contains(feature.Name))
 //                        {
-//                            Plugin.Config.EnabledTweaks.Add(tweak.InternalName);
-//                            Plugin.Config.Save();
+//                            P.Config.Enabledfeatures.Add(feature.Name);
+//                            P.Config.Save();
 //                        }
 //                    }
 //                }
@@ -182,10 +176,10 @@
 
 //            if (fixY)
 //            {
-//                ImGuiUtils.PushCursorY(3); // if i only knew why this happens
+//                ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 3);
 //            }
 
-//            if (!tweak.Ready || tweak.Outdated)
+//            if (!feature.Ready)
 //            {
 //                ImGui.PushStyleColor(ImGuiCol.Text, (uint)Colors.Red);
 //            }
@@ -194,16 +188,16 @@
 //                ImGui.PushStyleColor(ImGuiCol.Text, (uint)Colors.Grey);
 //            }
 
-//            if (ImGui.Selectable($"{tweak.Name}##Selectable_{tweak.InternalName}", _selectedTweak == tweak.InternalName))
+//            if (ImGui.Selectable($"{feature.Name}##Selectable_{feature.Name}", _selectedfeature == feature.Name))
 //            {
-//                SelectedTweak?.OnConfigWindowClose();
+//                Selectedfeature?.OnConfigWindowClose();
 
-//                _selectedTweak = _selectedTweak != tweak.InternalName
-//                    ? tweak.InternalName
+//                _selectedfeature = _selectedfeature != feature.Name
+//                    ? feature.Name
 //                    : string.Empty;
 //            }
 
-//            if (!tweak.Ready || tweak.Outdated || !enabled)
+//            if (!feature.Ready || !enabled)
 //            {
 //                ImGui.PopStyleColor();
 //            }
@@ -216,8 +210,8 @@
 //        if (!child.Success)
 //            return;
 
-//        var tweak = SelectedTweak;
-//        if (tweak == null)
+//        var feature = Selectedfeature;
+//        if (feature == null)
 //        {
 //            var cursorPos = ImGui.GetCursorPos();
 //            var contentAvail = ImGui.GetContentRegionAvail();
@@ -231,37 +225,15 @@
 //                ImGui.SetCursorPos(contentAvail / 2 - scaledLogoSize / 2 + new Vector2(ImGui.GetStyle().ItemSpacing.X, 0));
 //                ImGui.Image(_logoTextureWrap.ImGuiHandle, scaledLogoSize);
 //            }
-
-//            // links, bottom left
-//            ImGui.SetCursorPos(cursorPos + new Vector2(0, contentAvail.Y - ImGui.GetTextLineHeight()));
-//            ImGuiUtils.DrawLink("GitHub", t("HaselTweaks.Config.GitHubLink.Tooltip"), "https://github.com/Haselnussbomber/HaselTweaks");
-//            ImGui.SameLine();
-//            ImGui.TextUnformatted("•");
-//            ImGui.SameLine();
-//            ImGuiUtils.DrawLink("Ko-fi", t("HaselTweaks.Config.KoFiLink.Tooltip"), "https://ko-fi.com/haselnussbomber");
-
-//            // version, bottom right
-//#if DEBUG
-//            ImGui.SetCursorPos(cursorPos + contentAvail - ImGui.CalcTextSize("dev"));
-//            ImGuiUtils.DrawLink("dev", t("HaselTweaks.Config.DevGitHubLink.Tooltip"), $"https://github.com/Haselnussbomber/HaselTweaks/compare/main...dev");
-//#else
-//            var version = GetType().Assembly.GetName().Version;
-//            if (version != null)
-//            {
-//                var versionString = "v" + VersionPatchZeroRegex().Replace(version.ToString(), "");
-//                ImGui.SetCursorPos(cursorPos + contentAvail - ImGui.CalcTextSize(versionString));
-//                ImGuiUtils.DrawLink(versionString, t("HaselTweaks.Config.ReleaseNotesLink.Tooltip"), $"https://github.com/Haselnussbomber/HaselTweaks/releases/tag/{versionString}");
-//            }
-//#endif
-
 //            return;
 //        }
 
-//        using var id = ImRaii.PushId(tweak.InternalName);
+//        using var id = ImRaii.PushId(feature.Name);
 
-//        ImGuiUtils.TextUnformattedColored(Colors.Gold, tweak.Name);
+//        using (ImRaii.PushColor(ImGuiCol.Text, Colors.Gold))
+//            ImGui.TextUnformatted(feature.Name);
 
-//        var (status, color) = GetTweakStatus(tweak);
+//        var (status, color) = GetfeatureStatus(feature);
 
 //        var posX = ImGui.GetCursorPosX();
 //        var windowX = ImGui.GetContentRegionAvail().X;
@@ -269,111 +241,101 @@
 
 //        ImGui.SameLine(windowX - textSize.X);
 
-//        ImGuiUtils.TextUnformattedColored(color, status);
+//        using (ImRaii.PushColor(ImGuiCol.Text, color))
+//            ImGui.TextUnformatted(status);
 
-//        if (!string.IsNullOrEmpty(tweak.Description))
+//        if (!string.IsNullOrEmpty(feature.Description))
 //        {
-//            ImGuiUtils.DrawPaddedSeparator();
-//            ImGuiHelpers.SafeTextColoredWrapped(Colors.Grey2, tweak.Description);
+//            var style = ImGui.GetStyle();
+//            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + style.ItemSpacing.Y);
+//            ImGui.Separator();
+//            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + style.ItemSpacing.Y - 1);
+//            ImGuiHelpers.SafeTextColoredWrapped(Colors.Grey2, feature.Description);
 //        }
 
-//        if (tweak.IncompatibilityWarnings.Any(entry => entry.IsLoaded))
+//        if (feature.IncompatibilityWarnings.Any(entry => entry.IsLoaded))
 //        {
-//            ImGuiUtils.DrawSection(t("HaselTweaks.Config.SectionTitle.IncompatibilityWarning"));
-//            Svc.TextureManager.GetIcon(60073).Draw(24);
+//            ImGuiUtils.DrawSection(t("Haselfeatures.Config.SectionTitle.IncompatibilityWarning"));
+//            Svc.Texture.GetIcon(60073).Draw(24);
 //            ImGui.SameLine();
 //            var cursorPosX = ImGui.GetCursorPosX();
 
-//            static string getConfigName(string tweakName, string configName)
-//                => t($"HaselTweaks.Config.IncompatibilityWarning.Plugin.{tweakName}.Config.{configName}");
+//            static string getConfigName(string featureName, string configName)
+//                => t($"Haselfeatures.Config.IncompatibilityWarning.P.{featureName}.Config.{configName}");
 
-//            if (tweak.IncompatibilityWarnings.Length == 1)
+//            if (feature.IncompatibilityWarnings.Length == 1)
 //            {
-//                var entry = tweak.IncompatibilityWarnings[0];
-//                var pluginName = t($"HaselTweaks.Config.IncompatibilityWarning.Plugin.{entry.InternalName}.Name");
+//                var entry = feature.IncompatibilityWarnings[0];
+//                var PName = t($"Haselfeatures.Config.IncompatibilityWarning.P.{entry.Name}.Name");
 
 //                if (entry.IsLoaded)
 //                {
 //                    if (entry.ConfigNames.Length == 0)
 //                    {
-//                        ImGuiHelpers.SafeTextColoredWrapped(Colors.Grey2, t("HaselTweaks.Config.IncompatibilityWarning.Single.Plugin", pluginName));
+//                        ImGuiHelpers.SafeTextColoredWrapped(Colors.Grey2, t("Haselfeatures.Config.IncompatibilityWarning.Single.P", PName));
 //                    }
 //                    else if (entry.ConfigNames.Length == 1)
 //                    {
-//                        var configName = getConfigName(entry.InternalName, entry.ConfigNames[0]);
-//                        ImGuiHelpers.SafeTextColoredWrapped(Colors.Grey2, t("HaselTweaks.Config.IncompatibilityWarning.Single.PluginSetting", configName, pluginName));
+//                        var configName = getConfigName(entry.Name, entry.ConfigNames[0]);
+//                        ImGuiHelpers.SafeTextColoredWrapped(Colors.Grey2, t("Haselfeatures.Config.IncompatibilityWarning.Single.PSetting", configName, PName));
 //                    }
 //                    else if (entry.ConfigNames.Length > 1)
 //                    {
-//                        var configNames = entry.ConfigNames.Select((configName) => t($"HaselTweaks.Config.IncompatibilityWarning.Plugin.{entry.InternalName}.Config.{configName}"));
-//                        ImGuiHelpers.SafeTextColoredWrapped(Colors.Grey2, t("HaselTweaks.Config.IncompatibilityWarning.Single.PluginSettings", pluginName) + $"\n- {string.Join("\n- ", configNames)}");
+//                        var configNames = entry.ConfigNames.Select((configName) => t($"Haselfeatures.Config.IncompatibilityWarning.P.{entry.Name}.Config.{configName}"));
+//                        ImGuiHelpers.SafeTextColoredWrapped(Colors.Grey2, t("Haselfeatures.Config.IncompatibilityWarning.Single.PSettings", PName) + $"\n- {string.Join("\n- ", configNames)}");
 //                    }
 //                }
 //            }
-//            else if (tweak.IncompatibilityWarnings.Length > 1)
+//            else if (feature.IncompatibilityWarnings.Length > 1)
 //            {
-//                ImGuiHelpers.SafeTextColoredWrapped(Colors.Grey2, t("HaselTweaks.Config.IncompatibilityWarning.Multi.Preface"));
+//                ImGuiHelpers.SafeTextColoredWrapped(Colors.Grey2, t("Haselfeatures.Config.IncompatibilityWarning.Multi.Preface"));
 
-//                foreach (var entry in tweak.IncompatibilityWarnings.Where(entry => entry.IsLoaded))
+//                foreach (var entry in feature.IncompatibilityWarnings.Where(entry => entry.IsLoaded))
 //                {
-//                    var pluginName = t($"HaselTweaks.Config.IncompatibilityWarning.Plugin.{entry.InternalName}.Name");
+//                    var PName = t($"Haselfeatures.Config.IncompatibilityWarning.P.{entry.Name}.Name");
 
 //                    if (entry.ConfigNames.Length == 0)
 //                    {
 //                        ImGui.SetCursorPosX(cursorPosX);
-//                        ImGuiHelpers.SafeTextColoredWrapped(Colors.Grey2, t("HaselTweaks.Config.IncompatibilityWarning.Multi.Plugin", pluginName));
+//                        ImGuiHelpers.SafeTextColoredWrapped(Colors.Grey2, t("Haselfeatures.Config.IncompatibilityWarning.Multi.P", PName));
 //                    }
 //                    else if (entry.ConfigNames.Length == 1)
 //                    {
 //                        ImGui.SetCursorPosX(cursorPosX);
-//                        var configName = t($"HaselTweaks.Config.IncompatibilityWarning.Plugin.{entry.InternalName}.Config.{entry.ConfigNames[0]}");
-//                        ImGuiHelpers.SafeTextColoredWrapped(Colors.Grey2, t("HaselTweaks.Config.IncompatibilityWarning.Multi.PluginSetting", configName, pluginName));
+//                        var configName = t($"Haselfeatures.Config.IncompatibilityWarning.P.{entry.Name}.Config.{entry.ConfigNames[0]}");
+//                        ImGuiHelpers.SafeTextColoredWrapped(Colors.Grey2, t("Haselfeatures.Config.IncompatibilityWarning.Multi.PSetting", configName, PName));
 //                    }
 //                    else if (entry.ConfigNames.Length > 1)
 //                    {
 //                        ImGui.SetCursorPosX(cursorPosX);
-//                        var configNames = entry.ConfigNames.Select((configName) => t($"HaselTweaks.Config.IncompatibilityWarning.Plugin.{entry.InternalName}.Config.{configName}"));
-//                        ImGuiHelpers.SafeTextColoredWrapped(Colors.Grey2, t("HaselTweaks.Config.IncompatibilityWarning.Multi.PluginSettings", pluginName) + $"\n    - {string.Join("\n    - ", configNames)}");
+//                        var configNames = entry.ConfigNames.Select((configName) => t($"Haselfeatures.Config.IncompatibilityWarning.P.{entry.Name}.Config.{configName}"));
+//                        ImGuiHelpers.SafeTextColoredWrapped(Colors.Grey2, t("Haselfeatures.Config.IncompatibilityWarning.Multi.PSettings", PName) + $"\n    - {string.Join("\n    - ", configNames)}");
 //                    }
 //                }
 //            }
 //        }
 
-//#if DEBUG
-//        if (tweak.LastInternalException != null)
-//        {
-//            ImGuiUtils.DrawSection("[DEBUG] Exception");
-//            ImGuiHelpers.SafeTextColoredWrapped(Colors.Red, tweak.LastInternalException.Message.Replace("HaselTweaks.Tweaks.", ""));
-//            ImGuiHelpers.SafeTextColoredWrapped(Colors.Grey2, tweak.LastInternalException.StackTrace ?? "");
-//        }
-//#endif
-
-//        tweak.DrawConfig();
+//        feature.DrawConfig();
 //    }
 
-//    private static (string, HaselColor) GetTweakStatus(Tweak tweak)
+//    private static (string, HaselColor) GetfeatureStatus(Feature feature)
 //    {
-//        var status = t("HaselTweaks.Config.TweakStatus.Unknown");
+//        var status = t("Haselfeatures.Config.featureStatus.Unknown");
 //        var color = Colors.Grey3;
 
-//        if (tweak.Outdated)
+//        if (!feature.Ready)
 //        {
-//            status = t("HaselTweaks.Config.TweakStatus.Outdated");
+//            status = t("Haselfeatures.Config.featureStatus.InitializationFailed");
 //            color = Colors.Red;
 //        }
-//        else if (!tweak.Ready)
+//        else if (feature.Enabled)
 //        {
-//            status = t("HaselTweaks.Config.TweakStatus.InitializationFailed");
-//            color = Colors.Red;
-//        }
-//        else if (tweak.Enabled)
-//        {
-//            status = t("HaselTweaks.Config.TweakStatus.Enabled");
+//            status = t("Haselfeatures.Config.featureStatus.Enabled");
 //            color = Colors.Green;
 //        }
-//        else if (!tweak.Enabled)
+//        else if (!feature.Enabled)
 //        {
-//            status = t("HaselTweaks.Config.TweakStatus.Disabled");
+//            status = t("Haselfeatures.Config.featureStatus.Disabled");
 //        }
 
 //        return (status, color);

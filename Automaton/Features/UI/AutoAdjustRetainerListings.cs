@@ -1,22 +1,22 @@
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
+using Automaton.FeaturesSetup;
 using Dalamud.Game.Addon.Lifecycle;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
+using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.Internal.Notifications;
+using ECommons;
 using ECommons.Automation;
+using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using ECommons.DalamudServices;
-using Dalamud.Game.ClientState.Keys;
-using ECommons;
-using static ECommons.GenericHelpers;
-using Automaton.FeaturesSetup;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+using static ECommons.GenericHelpers;
 
 namespace Automaton.Features.Testing;
 
@@ -25,6 +25,7 @@ public partial class AutoAdjustRetainerListings : Feature
     public override string Name => "Auto Adjust Retainer Listings";
     public override string Description => "Adjusts your retainers' items upon opening listings. Interrupt with Shift.";
     public override FeatureType FeatureType => FeatureType.UI;
+    public override bool isDebug => true;
 
     public bool Initialized { get; set; }
 
@@ -36,9 +37,7 @@ public partial class AutoAdjustRetainerListings : Feature
     private VirtualKey ConflictKey { get; set; } = VirtualKey.SHIFT;
 
     public override bool UseAutoConfig => true;
-
     public Configs Config { get; private set; }
-
     public class Configs : FeatureConfig
     {
         [FeatureConfigOption("Price Reduction", IntMin = 0, IntMax = 600, EditorSize = 300)]
