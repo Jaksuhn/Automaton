@@ -1,7 +1,18 @@
+using Automaton.Debugging;
+using Automaton.FeaturesSetup;
+using Automaton.Helpers;
+using Dalamud;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Dalamud.Interface.Utility.Raii;
+using Dalamud.Memory;
+using ECommons.DalamudServices;
+using FFXIVClientStructs.Attributes;
+using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using FFXIVClientStructs.Interop.Attributes;
 using ImGuiNET;
+using Lumina.Excel;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,17 +22,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using Dalamud;
-using Dalamud.Memory;
-using FFXIVClientStructs.Attributes;
-using FFXIVClientStructs.FFXIV.Client.System.String;
-using FFXIVClientStructs.Interop.Attributes;
-using Lumina.Excel;
-using Automaton.Debugging;
-using Automaton.Helpers;
-using Automaton.Features;
-using ECommons.DalamudServices;
-using Dalamud.Interface.Utility.Raii;
 
 namespace Automaton
 {
@@ -37,7 +37,7 @@ namespace Automaton.Debugging
     public partial class DebugConfig
     {
         public string SelectedPage = string.Empty;
-        public Dictionary<string, object> SavedValues = new();
+        public Dictionary<string, object> SavedValues = [];
     }
 
     public abstract class DebugHelper : IDisposable
@@ -51,13 +51,7 @@ namespace Automaton.Debugging
 
         }
 
-        public string FullName
-        {
-            get
-            {
-                return Name;
-            }
-        }
+        public string FullName => Name;
 
         public FeatureProvider FeatureProvider = null!;
     }
@@ -65,7 +59,7 @@ namespace Automaton.Debugging
     public static class DebugManager
     {
 
-        private static readonly Dictionary<string, Action> DebugPages = new();
+        private static readonly Dictionary<string, Action> DebugPages = [];
 
         private static float SidebarSize = 0;
 
@@ -95,7 +89,8 @@ namespace Automaton.Debugging
 
         public static void Reload()
         {
-            DebugHelpers.RemoveAll(dh => {
+            DebugHelpers.RemoveAll(dh =>
+            {
                 if (!dh.FeatureProvider.Disposed) return false;
                 RemoveDebugPage(dh.FullName);
                 dh.Dispose();
@@ -116,13 +111,11 @@ namespace Automaton.Debugging
                     DebugHelpers.Add(debugger);
                 }
             }
-
-
         }
 
         private static bool SetupDebugHelpers = false;
 
-        private static readonly List<DebugHelper> DebugHelpers = new();
+        private static readonly List<DebugHelper> DebugHelpers = [];
 
         private static readonly Stopwatch InitDelay = Stopwatch.StartNew();
 
@@ -176,56 +169,50 @@ namespace Automaton.Debugging
                 {
                     Svc.Log.Error(ex, "");
                 }
-
             }
 
-            using (var table = ImRaii.Table($"{nameof(DebugManager)}Table", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.Resizable))
+            using var table = ImRaii.Table($"{nameof(DebugManager)}Table", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.Resizable);
+            if (!table.Success) return;
+
+            ImGui.TableSetupColumn($"##{nameof(DebugManager)}SelectionColumn", ImGuiTableColumnFlags.WidthFixed, 200.0f * ImGuiHelpers.GlobalScale);
+            ImGui.TableSetupColumn($"##{nameof(DebugManager)}ContentsColumn", ImGuiTableColumnFlags.WidthStretch);
+
+            ImGui.TableNextColumn();
+            using (ImRaii.Child($"###{Name}{nameof(DebugPages)}", new Vector2(SidebarSize, -1) * ImGui.GetIO().FontGlobalScale, true))
             {
-                if (!table.Success) return;
-
-                ImGui.TableSetupColumn($"##{nameof(DebugManager)}SelectionColumn", ImGuiTableColumnFlags.WidthFixed, 200.0f * ImGuiHelpers.GlobalScale);
-                ImGui.TableSetupColumn($"##{nameof(DebugManager)}ContentsColumn", ImGuiTableColumnFlags.WidthStretch);
-
-                ImGui.TableNextColumn();
-                using (ImRaii.Child($"###{Name}{nameof(DebugPages)}", new Vector2(SidebarSize, -1) * ImGui.GetIO().FontGlobalScale, true))
+                var keys = DebugPages.Keys.ToList();
+                keys.Sort((s, s1) =>
                 {
-                    var keys = DebugPages.Keys.ToList();
-                    keys.Sort((s, s1) => {
-                        if (s.StartsWith("[") && !s1.StartsWith("["))
-                        {
-                            return 1;
-                        }
-                        return string.CompareOrdinal(s, s1);
-                    });
+                    return s.StartsWith("[") && !s1.StartsWith("[") ? 1 : string.CompareOrdinal(s, s1);
+                });
 
-                    foreach (var k in keys)
+                foreach (var k in keys)
+                {
+                    if (ImGui.Selectable($"{k}##{Name}{nameof(DebugPages)}{nameof(Config)}", Config.Debugging.SelectedPage == k))
                     {
-                        if (ImGui.Selectable($"{k}##{Name}{nameof(DebugPages)}{nameof(Config)}", Config.Debugging.SelectedPage == k))
-                        {
-                            Config.Debugging.SelectedPage = k;
-                            Config.Save();
-                        }
+                        Config.Debugging.SelectedPage = k;
+                        Config.Save();
                     }
                 }
+            }
 
-                ImGui.TableNextColumn();
-                using (ImRaii.Child($"###{Name}{nameof(DebugPages)}View", new Vector2(-1, -1), true, ImGuiWindowFlags.HorizontalScrollbar))
+            ImGui.TableNextColumn();
+            using (ImRaii.Child($"###{Name}{nameof(DebugPages)}View", new Vector2(-1, -1), true, ImGuiWindowFlags.HorizontalScrollbar))
+            {
+                if (string.IsNullOrEmpty(Config.Debugging.SelectedPage) || !DebugPages.ContainsKey(Config.Debugging.SelectedPage))
                 {
-                    if (string.IsNullOrEmpty(Config.Debugging.SelectedPage) || !DebugPages.ContainsKey(Config.Debugging.SelectedPage))
+                    ImGui.Text("Select Debug Page");
+                }
+                else
+                {
+                    try
                     {
-                        ImGui.Text("Select Debug Page");
+                        DebugPages[Config.Debugging.SelectedPage]();
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        try
-                        {
-                            DebugPages[Config.Debugging.SelectedPage]();
-                        }
-                        catch (Exception ex)
-                        {
-                            Svc.Log.Error(ex, "");
-                            ImGui.TextColored(new Vector4(1, 0, 0, 1), ex.ToString());
-                        }
+                        Svc.Log.Error(ex, "");
+                        ImGui.TextColored(new Vector4(1, 0, 0, 1), ex.ToString());
                     }
                 }
             }
@@ -241,7 +228,6 @@ namespace Automaton.Debugging
             DebugHelpers.Clear();
             DebugPages.Clear();
         }
-
 
         private static unsafe Vector2 GetNodePosition(AtkResNode* node)
         {
@@ -303,14 +289,8 @@ namespace Automaton.Debugging
             if (ImGui.IsItemClicked()) ImGui.SetClipboardText($"{textCopy}");
         }
 
-        public static unsafe void ClickToCopy(void* address)
-        {
-            ClickToCopyText($"{(ulong)address:X}");
-        }
-        public static unsafe void ClickToCopy<T>(T* address) where T : unmanaged
-        {
-            ClickToCopy((void*)address);
-        }
+        public static unsafe void ClickToCopy(void* address) => ClickToCopyText($"{(ulong)address:X}");
+        public static unsafe void ClickToCopy<T>(T* address) where T : unmanaged => ClickToCopy((void*)address);
 
         public static unsafe void SeStringToText(SeString seStr)
         {
@@ -383,7 +363,7 @@ namespace Automaton.Debugging
                         {
                             ImGui.SameLine();
                             ImGui.PushStyleColor(ImGuiCol.Text, 0xffcbc0ff);
-                            ClickToCopyText($"ffxiv_dx11.exe+{(unboxedAddr - BeginModule):X}");
+                            ClickToCopyText($"ffxiv_dx11.exe+{unboxedAddr - BeginModule:X}");
                             ImGui.PopStyleColor();
                         }
 
@@ -455,7 +435,6 @@ namespace Automaton.Debugging
                                     {
                                         ImGui.Text("Null Pointer");
                                     }
-
                                 }
                                 else if (fixedType.IsGenericType)
                                 {
@@ -479,10 +458,8 @@ namespace Automaton.Debugging
                         if (fixedArray != null)
                         {
 
-
                             if (fixedArray.Type == typeof(string) && fixedArray.Count == 1)
                             {
-
 
                                 var text = Marshal.PtrToStringUTF8((IntPtr)addr);
                                 if (text != null)
@@ -517,7 +494,6 @@ namespace Automaton.Debugging
                                     ImGui.TreePop();
                                 }
                             }
-
                         }
                         else
                         {
@@ -584,7 +560,6 @@ namespace Automaton.Debugging
                                             if (i != 0 && i % 16 != 0) ImGui.SameLine();
                                             ImGui.TextDisabled(ImGui.GetIO().KeyShift ? $"{v:000}" : $"{v:X2}");
                                         }
-
                                     }
                                 }
 
@@ -633,7 +608,7 @@ namespace Automaton.Debugging
                             {
                                 ImGui.SameLine();
                                 ImGui.PushStyleColor(ImGuiCol.Text, 0xffcbc0ff);
-                                ClickToCopyText($"ffxiv_dx11.exe+{(pAddr - BeginModule):X}");
+                                ClickToCopyText($"ffxiv_dx11.exe+{pAddr - BeginModule:X}");
                                 ImGui.PopStyleColor();
                             }
                         }
@@ -641,7 +616,6 @@ namespace Automaton.Debugging
                         {
                             ImGui.Text($"{value}");
                         }
-
                     }
                 }
             }
@@ -651,22 +625,13 @@ namespace Automaton.Debugging
             }
         }
 
-        public static unsafe void PrintOutObject<T>(T* ptr, bool autoExpand = false, string headerText = null) where T : unmanaged
-        {
-            PrintOutObject(ptr, new List<string>(), autoExpand, headerText);
-        }
+        public static unsafe void PrintOutObject<T>(T* ptr, bool autoExpand = false, string headerText = null) where T : unmanaged => PrintOutObject(ptr, [], autoExpand, headerText);
 
-        public static unsafe void PrintOutObject<T>(T* ptr, List<string> path, bool autoExpand = false, string headerText = null) where T : unmanaged
-        {
-            PrintOutObject(*ptr, (ulong)ptr, path, autoExpand, headerText);
-        }
+        public static unsafe void PrintOutObject<T>(T* ptr, List<string> path, bool autoExpand = false, string headerText = null) where T : unmanaged => PrintOutObject(*ptr, (ulong)ptr, path, autoExpand, headerText);
 
-        public static unsafe void PrintOutObject(object obj, ulong addr, bool autoExpand = false, string headerText = null)
-        {
-            PrintOutObject(obj, addr, new List<string>(), autoExpand, headerText);
-        }
+        public static unsafe void PrintOutObject(object obj, ulong addr, bool autoExpand = false, string headerText = null) => PrintOutObject(obj, addr, [], autoExpand, headerText);
 
-        private static readonly Dictionary<string, object> SavedValues = new();
+        private static readonly Dictionary<string, object> SavedValues = [];
         public static void SetSavedValue<T>(string key, T value)
         {
             if (Config.Debugging.SavedValues.ContainsKey(key)) Config.Debugging.SavedValues.Remove(key);
@@ -674,16 +639,12 @@ namespace Automaton.Debugging
             Config.Save();
         }
 
-        public static T GetSavedValue<T>(string key, T defaultValue)
-        {
-            if (!Config.Debugging.SavedValues.ContainsKey(key)) return defaultValue;
-            return (T)Config.Debugging.SavedValues[key];
-        }
+        public static T GetSavedValue<T>(string key, T defaultValue) => !Config.Debugging.SavedValues.ContainsKey(key) ? defaultValue : (T)Config.Debugging.SavedValues[key];
 
         private static string ParseTypeName(Type type, List<Type> loopSafety = null)
         {
             if (!type.IsGenericType) return type.Name;
-            loopSafety ??= new List<Type>();
+            loopSafety ??= [];
             if (loopSafety.Contains(type)) return $"...{type.Name}";
             loopSafety.Add(type);
             var n = type.Name.Split('`')[0];
@@ -711,7 +672,6 @@ namespace Automaton.Debugging
                     err = ex;
                 }
 
-
                 if (err != null)
                 {
                     ImGui.TextDisabled(err.Message);
@@ -722,7 +682,6 @@ namespace Automaton.Debugging
                     ImGui.Text($"\"{text}\"");
                     ImGui.SameLine();
                 }
-
             }
 
             var pushedColor = 0;
@@ -734,7 +693,7 @@ namespace Automaton.Debugging
                     try
                     {
                         BeginModule = (ulong)Process.GetCurrentProcess().MainModule.BaseAddress.ToInt64();
-                        EndModule = (BeginModule + (ulong)Process.GetCurrentProcess().MainModule.ModuleMemorySize);
+                        EndModule = BeginModule + (ulong)Process.GetCurrentProcess().MainModule.ModuleMemorySize;
                     }
                     catch
                     {
@@ -750,9 +709,6 @@ namespace Automaton.Debugging
                 }
 
                 headerText ??= $"{obj}";
-
-
-
 
                 if (ImGui.TreeNode($"{headerText}##print-obj-{addr:X}-{string.Join("-", path)}"))
                 {
@@ -788,8 +744,6 @@ namespace Automaton.Debugging
                             ImGui.SameLine();
                         }
 
-
-
                         var fixedBuffer = (FixedBufferAttribute)f.GetCustomAttribute(typeof(FixedBufferAttribute));
                         if (fixedBuffer != null)
                         {
@@ -813,7 +767,6 @@ namespace Automaton.Debugging
                                 {
                                     ImGui.TextColored(new Vector4(0.2f, 0.9f, 0.9f, 1), $"{fixedArray.Type.Name}[{fixedArray.Count:X}]");
                                 }
-
                             }
                             else
                             {
@@ -837,7 +790,7 @@ namespace Automaton.Debugging
                         ImGui.SameLine();
 
                         ImGui.TextColored(new Vector4(0.2f, 0.9f, 0.4f, 1), $"{f.Name}: ");
-                        var fullFieldName = $"{(obj.GetType().FullName ?? "UnknownType")}.{f.Name}";
+                        var fullFieldName = $"{obj.GetType().FullName ?? "UnknownType"}.{f.Name}";
                         if (ImGui.GetIO().KeyShift && ImGui.IsItemHovered())
                         {
                             ImGui.SetTooltip(fullFieldName);
@@ -897,8 +850,6 @@ namespace Automaton.Debugging
                         {
                             PrintOutValue(addr, new List<string>(path) { p.Name }, p.PropertyType, p.GetValue(obj), p);
                         }
-
-
                     }
 
                     openedNode = false;
@@ -933,7 +884,7 @@ namespace Automaton.Debugging
                     try
                     {
                         BeginModule = (ulong)Process.GetCurrentProcess().MainModule.BaseAddress.ToInt64();
-                        EndModule = (BeginModule + (ulong)Process.GetCurrentProcess().MainModule.ModuleMemorySize);
+                        EndModule = BeginModule + (ulong)Process.GetCurrentProcess().MainModule.ModuleMemorySize;
                     }
                     catch
                     {
@@ -949,7 +900,7 @@ namespace Automaton.Debugging
             if (BeginModule > 0 && ulongAddress >= BeginModule && ulongAddress <= EndModule)
             {
                 isRelative = true;
-                return $"ffxiv_dx11.exe+{(ulongAddress - BeginModule):X}";
+                return $"ffxiv_dx11.exe+{ulongAddress - BeginModule:X}";
             }
             return $"{ulongAddress:X}";
         }

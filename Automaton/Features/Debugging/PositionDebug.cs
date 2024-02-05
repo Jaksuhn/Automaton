@@ -89,7 +89,6 @@ public unsafe class PositionDebug : DebugHelper
 
         ImGui.Separator();
 
-
         if (Svc.Targets.Target != null || Svc.Targets.PreviousTarget != null)
         {
             var targetPos = Svc.Targets.Target != null ? Svc.Targets.Target.Position : Svc.Targets.PreviousTarget.Position;
@@ -108,14 +107,14 @@ public unsafe class PositionDebug : DebugHelper
 
         Svc.GameGui.ScreenToWorld(ImGui.GetIO().MousePos, out var pos, 100000f);
         ImGui.Text($"Mouse Position: {pos:f3}");
-        
+
         ImGui.Separator();
 
         var territoryID = Svc.ClientState.TerritoryType;
         var map = Svc.Data.GetExcelSheet<TerritoryType>()!.GetRow(territoryID);
         ImGui.Text($"Territory ID: {territoryID}");
         ImGui.Text($"Territory Name: {map!.PlaceName.Value?.Name}");
-        
+
         if (Svc.ClientState.LocalPlayer != null)
             ImGui.Text($"Nearest Aetheryte: {CoordinatesHelper.GetNearestAetheryte(Svc.ClientState.LocalPlayer.Position, map)}");
     }

@@ -1,15 +1,15 @@
 using Automaton.Debugging;
-using ImGuiNET;
+using ECommons.DalamudServices;
+using ECommons.GameFunctions;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using FFXIVClientStructs.Interop.Attributes;
-using System.Runtime.InteropServices;
-using System.Numerics;
-using ECommons.DalamudServices;
-using System.Linq;
-using ECommons.GameFunctions;
+using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
+using System.Linq;
+using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace Automaton.Features.Debugging;
 

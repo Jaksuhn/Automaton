@@ -1,7 +1,6 @@
-namespace Automaton.Features
-{
-    public abstract class FeatureConfig
-    {
+namespace Automaton.FeaturesSetup;
 
-    }
+public abstract class FeatureConfig
+{
+
 }

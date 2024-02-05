@@ -1,9 +1,9 @@
+using Automaton.Helpers.Faloop.Model;
 using System;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Automaton.Helpers.Faloop.Model;
 
 namespace Automaton.Helpers.Faloop;
 
@@ -94,8 +94,5 @@ public class FaloopApiClient : IDisposable
         return await response.Content.ReadAsStringAsync();
     }
 
-    public void Dispose()
-    {
-        client.Dispose();
-    }
+    public void Dispose() => client.Dispose();
 }

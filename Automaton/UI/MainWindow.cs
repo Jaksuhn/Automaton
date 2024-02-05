@@ -1,16 +1,16 @@
+using Automaton.Features;
+using Automaton.FeaturesSetup;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Windowing;
 using Dalamud.Utility;
 using ECommons;
+using ECommons.DalamudServices;
 using ECommons.ImGuiMethods;
 using ImGuiNET;
-using Automaton.Features;
-using Automaton.FeaturesSetup;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using ECommons.DalamudServices;
 
 namespace Automaton.UI;
 
@@ -20,7 +20,7 @@ internal class MainWindow : Window
 
     public MainWindow() : base($"{Name} {P.GetType().Assembly.GetName().Version}###{Name}")
     {
-        this.SizeConstraints = new WindowSizeConstraints
+        SizeConstraints = new WindowSizeConstraints
         {
             MinimumSize = new Vector2(375, 330),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
@@ -33,9 +33,10 @@ internal class MainWindow : Window
     }
 
     private string searchString = string.Empty;
-    private readonly List<BaseFeature> filteredFeatures = new();
+    private readonly List<BaseFeature> filteredFeatures = [];
     private bool hornybonk;
 
+    [Obsolete]
     public override void Draw()
     {
         var region = ImGui.GetContentRegionAvail();
@@ -85,7 +86,7 @@ internal class MainWindow : Window
                         {
                             foreach (var feature in P.Features)
                             {
-                                if (feature.FeatureType == FeatureType.Commands || feature.FeatureType == FeatureType.Disabled) continue;
+                                if (feature.FeatureType is FeatureType.Commands or FeatureType.Disabled) continue;
 
                                 if (feature.Description.Contains(searchString, StringComparison.CurrentCultureIgnoreCase) ||
                                     feature.Name.Contains(searchString, StringComparison.CurrentCultureIgnoreCase))
@@ -93,7 +94,6 @@ internal class MainWindow : Window
                             }
                         }
                     }
-
                 }
                 ImGui.EndChild();
                 ImGui.PopStyleVar();
@@ -137,7 +137,7 @@ internal class MainWindow : Window
                 }
                 ImGui.EndChild();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ex.Log();
                 ImGui.EndTable();
@@ -155,6 +155,7 @@ internal class MainWindow : Window
         ImGui.Text("Icon by Kadmas");
     }
 
+    [Obsolete]
     private static void DrawCommands(BaseFeature[] features)
     {
         if (features == null || !features.Any() || features.Length == 0) return;
@@ -190,6 +191,7 @@ internal class MainWindow : Window
         }
     }
 
+    [Obsolete]
     private void DrawFeatures(IEnumerable<BaseFeature> features)
     {
         if (features == null || !features.Any() || !features.Any()) return;

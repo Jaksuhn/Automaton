@@ -1,17 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using Automaton.Helpers;
 using Dalamud.Hooking;
 using Dalamud.Memory;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
 using ValueType = FFXIVClientStructs.FFXIV.Component.GUI.ValueType;
 
-namespace Automaton;
+namespace Automaton.FeaturesSetup;
 
 public static unsafe class Common
 {
@@ -26,7 +26,7 @@ public static unsafe class Common
     private delegate void FinalizeAddonDelegate(AtkUnitManager* unitManager, AtkUnitBase** atkUnitBase);
     private static Hook<FinalizeAddonDelegate> FinalizeAddonHook;
 
-    private static IntPtr LastCommandAddress;
+    private static nint LastCommandAddress;
 
     public static Utf8String* LastCommand { get; private set; }
     public static void* ThrowawayOut { get; private set; } = (void*)Marshal.AllocHGlobal(1024);
@@ -38,7 +38,7 @@ public static unsafe class Common
     public static void Setup()
     {
         LastCommandAddress = Svc.SigScanner.GetStaticAddressFromSig("4C 8D 05 ?? ?? ?? ?? 41 B1 01 49 8B D4 E8 ?? ?? ?? ?? 83 EB 06");
-        LastCommand = (Utf8String*)(LastCommandAddress);
+        LastCommand = (Utf8String*)LastCommandAddress;
 
         AddonSetupHook = Svc.Hook.HookFromSignature<AddonSetupDelegate>("E8 ?? ?? ?? ?? 8B 83 ?? ?? ?? ?? C1 E8 14", AddonSetupDetour);
         AddonSetupHook?.Enable();
@@ -92,12 +92,8 @@ public static unsafe class Common
         FinalizeAddonHook?.Original(unitManager, atkUnitBase);
     }
 
-    public static AtkUnitBase* GetUnitBase(string name, int index = 1)
-    {
-        return (AtkUnitBase*)Svc.GameGui.GetAddonByName(name, index);
-    }
+    public static AtkUnitBase* GetUnitBase(string name, int index = 1) => (AtkUnitBase*)Svc.GameGui.GetAddonByName(name, index);
 
-    
     public static AtkValue* CreateAtkValueArray(params object[] values)
     {
         var atkValues = (AtkValue*)Marshal.AllocHGlobal(values.Length * sizeof(AtkValue));
@@ -148,12 +144,11 @@ public static unsafe class Common
         return atkValues;
     }
 
-
     public static void Shutdown()
     {
         if (ThrowawayOut != null)
         {
-            Marshal.FreeHGlobal(new IntPtr(ThrowawayOut));
+            Marshal.FreeHGlobal(new nint(ThrowawayOut));
             ThrowawayOut = null;
         }
 
@@ -175,9 +170,7 @@ public static unsafe class Common
             {
                 var unitBase = unitManager->EntriesSpan[j].Value;
                 if (unitBase != null && unitBase->ID == id)
-                {
                     return unitBase;
-                }
             }
         }
 
@@ -229,12 +222,12 @@ public static unsafe class Common
         return wh;
     }
 
-    public static List<IHookWrapper> HookList = new();
+    public static List<IHookWrapper> HookList = [];
 }
 
 public unsafe class SetupAddonArgs
 {
     public AtkUnitBase* Addon { get; init; }
     private string addonName;
-    public string AddonName => addonName ??= MemoryHelper.ReadString(new IntPtr(Addon->Name), 0x20).Split('\0')[0];
+    public string AddonName => addonName ??= MemoryHelper.ReadString(new nint(Addon->Name), 0x20).Split('\0')[0];
 }

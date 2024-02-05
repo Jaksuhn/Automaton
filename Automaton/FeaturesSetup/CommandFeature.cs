@@ -1,6 +1,6 @@
+using Automaton.FeaturesSetup;
 using Dalamud.Game.Command;
 using ECommons.DalamudServices;
-using Automaton.FeaturesSetup;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +25,7 @@ public abstract partial class CommandFeature : Feature
         OnCommand(args.Split(' ').ToList());
     }
 
-    private readonly List<string> registeredCommands = new();
+    private readonly List<string> registeredCommands = [];
 
     public override void Enable()
     {
@@ -71,11 +71,9 @@ public abstract partial class CommandFeature : Feature
     public static List<string> GetArgumentList(string args) => ArgumentRegex().Matches(args)
     .Select(m =>
     {
-        if (m.Value.StartsWith('"') && m.Value.EndsWith('"')) { return m.Value[1..^1]; }
-        return m.Value;
+        return m.Value.StartsWith('"') && m.Value.EndsWith('"') ? m.Value[1..^1] : m.Value;
     })
     .ToList();
-
 
     [GeneratedRegex("[\\\"].+?[\\\"]|[^ ]+")]
     private static partial Regex ArgumentRegex();

@@ -1,102 +1,94 @@
-using ECommons.DalamudServices;
 using Automaton.FeaturesSetup;
-using System;
 using Dalamud.Plugin;
-using System.Reflection;
+using ECommons.DalamudServices;
+using System;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 
-namespace Automaton.Features.Testing
+namespace Automaton.Features.Experiments;
+
+public unsafe class PluginUnlocker : Feature
 {
-    public unsafe class PluginUnlocker : Feature
+    public override string Name => "Plugin Unlocker";
+    public override string Description => "Can't stand plugins not working in PvP areas despite having nothing to do with PvP? Me too.";
+
+    public override FeatureType FeatureType => FeatureType.Disabled;
+
+    public Configs Config { get; private set; }
+    public override bool UseAutoConfig => true;
+
+    public class Configs : FeatureConfig
     {
-        public override string Name => "Plugin Unlocker";
-        public override string Description => "Can't stand plugins not working in PvP areas despite having nothing to do with PvP? Me too.";
+        [FeatureConfigOption("SortaKinda", "", HelpText = "Makes it work in PvP")]
+        public bool SortaKinda = true;
+    }
 
-        public override FeatureType FeatureType => FeatureType.Disabled;
+    public override void Enable()
+    {
+        Config = LoadConfig<Configs>() ?? new Configs();
+        if (Config.SortaKinda)
+            SortaKindaUnlockPvP();
+        base.Enable();
+    }
 
-        public Configs Config { get; private set; }
-        public override bool UseAutoConfig => true;
+    public override void Disable()
+    {
+        SaveConfig(Config);
+        base.Disable();
+    }
 
-        public class Configs : FeatureConfig
+    internal static void SortaKindaUnlockPvP()
+    {
+        try
         {
-            [FeatureConfigOption("SortaKinda", "", HelpText = "Makes it work in PvP")]
-            public bool SortaKinda = true;
-        }
+            var plugin = GetPluginByName("sortakinda");
+            var openConfigWindowMethod = plugin.GetType().GetMethod("OpenConfigWindow");
 
-        public override void Enable()
-        {
-            Config = LoadConfig<Configs>() ?? new Configs();
-            if (Config.SortaKinda)
-                SortaKindaUnlockPvP();
-            base.Enable();
-        }
-
-        public override void Disable()
-        {
-            SaveConfig(Config);
-            base.Disable();
-        }
-
-        internal static void SortaKindaUnlockPvP()
-        {
-            try
+            if (openConfigWindowMethod != null)
             {
-                var plugin = GetPluginByName("sortakinda");
-                var openConfigWindowMethod = plugin.GetType().GetMethod("OpenConfigWindow");
+                var newOpenConfigWindowMethod = new DynamicMethod("OpenConfigWindow", openConfigWindowMethod.ReturnType, openConfigWindowMethod.GetParameters().Select(p => p.ParameterType).ToArray(), openConfigWindowMethod.DeclaringType);
 
-                if (openConfigWindowMethod != null)
+                var ilGenerator = newOpenConfigWindowMethod.GetILGenerator();
+                ilGenerator.Emit(OpCodes.Ldarg_0);
+                ilGenerator.Emit(OpCodes.Call, plugin.GetType().GetMethod("Toggle"));
+                ilGenerator.Emit(OpCodes.Ret);
+
+                var openConfigWindowField = plugin.GetType().GetField("OpenConfigWindow", BindingFlags.NonPublic | BindingFlags.Instance);
+                openConfigWindowField.SetValue(plugin, newOpenConfigWindowMethod.CreateDelegate(openConfigWindowMethod.DeclaringType));
+            }
+        }
+        catch (Exception e)
+        {
+            Svc.Log.Error($"{e.Message}\n{e.StackTrace}");
+        }
+    }
+
+    private static IDalamudPlugin GetPluginByName(string internalName)
+    {
+        try
+        {
+            var pluginManager = Svc.PluginInterface.GetType().Assembly.
+                GetType("Dalamud.Service`1", true).MakeGenericType(Svc.PluginInterface.GetType().Assembly.GetType("Dalamud.Plugin.Internal.PluginManager", true)).
+                GetMethod("Get").Invoke(null, BindingFlags.Default, null, Array.Empty<object>(), null);
+            var installedPlugins = (System.Collections.IList)pluginManager.GetType().GetProperty("InstalledPlugins").GetValue(pluginManager);
+
+            foreach (var t in installedPlugins)
+                if ((string)t.GetType().GetProperty("Name").GetValue(t) == internalName)
                 {
-                    var newOpenConfigWindowMethod = new DynamicMethod("OpenConfigWindow", openConfigWindowMethod.ReturnType, openConfigWindowMethod.GetParameters().Select(p => p.ParameterType).ToArray(), openConfigWindowMethod.DeclaringType);
-
-                    var ilGenerator = newOpenConfigWindowMethod.GetILGenerator();
-                    ilGenerator.Emit(OpCodes.Ldarg_0);
-                    ilGenerator.Emit(OpCodes.Call, plugin.GetType().GetMethod("Toggle"));
-                    ilGenerator.Emit(OpCodes.Ret);
-
-                    var openConfigWindowField = plugin.GetType().GetField("OpenConfigWindow", BindingFlags.NonPublic | BindingFlags.Instance);
-                    openConfigWindowField.SetValue(plugin, newOpenConfigWindowMethod.CreateDelegate(openConfigWindowMethod.DeclaringType));
+                    var type = t.GetType().Name == "LocalDevPlugin" ? t.GetType().BaseType : t.GetType();
+                    var plugin = (IDalamudPlugin)type.GetField("instance", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(t);
+                    return (bool)plugin.GetType().GetField("Init", BindingFlags.Static | BindingFlags.NonPublic).GetValue(plugin)
+                        ? plugin
+                        : throw new Exception($"{internalName} is not initialized");
                 }
-            }
-            catch (Exception e)
-            {
-                Svc.Log.Error($"{e.Message}\n{e.StackTrace}");
-            }
+            return null;
         }
-
-        private static IDalamudPlugin GetPluginByName(string internalName)
+        catch (Exception e)
         {
-            try
-            {
-                var pluginManager = Svc.PluginInterface.GetType().Assembly.
-                    GetType("Dalamud.Service`1", true).MakeGenericType(Svc.PluginInterface.GetType().Assembly.GetType("Dalamud.Plugin.Internal.PluginManager", true)).
-                    GetMethod("Get").Invoke(null, BindingFlags.Default, null, Array.Empty<object>(), null);
-                var installedPlugins = (System.Collections.IList)pluginManager.GetType().GetProperty("InstalledPlugins").GetValue(pluginManager);
-
-                foreach (var t in installedPlugins)
-                {
-                    if ((string)t.GetType().GetProperty("Name").GetValue(t) == internalName)
-                    {
-                        var type = t.GetType().Name == "LocalDevPlugin" ? t.GetType().BaseType : t.GetType();
-                        var plugin = (IDalamudPlugin)type.GetField("instance", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(t);
-                        if ((bool)plugin.GetType().GetField("Init", BindingFlags.Static | BindingFlags.NonPublic).GetValue(plugin))
-                        {
-                            return plugin;
-                        }
-                        else
-                        {
-                            throw new Exception($"{internalName} is not initialized");
-                        }
-                    }
-                }
-                return null;
-            }
-            catch (Exception e)
-            {
-                Svc.Log.Error($"Can't find {internalName} plugin: " + e.Message);
-                Svc.Log.Error(e.StackTrace);
-                return null;
-            }
+            Svc.Log.Error($"Can't find {internalName} plugin: " + e.Message);
+            Svc.Log.Error(e.StackTrace);
+            return null;
         }
     }
 }

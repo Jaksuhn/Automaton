@@ -43,7 +43,7 @@ public unsafe class OverrideCamera : IDisposable
 
     private delegate void RMICameraDelegate(CameraEx* self, int inputMode, float speedH, float speedV);
     [Signature("40 53 48 83 EC 70 44 0F 29 44 24 ?? 48 8B D9")]
-    private Hook<RMICameraDelegate> _rmiCameraHook = null!;
+    private readonly Hook<RMICameraDelegate> _rmiCameraHook = null!;
 
     public OverrideCamera()
     {
@@ -51,10 +51,7 @@ public unsafe class OverrideCamera : IDisposable
         Svc.Log.Information($"RMICamera address: 0x{_rmiCameraHook.Address:X}");
     }
 
-    public void Dispose()
-    {
-        _rmiCameraHook.Dispose();
-    }
+    public void Dispose() => _rmiCameraHook.Dispose();
 
     private void RMICameraDetour(CameraEx* self, int inputMode, float speedH, float speedV)
     {

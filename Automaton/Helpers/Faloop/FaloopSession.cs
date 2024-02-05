@@ -1,6 +1,6 @@
+using ECommons.DalamudServices;
 using System;
 using System.Threading.Tasks;
-using ECommons.DalamudServices;
 
 namespace Automaton.Helpers.Faloop;
 
@@ -9,10 +9,7 @@ public class FaloopSession : IDisposable
     private readonly FaloopApiClient client = new();
     public readonly FaloopEmbedData EmbedData;
 
-    public FaloopSession()
-    {
-        EmbedData = new FaloopEmbedData(client);
-    }
+    public FaloopSession() => EmbedData = new FaloopEmbedData(client);
 
     public bool IsLoggedIn { get; private set; }
 
@@ -57,8 +54,5 @@ public class FaloopSession : IDisposable
         SessionId = default;
     }
 
-    public void Dispose()
-    {
-        client.Dispose();
-    }
+    public void Dispose() => client.Dispose();
 }

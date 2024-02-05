@@ -1,10 +1,10 @@
+using Automaton.Helpers.Faloop.Model;
+using SocketIOClient;
+using SocketIOClient.Transport;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Automaton.Helpers.Faloop.Model;
-using SocketIOClient;
-using SocketIOClient.Transport;
 
 namespace Automaton.Helpers.Faloop;
 

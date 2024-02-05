@@ -1,7 +1,7 @@
 using Automaton.Debugging;
-using ImGuiNET;
-using ECommons.DalamudServices;
 using Dalamud.Game;
+using ECommons.DalamudServices;
+using ImGuiNET;
 using System;
 using static Automaton.Features.Debugging.HousingDebug;
 

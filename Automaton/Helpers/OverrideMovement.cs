@@ -46,11 +46,11 @@ public unsafe class OverrideMovement : IDisposable
 
     private delegate void RMIWalkDelegate(void* self, float* sumLeft, float* sumForward, float* sumTurnLeft, byte* haveBackwardOrStrafe, byte* a6, byte bAdditiveUnk);
     [Signature("E8 ?? ?? ?? ?? 80 7B 3E 00 48 8D 3D")]
-    private Hook<RMIWalkDelegate> _rmiWalkHook = null!;
+    private readonly Hook<RMIWalkDelegate> _rmiWalkHook = null!;
 
     private delegate void RMIFlyDelegate(void* self, PlayerMoveControllerFlyInput* result);
     [Signature("E8 ?? ?? ?? ?? 0F B6 0D ?? ?? ?? ?? B8")]
-    private Hook<RMIFlyDelegate> _rmiFlyHook = null!;
+    private readonly Hook<RMIFlyDelegate> _rmiFlyHook = null!;
 
     public OverrideMovement()
     {
@@ -69,7 +69,7 @@ public unsafe class OverrideMovement : IDisposable
     {
         _rmiWalkHook.Original(self, sumLeft, sumForward, sumTurnLeft, haveBackwardOrStrafe, a6, bAdditiveUnk);
         // TODO: we really need to introduce some extra checks that PlayerMoveController::readInput does - sometimes it skips reading input, and returning something non-zero breaks stuff...
-        if (bAdditiveUnk == 0 && (IgnoreUserInput || *sumLeft == 0 && *sumForward == 0) && DirectionToDestination(false) is var relDir && relDir != null)
+        if (bAdditiveUnk == 0 && (IgnoreUserInput || (*sumLeft == 0 && *sumForward == 0)) && DirectionToDestination(false) is var relDir && relDir != null)
         {
             var dir = relDir.Value.h.ToDirection();
             *sumLeft = dir.X;
@@ -81,7 +81,7 @@ public unsafe class OverrideMovement : IDisposable
     {
         _rmiFlyHook.Original(self, result);
         // TODO: we really need to introduce some extra checks that PlayerMoveController::readInput does - sometimes it skips reading input, and returning something non-zero breaks stuff...
-        if ((IgnoreUserInput || result->Forward == 0 && result->Left == 0 && result->Up == 0) && DirectionToDestination(true) is var relDir && relDir != null)
+        if ((IgnoreUserInput || (result->Forward == 0 && result->Left == 0 && result->Up == 0)) && DirectionToDestination(true) is var relDir && relDir != null)
         {
             var dir = relDir.Value.h.ToDirection();
             result->Forward = dir.Y;

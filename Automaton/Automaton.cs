@@ -1,17 +1,17 @@
+using Automaton.FeaturesSetup;
+using Automaton.IPC;
+using Automaton.UI;
 using Dalamud.Game.Command;
 using Dalamud.Interface.Windowing;
+using Dalamud.IoC;
 using Dalamud.Plugin;
 using ECommons;
 using ECommons.Automation;
 using ECommons.DalamudServices;
-using Automaton.Features;
-using Automaton.UI;
+using ImGuiNET;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Automaton.IPC;
-using ImGuiNET;
-using Dalamud.IoC;
 
 namespace Automaton;
 
@@ -29,7 +29,7 @@ public class Automaton : IDalamudPlugin
     internal static DalamudPluginInterface pi;
     public static Configuration Config;
 
-    public List<FeatureProvider> FeatureProviders = new();
+    public List<FeatureProvider> FeatureProviders = [];
     private FeatureProvider provider;
     public IEnumerable<BaseFeature> Features => FeatureProviders.Where(x => !x.Disposed).SelectMany(x => x.Features).OrderBy(x => x.Name);
     internal TaskManager TaskManager;
@@ -69,7 +69,7 @@ public class Automaton : IDalamudPlugin
         provider = new FeatureProvider(Assembly.GetExecutingAssembly());
         provider.LoadFeatures();
         FeatureProviders.Add(provider);
-#if (DEBUG)
+#if DEBUG
         MainWindow.IsOpen = !MainWindow.IsOpen;
 #endif
     }

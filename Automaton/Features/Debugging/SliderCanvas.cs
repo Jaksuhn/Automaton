@@ -14,7 +14,6 @@ public unsafe class SliderCanvas : DebugHelper
     private const int BarSpacing = 4;
     private const int BarCount = 64;
 
-
     public override void Draw()
     {
         if (!sw.IsRunning) sw.Restart();
@@ -32,7 +31,7 @@ public unsafe class SliderCanvas : DebugHelper
             var p0 = ImGui.GetCursorScreenPos();
             dl.AddRectFilled(p0 - new Vector2(50), p0 + space + new Vector2(100), 0xFFFFFFFF);
             for (var i = 0; i < BarCount; i++) dl.AddRectFilled(p0 + new Vector2((i * BarSpacing) + (i * barSize), 0), p0 + new Vector2((i * BarSpacing) + ((i + 1) * barSize), space.Y), 0x33555555);
-            var t = (float)(sw.Elapsed.TotalSeconds);
+            var t = (float)sw.Elapsed.TotalSeconds;
             for (var i = 0; i < BarCount; i++)
             {
                 var v = Math.Clamp(GetSliderValue(t, i / (float)BarCount, i), 0f, 1f);
@@ -45,8 +44,5 @@ public unsafe class SliderCanvas : DebugHelper
 
     }
 
-    public static float GetSliderValue(float t, float x, int i)
-    {
-        return (float)Doom.GetSliderValue(t, x, i);
-    }
+    public static float GetSliderValue(float t, float x, int i) => (float)Doom.GetSliderValue(t, x, i);
 }

@@ -9,7 +9,7 @@ public static class MockData
     private static readonly MobReportData.Spawn Spawn = new()
     {
         ZoneId = 399,
-        ZonePoiIds = new() { 643 },
+        ZonePoiIds = [643],
         Timestamp = DateTime.Parse("2022-12-09T12:06:33.031Z"),
         Window = 1,
     };

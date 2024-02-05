@@ -1,14 +1,13 @@
-namespace Automaton.FeaturesSetup
+namespace Automaton.FeaturesSetup;
+
+public enum FeatureType
 {
-    public enum FeatureType
-    {
-        Disabled,
-        Actions,
-        UI,
-        Targeting,
-        Commands,
-        Other,
-        ChatFeature,
-        Achievements,
-    }
+    Disabled,
+    Actions,
+    UI,
+    Targeting,
+    Commands,
+    Other,
+    ChatFeature,
+    Achievements,
 }

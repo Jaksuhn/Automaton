@@ -1,6 +1,6 @@
+using Automaton.Debugging;
 using Dalamud.Interface.Windowing;
 using System.Numerics;
-using Automaton.Debugging;
 
 namespace Automaton.UI;
 
@@ -19,8 +19,5 @@ internal class DebugWindow : Window
     {
 
     }
-    public override void Draw()
-    {
-        DebugManager.DrawDebugWindow();
-    }
+    public override void Draw() => DebugManager.DrawDebugWindow();
 }

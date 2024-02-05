@@ -1,4 +1,5 @@
 using Automaton.Debugging;
+using Automaton.FeaturesSetup;
 using Automaton.Helpers;
 using ECommons.Automation;
 using ECommons.DalamudServices;
@@ -25,7 +26,7 @@ public unsafe class QuestDebug : DebugHelper
     private readonly FeatureProvider provider = new(Assembly.GetExecutingAssembly());
 
     private QuestManager qm = new();
-    private QuestManager* _qm = QuestManager.Instance();
+    private readonly QuestManager* _qm = QuestManager.Instance();
     private int selectedQuestID;
     private string questName = "";
     private readonly ExcelSheet<Quest> questSheet;
@@ -49,7 +50,7 @@ public unsafe class QuestDebug : DebugHelper
             ImGui.Text($"QuestID: {(int)quest.RowId}");
         }
         ImGui.InputInt("###QuestIDInput", ref selectedQuestID, 500);
-        if ( selectedQuestID != 0 )
+        if (selectedQuestID != 0)
         {
             ImGui.Text($"Is Quest Accepted?: {qm.IsQuestAccepted((ushort)selectedQuestID)}");
             ImGui.Text($"Is Quest Complete?: {QuestManager.IsQuestComplete((ushort)selectedQuestID)}");

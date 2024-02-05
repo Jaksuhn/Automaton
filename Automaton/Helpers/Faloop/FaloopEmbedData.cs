@@ -1,3 +1,5 @@
+using AngleSharp.Html.Parser;
+using Automaton.Helpers.Faloop.Model.Embed;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,15 +7,13 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using AngleSharp.Html.Parser;
-using Automaton.Helpers.Faloop.Model.Embed;
 
 namespace Automaton.Helpers.Faloop;
 
 public class FaloopEmbedData(FaloopApiClient client)
 {
-    public List<ZoneLocationData> ZoneLocations { get; private set; } = new();
-    public List<MobData> Mobs { get; private set; } = new();
+    public List<ZoneLocationData> ZoneLocations { get; private set; } = [];
+    public List<MobData> Mobs { get; private set; } = [];
 
     private readonly FaloopApiClient client = client;
 
@@ -30,12 +30,12 @@ public class FaloopEmbedData(FaloopApiClient client)
         {
             if (node is JsonArray { Count: > 0 } array && array[0] is JsonObject obj)
             {
-                if (new[] { "id", "key", "rank", "version", "zoneIds" }.All(x => obj.ContainsKey(x)))
+                if (new[] { "id", "key", "rank", "version", "zoneIds" }.All(obj.ContainsKey))
                 {
                     Mobs = array.Deserialize<List<MobData>>(options)!;
                 }
 
-                if (new[] { "id", "zoneId", "type", "location" }.All(x => obj.ContainsKey(x)))
+                if (new[] { "id", "zoneId", "type", "location" }.All(obj.ContainsKey))
                 {
                     ZoneLocations = array.Deserialize<List<ZoneLocationData>>(options)!;
                 }

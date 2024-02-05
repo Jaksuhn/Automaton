@@ -1,5 +1,5 @@
-using System;
 using Dalamud.Hooking;
+using System;
 
 namespace Automaton.Helpers;
 
@@ -10,20 +10,16 @@ public interface IHookWrapper : IDisposable
 
     public bool IsEnabled { get; }
     public bool IsDisposed { get; }
-
 }
 
 public class HookWrapper<T> : IHookWrapper where T : Delegate
 {
 
-    private Hook<T> wrappedHook;
+    private readonly Hook<T> wrappedHook;
 
     private bool disposed;
 
-    public HookWrapper(Hook<T> hook)
-    {
-        this.wrappedHook = hook;
-    }
+    public HookWrapper(Hook<T> hook) => wrappedHook = hook;
 
     public void Enable()
     {

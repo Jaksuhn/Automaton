@@ -46,8 +46,8 @@ public class AutoLeve : Feature
     private static int Allowances;
     private static string SearchString = string.Empty;
 
-    private readonly Dictionary<uint, NpcLocation> npcLocations = new();
-    private readonly List<uint> leveNPCs = new();
+    private readonly Dictionary<uint, NpcLocation> npcLocations = [];
+    private readonly List<uint> leveNPCs = [];
     private ExcelSheet<ENpcResident> eNpcResidents;
     private ExcelSheet<Map> maps;
     private ExcelSheet<TerritoryType> territoryType;
@@ -90,10 +90,7 @@ public class AutoLeve : Feature
         EndProcessHandler();
     }
 
-    private void OnZoneChanged(ushort obj)
-    {
-        LeveQuests.Clear();
-    }
+    private void OnZoneChanged(ushort obj) => LeveQuests.Clear();
 
     private static float GetDistanceToNpc(int npcId, out GameObject? o)
     {
@@ -113,7 +110,7 @@ public class AutoLeve : Feature
         return float.MaxValue;
     }
 
-    public unsafe override void Draw()
+    public override unsafe void Draw()
     {
         if (GameMain.Instance()->CurrentContentFinderConditionId != 0) return;
         if (npcLocations.Values.ToList().All(x => x.TerritoryType != Svc.ClientState.TerritoryType)) return;
@@ -194,7 +191,7 @@ public class AutoLeve : Feature
             }
             ImGui.End();
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Svc.Log.Error(e.ToString());
         }
@@ -418,22 +415,22 @@ public class AutoLeve : Feature
     // https://github.com/Nukoooo/ItemVendorLocation/blob/fc138fc71e98fef65e1a9e8bd530d56e1b536258/ItemVendorLocation/ItemLookup.cs
     private void BuildNpcLocation()
     {
-        foreach (TerritoryType sTerritoryType in territoryType)
+        foreach (var sTerritoryType in territoryType)
         {
-            string bg = sTerritoryType.Bg.ToString();
+            var bg = sTerritoryType.Bg.ToString();
             if (string.IsNullOrEmpty(bg))
                 continue;
 
-            string lgbFileName = "bg/" + bg[..(bg.IndexOf("/level/", StringComparison.Ordinal) + 1)] + "level/planevent.lgb";
-            LgbFile sLgbFile = Svc.Data.GetFile<LgbFile>(lgbFileName);
+            var lgbFileName = "bg/" + bg[..(bg.IndexOf("/level/", StringComparison.Ordinal) + 1)] + "level/planevent.lgb";
+            var sLgbFile = Svc.Data.GetFile<LgbFile>(lgbFileName);
             if (sLgbFile == null)
                 continue;
 
             ParseLgbFile(sLgbFile, sTerritoryType);
         }
 
-        ExcelSheet<Level> levels = Svc.Data.GetExcelSheet<Level>();
-        foreach (Level level in levels)
+        var levels = Svc.Data.GetExcelSheet<Level>();
+        foreach (var level in levels)
         {
             // NPC
             if (level.Type != 8)
@@ -450,7 +447,7 @@ public class AutoLeve : Feature
         }
 
         // https://github.com/ufx/GarlandTools/blob/7b38def8cf0ab553a2c3679aec86480c0e4e9481/Garland.Data/Modules/NPCs.cs#L59-L66
-        TerritoryType corrected = territoryType.GetRow(698);
+        var corrected = territoryType.GetRow(698);
         foreach (var key in new uint[] { 1004418, 1006747, 1002299, 1002281, 1001766, 1001945, 1001821 })
             if (npcLocations.ContainsKey(key))
                 npcLocations[key].TerritoryExcel = corrected;
@@ -460,15 +457,15 @@ public class AutoLeve : Feature
 
     public void ParseLgbFile(LgbFile lgbFile, TerritoryType sTerritoryType, uint? npcId = null)
     {
-        foreach (LayerCommon.Layer sLgbGroup in lgbFile.Layers)
+        foreach (var sLgbGroup in lgbFile.Layers)
         {
-            foreach (LayerCommon.InstanceObject instanceObject in sLgbGroup.InstanceObjects)
+            foreach (var instanceObject in sLgbGroup.InstanceObjects)
             {
                 if (instanceObject.AssetType != LayerEntryType.EventNPC)
                     continue;
 
-                LayerCommon.ENPCInstanceObject eventNpc = (LayerCommon.ENPCInstanceObject)instanceObject.Object;
-                uint npcRowId = eventNpc.ParentData.ParentData.BaseId;
+                var eventNpc = (LayerCommon.ENPCInstanceObject)instanceObject.Object;
+                var npcRowId = eventNpc.ParentData.ParentData.BaseId;
                 if (npcRowId == 0)
                     continue;
 
@@ -478,10 +475,10 @@ public class AutoLeve : Feature
                 if (npcId == null && npcLocations.ContainsKey(npcRowId))
                     continue;
 
-                byte mapId = eNpcResidents.GetRow(npcRowId).Map;
+                var mapId = eNpcResidents.GetRow(npcRowId).Map;
                 try
                 {
-                    Map map = maps.First(i => i.TerritoryType.Value == sTerritoryType && i.MapIndex == mapId);
+                    var map = maps.First(i => i.TerritoryType.Value == sTerritoryType && i.MapIndex == mapId);
                     npcLocations.Add(npcRowId, new NpcLocation(instanceObject.Transform.Translation.X, instanceObject.Transform.Translation.Z, sTerritoryType, map.RowId));
                 }
                 catch (InvalidOperationException)

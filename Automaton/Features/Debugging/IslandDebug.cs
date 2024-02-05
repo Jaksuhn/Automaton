@@ -1,17 +1,17 @@
 using Automaton.Debugging;
-using ImGuiNET;
-using System.Collections.Generic;
-using FFXIVClientStructs.FFXIV.Client.Game.MJI;
 using ECommons.DalamudServices;
+using ECommons.ImGuiMethods;
+using FFXIVClientStructs.FFXIV.Client.Game.MJI;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using FFXIVClientStructs.Interop;
 using FFXIVClientStructs.STD;
+using ImGuiNET;
+using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System;
-using FFXIVClientStructs.Interop;
 using AtkValueType = FFXIVClientStructs.FFXIV.Component.GUI.ValueType;
-using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-using ECommons.ImGuiMethods;
 
 namespace Automaton.Features.Debugging;
 
@@ -21,11 +21,11 @@ public unsafe class IslandDebug : DebugHelper
 
     public AgentMJICraftSchedule* Agent = (AgentMJICraftSchedule*)AgentModule.Instance()->GetAgentByInternalId(AgentId.MJICraftSchedule);
     public AgentMJICraftSchedule.AgentData* AgentData => Agent != null ? Agent->Data : null;
-    private static byte[] R1 = new byte[2] { 0, 0 };
-    private static byte[] R2 = new byte[2] { 0, 0 };
-    private static byte[] R3 = new byte[2] { 0, 0 };
-    private static byte[] R4 = new byte[2] { 0, 0 };
-    private readonly List<byte[]> rests = new() { R1, R2, R3, R4 };
+    private static readonly byte[] R1 = new byte[2] { 0, 0 };
+    private static readonly byte[] R2 = new byte[2] { 0, 0 };
+    private static readonly byte[] R3 = new byte[2] { 0, 0 };
+    private static readonly byte[] R4 = new byte[2] { 0, 0 };
+    private readonly List<byte[]> rests = [R1, R2, R3, R4];
 
     public override void Draw()
     {
@@ -54,7 +54,7 @@ public unsafe class IslandDebug : DebugHelper
         var restDays3 = MJIManager.Instance()->CraftworksRestDays[2];
         var restDays4 = MJIManager.Instance()->CraftworksRestDays[3];
 
-        return new List<int> { restDays1, restDays2, restDays3, restDays4 };
+        return [restDays1, restDays2, restDays3, restDays4];
     }
 
     public void SetRestCycles(uint mask)
