@@ -60,11 +60,8 @@ public class AutoMooglePaw : Feature
         }
     }
 
-    private static unsafe bool? WaitSelectStringAddon()
-    {
-        return GenericHelpers.TryGetAddonByName<AddonSelectString>("SelectString", out var addon) && GenericHelpers.IsAddonReady(&addon->AtkUnitBase)
-&& Click.TrySendClick("select_string1");
-    }
+    private static unsafe bool? WaitSelectStringAddon() =>
+        GenericHelpers.TryGetAddonByName<AddonSelectString>("SelectString", out var addon) && GenericHelpers.IsAddonReady(&addon->AtkUnitBase) && Click.TrySendClick("select_string1");
 
     private unsafe bool? ClickGameButton()
     {
