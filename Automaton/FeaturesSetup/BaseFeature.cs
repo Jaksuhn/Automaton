@@ -377,21 +377,7 @@ public abstract class BaseFeature
 
     public unsafe bool IsMoving() => AgentMap.Instance()->IsPlayerMoving == 1;
 
-    public void PrintModuleMessage(string msg)
-    {
-        var message = new XivChatEntry
-        {
-            Message = new SeStringBuilder()
-            .AddUiForeground($"[{Automaton.Name}] ", 45)
-            .AddUiForeground($"[{Name}] ", 62)
-            .AddText(msg)
-            .Build()
-        };
-
-        Svc.Chat.Print(message);
-    }
-
-    public void PrintModuleMessage(SeString msg)
+    public void PrintFullyQualifiedModuleMessage(SeString msg)
     {
         var message = new XivChatEntry
         {
@@ -404,6 +390,23 @@ public abstract class BaseFeature
 
         Svc.Chat.Print(message);
     }
+
+    public void PrintFullyQualifiedModuleMessage(string msg) => PrintFullyQualifiedModuleMessage(new SeString(new Payload[] { new TextPayload(msg) }));
+
+    public void PrintModuleMessage(SeString msg)
+    {
+        var message = new XivChatEntry
+        {
+            Message = new SeStringBuilder()
+            .AddUiForeground($"[{Name}] ", 62)
+            .Append(msg)
+            .Build()
+        };
+
+        Svc.Chat.Print(message);
+    }
+
+    public void PrintModuleMessage(string msg) => PrintModuleMessage(new SeString(new Payload[] { new TextPayload(msg) }));
 
     internal static unsafe AtkUnitBase* GetSpecificYesno(Predicate<string> compare)
     {

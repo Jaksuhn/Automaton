@@ -21,9 +21,7 @@ namespace Automaton.Features.Actions;
 public unsafe class AutoFollow : Feature
 {
     public override string Name => "Auto Follow";
-
     public override string Description => "True Auto Follow. Trigger with /autofollow while targeting someone. Use it with no target to wipe the current master.";
-
     public override FeatureType FeatureType => FeatureType.Actions;
 
     public Configs Config { get; private set; }

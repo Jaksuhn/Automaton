@@ -118,7 +118,7 @@ public unsafe class GettingTooAttached : Feature
         var msg = message.ExtractText();
         if (new[] { 7701, 7707 }.Any(x => msg == Svc.Data.GetExcelSheet<LogMessage>().FirstOrDefault(y => y.RowId == x)?.Text.ExtractText()))
         {
-            PrintModuleMessage("Error while melding. Aborting Tasks.");
+            PrintFullyQualifiedModuleMessage("Error while melding. Aborting Tasks.");
             CancelLoop();
         }
     }
@@ -151,7 +151,7 @@ public unsafe class GettingTooAttached : Feature
             if (addon->UldManager.NodeList[16]->IsVisible)
             {
                 CancelLoop();
-                PrintModuleMessage("Unable to continue. No gear in inventory");
+                PrintFullyQualifiedModuleMessage("Unable to continue. No gear in inventory");
                 return false;
             }
 
@@ -170,13 +170,13 @@ public unsafe class GettingTooAttached : Feature
             if (addon->UldManager.NodeList[6]->IsVisible)
             {
                 CancelLoop();
-                PrintModuleMessage("Unable to continue. No materia to meld.");
+                PrintFullyQualifiedModuleMessage("Unable to continue. No materia to meld.");
                 return false;
             }
             else if (MemoryHelper.ReadSeStringNullTerminated(new nint(addon->AtkValues[289].String)).ToString().Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)[2] == "0")
             {
                 CancelLoop();
-                PrintModuleMessage("Unable to continue. First listed materia has too high ilvl requirements.");
+                PrintFullyQualifiedModuleMessage("Unable to continue. First listed materia has too high ilvl requirements.");
                 return false;
             }
 
@@ -192,7 +192,7 @@ public unsafe class GettingTooAttached : Feature
         if (obj.Addon->AtkValues[50].Type != 0)
         {
             CancelLoop();
-            PrintModuleMessage("Unable to continue. This gear is requires overmelding.");
+            PrintFullyQualifiedModuleMessage("Unable to continue. This gear is requires overmelding.");
             return;
         }
 

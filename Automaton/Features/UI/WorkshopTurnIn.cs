@@ -190,7 +190,7 @@ public unsafe class WorkshopTurnin : Feature
     {
         if (condition)
         {
-            PrintModuleMessage(message);
+            PrintFullyQualifiedModuleMessage(message);
             EndLoop(message);
         }
         return condition;

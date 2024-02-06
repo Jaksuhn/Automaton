@@ -188,11 +188,11 @@ internal class FaloopToChat : Feature
             _ => default,
         };
 
-    private void OnConnected() => PrintModuleMessage("Connected");
+    private void OnConnected() => PrintFullyQualifiedModuleMessage("Connected");
 
     private void OnDisconnected(string cause)
     {
-        PrintModuleMessage("Disconnected.");
+        PrintFullyQualifiedModuleMessage("Disconnected.");
         Svc.Log.Warning($"Disconnected. Reason: {cause}");
     }
 
@@ -363,7 +363,7 @@ internal class FaloopToChat : Feature
     {
         if (string.IsNullOrWhiteSpace(MainConfig.FaloopUsername) || string.IsNullOrWhiteSpace(MainConfig.FaloopPassword))
         {
-            PrintModuleMessage("Login information invalid.");
+            PrintFullyQualifiedModuleMessage("Login information invalid.");
             return;
         }
 

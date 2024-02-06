@@ -71,9 +71,9 @@ public unsafe class ISLockAndMove : Feature
 
                 if (MJIManager.Instance()->CurrentMode == 1)
                 {
-                    TaskManager.Enqueue(() => { lockingOn = true; Chat.Instance.SendMessage("/lockon on"); });
+                    TaskManager.Enqueue(() => { lockingOn = true; ECommons.Automation.Chat.Instance.SendMessage("/lockon on"); });
                     TaskManager.DelayNext(new Random().Next(100, 250));
-                    TaskManager.Enqueue(() => { if (IsTargetLocked) { Chat.Instance.SendMessage("/automove on"); lockingOn = false; } });
+                    TaskManager.Enqueue(() => { if (IsTargetLocked) { ECommons.Automation.Chat.Instance.SendMessage("/automove on"); lockingOn = false; } });
                 }
             });
         }

@@ -32,7 +32,7 @@ public class GMAlert : Feature
             unsafe
             {
                 if (((Character*)player.Address)->CharacterData.OnlineStatus is <= 3 and > 0)
-                    PrintModuleMessage(player.Name);
+                    PrintFullyQualifiedModuleMessage(player.Name);
             }
     }
 }
