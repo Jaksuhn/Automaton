@@ -121,7 +121,6 @@ public class AutoLeve : Feature
         {
             if (ImGui.Begin("AutoLeve"))
             {
-                ImGui.Text("yippee");
                 using (ImRaii.Disabled(IsOnProcessing))
                 {
                     ImGui.Text($"SelectedLeve");

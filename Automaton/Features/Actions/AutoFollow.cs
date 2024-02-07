@@ -129,6 +129,7 @@ public unsafe class AutoFollow : Feature
 
         Svc.Framework.Update -= Follow;
         Svc.Chat.ChatMessage -= OnChatMessage;
+        movement.Dispose();
         base.Disable();
     }
 

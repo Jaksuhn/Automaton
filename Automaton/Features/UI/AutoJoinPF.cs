@@ -13,14 +13,11 @@ namespace Automaton.Features.UI;
 public unsafe class AutoJoinPF : Feature
 {
     public override string Name => "Auto-Join Party Finder Groups";
-
     public override string Description => "Whenever you click a Party Finder listing, this will bypass the description window and auto click the join button.";
-
     public override FeatureType FeatureType => FeatureType.UI;
+
     public override bool UseAutoConfig => true;
-
     public Configs Config { get; private set; }
-
     public class Configs : FeatureConfig
     {
         [FeatureConfigOption("None", "", 1)]

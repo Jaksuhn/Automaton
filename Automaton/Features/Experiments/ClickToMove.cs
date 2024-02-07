@@ -38,6 +38,7 @@ public unsafe class ClickToMove : Feature
         SaveConfig(Config);
 
         Svc.Framework.Update -= MoveTo;
+        movement.Dispose();
         base.Disable();
     }
 
