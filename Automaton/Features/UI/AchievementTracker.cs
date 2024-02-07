@@ -43,7 +43,6 @@ internal unsafe class AchievementTracker : Feature
     )]
     public Hook<ReceiveAchievementProgressDelegate> ReceiveAchievementProgressHook = null!;
 
-    public override bool UseAutoConfig => false;
     public Configs Config { get; private set; }
     public class Configs : FeatureConfig
     {
@@ -193,8 +192,9 @@ internal unsafe class AchievementTracker : Feature
 
         ImGuiEx.TextV($"Select Achievement");
         ImGui.SameLine(120f.Scale());
+
         ImGuiEx.SetNextItemFullWidth();
-        var combo = ImRaii.Combo("###AchievementSelect", preview);
+        using var combo = ImRaii.Combo("###AchievementSelect", preview);
         if (!combo) return;
         ImGui.Text("Search");
         ImGui.SameLine();
@@ -219,7 +219,6 @@ internal unsafe class AchievementTracker : Feature
 
             ImGui.PopID();
         }
-        combo?.Dispose();
     }
 
     private void DrawTracker()
@@ -254,7 +253,7 @@ internal unsafe class AchievementTracker : Feature
     // https://github.com/KazWolfe/CollectorsAnxiety/blob/bf48a4b0681e5f70fb67e3b1cb22b4565ecfcc02/CollectorsAnxiety/Util/ImGuiUtil.cs#L10
     private void DrawProgressBar(int progress, int total, int height = 25, bool parseColors = false)
     {
-        var group = ImRaii.Group();
+        using var group = ImRaii.Group();
         if (!group) return;
 
         var cursor = ImGui.GetCursorPos();
@@ -269,7 +268,5 @@ internal unsafe class AchievementTracker : Feature
 
         ImGui.SetCursorPos(new Vector2(cursor.X + sizeVec.X - labelSize.X - 4, cursor.Y));
         ImGuiEx.TextV(label);
-
-        group?.Dispose();
     }
 }

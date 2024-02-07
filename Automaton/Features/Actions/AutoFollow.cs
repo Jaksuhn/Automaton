@@ -77,22 +77,26 @@ public unsafe class AutoFollow : Feature
     private Dalamud.Game.ClientState.Objects.Types.GameObject? master;
     private uint? masterObjectID;
 
-    protected void OnCommand(List<string> args)
+    protected void OnCommand(string _, string args)
     {
         try
         {
+            if (!args.IsNullOrEmpty())
+            {
+                var obj = Svc.Objects.FirstOrDefault(o => o.Name.TextValue.ToLowerInvariant().Contains(args, StringComparison.InvariantCultureIgnoreCase));
+                if (obj != null)
+                {
+                    master = obj;
+                    masterObjectID = obj.ObjectId;
+                    return;
+                }
+            }
             if (Svc.Targets.Target != null)
                 SetMaster();
             else
                 ClearMaster();
         }
         catch (Exception e) { e.Log(); }
-    }
-
-    protected virtual void OnCommandInternal(string _, string args)
-    {
-        args = args.ToLower();
-        OnCommand(args.Split(' ').ToList());
     }
 
     public override void Enable()
@@ -104,7 +108,7 @@ public unsafe class AutoFollow : Feature
         }
         else
         {
-            Svc.Commands.AddHandler(Command, new CommandInfo(OnCommandInternal)
+            Svc.Commands.AddHandler(Command, new CommandInfo(OnCommand)
             {
                 HelpMessage = "",
                 ShowInHelp = false
