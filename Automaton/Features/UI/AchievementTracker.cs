@@ -77,6 +77,8 @@ internal unsafe class AchievementTracker : Feature
         public string Name;
         public uint CurrentProgress;
         public uint MaxProgress;
+        public string Description = string.Empty;
+        public byte Points = 0;
         public bool Completed => CurrentProgress != default && CurrentProgress >= MaxProgress;
     }
 
@@ -212,7 +214,7 @@ internal unsafe class AchievementTracker : Feature
 
             if (selected)
             {
-                Config.Achievements.Add(new Achv { ID = achv.RowId, Name = achv.Name });
+                Config.Achievements.Add(new Achv { ID = achv.RowId, Name = achv.Name, Description = achvSheet.GetRow(achv.RowId).Description.RawString, Points = achvSheet.GetRow(achv.RowId).Points });
                 RequestUpdate(achv.RowId);
                 SaveConfig(Config);
             }
