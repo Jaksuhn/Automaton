@@ -236,6 +236,7 @@ internal unsafe class AchievementTracker : Feature
                 }
                 ImGui.Columns(2);
                 ImGuiEx.TextV($"[{achv.ID}] {achv.Name}");
+                if (ImGui.IsItemHovered()) ImGui.SetTooltip($"[{achv.Points}pts] {achv.Description}");
 
                 ImGui.NextColumn();
                 DrawProgressBar((int)achv.CurrentProgress, (int)achv.MaxProgress);
