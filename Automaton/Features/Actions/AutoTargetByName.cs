@@ -39,7 +39,7 @@ internal class AutoTargetByName : Feature
     private void OnUpdate(IFramework framework)
     {
         if (Svc.ClientState.LocalPlayer == null || !Svc.ClientState.LocalPlayer.IsTargetable) return;
-        var t = Svc.Objects.First(o => o.IsTargetable && !Config.TargetName.IsNullOrEmpty() && o.Name.TextValue.Equals(Config.TargetName, System.StringComparison.InvariantCultureIgnoreCase));
+        var t = Svc.Objects.FirstOrDefault(o => o.IsTargetable && !Config.TargetName.IsNullOrEmpty() && o.Name.TextValue.Equals(Config.TargetName, System.StringComparison.InvariantCultureIgnoreCase));
         if (t != null)
             Svc.Targets.Target = t;
     }
