@@ -41,6 +41,8 @@ public unsafe class AutoFollow : Feature
 
         [FeatureConfigOption("Mount & Fly (Experimental)", "", 5)]
         public bool MountAndFly = true;
+
+        public string AutoAutoFollowByName = string.Empty;
     }
 
     protected override DrawConfigDelegate DrawConfigTree => (ref bool hasChanged) =>
@@ -54,6 +56,8 @@ public unsafe class AutoFollow : Feature
         if (ImGui.SliderInt("Distance to Keep (yalms)", ref Config.distanceToKeep, 0, 30)) hasChanged = true;
         ImGui.PushItemWidth(300);
         if (ImGui.SliderInt("Disable if Further Than (yalms)", ref Config.disableIfFurtherThan, 0, 300)) hasChanged = true;
+
+        ImGui.InputText("Auto Follow By Name", ref Config.AutoAutoFollowByName, 32);
 
         ImGui.Text($"Current Master: {(master != null ? master.Name : "null")}");
 
@@ -155,7 +159,7 @@ public unsafe class AutoFollow : Feature
 
     private void Follow(IFramework framework)
     {
-        master = Svc.Objects.FirstOrDefault(x => x.ObjectId == masterObjectID);
+        master = Svc.Objects.FirstOrDefault(x => x.ObjectId == masterObjectID || x.Name.TextValue.Equals(Config.AutoAutoFollowByName, StringComparison.InvariantCultureIgnoreCase));
 
         if (master == null) { movement.Enabled = false; return; }
         if (Config.disableIfFurtherThan > 0 && Vector3.Distance(Svc.ClientState.LocalPlayer.Position, master.Position) > Config.disableIfFurtherThan) { movement.Enabled = false; return; }
