@@ -27,7 +27,7 @@ internal class AutoQueue : Feature
     public class Configs : FeatureConfig
     {
         public List<string> peopleToCheckFor = [ ];
-        public bool leaveIfAllArentPreset;
+        public bool leaveIfAllArentPresent;
     }
 
     protected override DrawConfigDelegate DrawConfigTree => (ref bool hasChanged) =>
@@ -35,14 +35,14 @@ internal class AutoQueue : Feature
         try
         {
             var x = string.Empty;
-            if (ImGui.InputText("Target Name", ref x, 32, ImGuiInputTextFlags.EnterReturnsTrue))
+            if (ImGui.InputText("Player Names", ref x, 32, ImGuiInputTextFlags.EnterReturnsTrue))
             {
                 peoples.Add(x);
                 hasChanged = true;
             }
         }
         catch { }
-        if (ImGui.Checkbox("Leave if all members are not present", ref Config.leaveIfAllArentPreset)) hasChanged = true;
+        if (ImGui.Checkbox("Leave if all members are not present", ref Config.leaveIfAllArentPresent)) hasChanged = true;
         try
         {
             foreach (var person in peoples)
@@ -95,7 +95,7 @@ internal class AutoQueue : Feature
 
     private void OnDutyStart(object sender, ushort e)
     {
-        if (Config.leaveIfAllArentPreset && !new HashSet<string>(peoples).IsSubsetOf(Svc.Party.Select(p => p.Name.TextValue)))
+        if (Config.leaveIfAllArentPresent && peoples.Count > 0 && !new HashSet<string>(peoples).IsSubsetOf(Svc.Party.Select(p => p.Name.TextValue)))
             _abandonDuty(false);
     }
 }
