@@ -6,6 +6,7 @@ using ECommons.Automation;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
@@ -77,6 +78,7 @@ internal class AutoQueue : Feature
         Svc.ClientState.TerritoryChanged -= OnTerritoryChanged;
         Svc.DutyState.DutyStarted -= OnDutyStart;
         Common.OnAddonSetup -= AddonSetup;
+        _abandonDuty = null;
     }
 
     private unsafe void AddonSetup(SetupAddonArgs obj)
@@ -90,7 +92,7 @@ internal class AutoQueue : Feature
         if (GameMain.Instance()->CurrentContentFinderConditionId != 0) return;
         if (RouletteController.Instance()->GetPenaltyRemainingInMinutes(0) > 0) return;
         TaskManager.Enqueue(() => !GenericHelpers.IsOccupied());
-        TaskManager.Enqueue(() => ECommons.Automation.Chat.Instance.SendMessage("/maincommand Duty Finder"));
+        TaskManager.Enqueue(() => Framework.Instance()->GetUiModule()->ExecuteMainCommand(33));
     }
 
     private void OnDutyStart(object sender, ushort e)

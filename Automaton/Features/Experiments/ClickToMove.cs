@@ -2,6 +2,7 @@ using Automaton.FeaturesSetup;
 using Automaton.Helpers;
 using ECommons;
 using ECommons.DalamudServices;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
 using System.Numerics;
 using System.Windows.Forms;

@@ -33,11 +33,12 @@ internal class AutoLeaveOnDutyEnd : Feature
         base.Disable();
         SaveConfig(Config);
         Svc.DutyState.DutyCompleted -= OnDutyComplete;
+        _abandonDuty = null;
     }
 
     private void OnDutyComplete(object sender, ushort e)
     {
-        TaskManager.DelayNext(Config.timeToWait);
+        TaskManager.DelayNext(Config.timeToWait * 1000); // why is this off by so much?
         TaskManager.Enqueue(() => _abandonDuty(false));
     }
 }
