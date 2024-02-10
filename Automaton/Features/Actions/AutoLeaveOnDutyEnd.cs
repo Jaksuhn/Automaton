@@ -16,7 +16,7 @@ internal class AutoLeaveOnDutyEnd : Feature
     public Configs Config { get; private set; }
     public class Configs : FeatureConfig
     {
-        [FeatureConfigOption("Time to wait until leave (ms)")]
+        [FeatureConfigOption("Time to wait until leave (ms)", EditorSize = 300, IntMin = 0, IntMax = 600000)]
         public int timeToWait = 0;
     }
 
