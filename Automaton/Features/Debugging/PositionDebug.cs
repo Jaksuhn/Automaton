@@ -3,6 +3,7 @@ using Automaton.Helpers;
 using Dalamud;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
@@ -33,7 +34,6 @@ public unsafe class PositionDebug : DebugHelper
     {
         ImGui.Text($"{Name}");
         ImGui.Separator();
-
         if (Svc.ClientState.LocalPlayer != null)
         {
             var curPos = Svc.ClientState.LocalPlayer.Position;

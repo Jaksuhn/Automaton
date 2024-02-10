@@ -159,7 +159,7 @@ public unsafe class AutoFollow : Feature
 
     private void Follow(IFramework framework)
     {
-        master = Svc.Objects.FirstOrDefault(x => x.ObjectId == masterObjectID || x.Name.TextValue.Equals(Config.AutoAutoFollowByName, StringComparison.InvariantCultureIgnoreCase));
+        master = Svc.Objects.FirstOrDefault(x => x.ObjectId == masterObjectID || (!Config.AutoAutoFollowByName.IsNullOrEmpty() && x.Name.TextValue.Equals(Config.AutoAutoFollowByName, StringComparison.InvariantCultureIgnoreCase)));
 
         if (master == null) { movement.Enabled = false; return; }
         if (Config.disableIfFurtherThan > 0 && Vector3.Distance(Svc.ClientState.LocalPlayer.Position, master.Position) > Config.disableIfFurtherThan) { movement.Enabled = false; return; }

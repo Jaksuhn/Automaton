@@ -1,6 +1,11 @@
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
+using FFXIVClientStructs.FFXIV.Component.GUI;
+using ImGuiNET;
 using Lumina.Excel;
 using Lumina.Excel.GeneratedSheets;
 using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Automaton.Helpers;
 
@@ -21,4 +26,32 @@ public static class Misc
 
         throw new Exception("https://tenor.com/view/8032213");
     }
+
+    public static bool ApplicationIsActivated()
+    {
+        var activatedHandle = GetForegroundWindow();
+        if (activatedHandle == IntPtr.Zero)
+        {
+            return false;       // No window is currently activated
+        }
+
+        var procId = Process.GetCurrentProcess().Id;
+        int activeProcId;
+        GetWindowThreadProcessId(activatedHandle, out activeProcId);
+
+        return activeProcId == procId;
+    }
+
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+    private static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    private static extern int GetWindowThreadProcessId(IntPtr handle, out int processId);
+
+    public static unsafe bool IsClickingInGameWorld() =>
+        !ImGui.IsWindowHovered(ImGuiHoveredFlags.AnyWindow)
+        && !ImGui.GetIO().WantCaptureMouse
+        && AtkStage.GetSingleton()->RaptureAtkUnitManager->AtkUnitManager.FocusedUnitsList.Count == 0
+        && Framework.Instance()->Cursor->ActiveCursorType == 0;
 }
