@@ -45,14 +45,14 @@ public unsafe class Equip : CommandFeature
 
     private static void EquipItem(uint itemId)
     {
-        var pos = FindItemInInventory(itemId, [InventoryType.Inventory1, InventoryType.Inventory2, InventoryType.Inventory3, InventoryType.Inventory4, InventoryType.ArmoryMainHand, InventoryType.ArmoryHands]);
+        var pos = FindItemInInventory(itemId, [InventoryType.Inventory1, InventoryType.Inventory2, InventoryType.Inventory3, InventoryType.Inventory4, InventoryType.ArmoryMainHand, InventoryType.ArmoryOffHand, InventoryType.ArmoryHead, InventoryType.ArmoryBody, InventoryType.ArmoryHands, InventoryType.ArmoryLegs, InventoryType.ArmoryFeets, InventoryType.ArmoryEar, InventoryType.ArmoryNeck, InventoryType.ArmoryWrist, InventoryType.ArmoryRings, InventoryType.ArmorySoulCrystal]);
         if (pos == null)
         {
             DuoLog.Error($"Failed to find item {Svc.Data.GetExcelSheet<Item>().GetRow(itemId).Name} (ID: {itemId}) in inventory");
             return;
         }
 
-        var agentId = pos.Value.inv is InventoryType.ArmoryMainHand or InventoryType.ArmoryHands ? AgentId.ArmouryBoard : AgentId.Inventory;
+        var agentId = pos.Value.inv is InventoryType.ArmoryMainHand or InventoryType.ArmoryOffHand or InventoryType.ArmoryHead or InventoryType.ArmoryBody or InventoryType.ArmoryHands or InventoryType.ArmoryLegs or InventoryType.ArmoryFeets or InventoryType.ArmoryEar or InventoryType.ArmoryNeck or InventoryType.ArmoryWrist or InventoryType.ArmoryRings or InventoryType.ArmorySoulCrystal ? AgentId.ArmouryBoard : AgentId.Inventory;
         var addonId = AgentModule.Instance()->GetAgentByInternalId(agentId)->GetAddonID();
         var ctx = AgentInventoryContext.Instance();
         ctx->OpenForItemSlot(pos.Value.inv, pos.Value.slot, addonId);
