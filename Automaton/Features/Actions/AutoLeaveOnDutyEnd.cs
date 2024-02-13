@@ -38,6 +38,7 @@ internal class AutoLeaveOnDutyEnd : Feature
 
     private void OnDutyComplete(object sender, ushort e)
     {
+        if (Config.timeToWait == 0) { _abandonDuty(false); return; }
         TaskManager.DelayNext(Config.timeToWait * 1000); // why is this off by so much?
         TaskManager.Enqueue(() => _abandonDuty(false));
     }

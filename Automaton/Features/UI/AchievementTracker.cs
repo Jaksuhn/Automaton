@@ -256,20 +256,24 @@ internal unsafe class AchievementTracker : Feature
     // https://github.com/KazWolfe/CollectorsAnxiety/blob/bf48a4b0681e5f70fb67e3b1cb22b4565ecfcc02/CollectorsAnxiety/Util/ImGuiUtil.cs#L10
     private void DrawProgressBar(int progress, int total, int height = 25, bool parseColors = false)
     {
-        using var group = ImRaii.Group();
-        if (!group) return;
+        try
+        {
+            using var group = ImRaii.Group();
+            if (!group) return;
 
-        var cursor = ImGui.GetCursorPos();
-        var sizeVec = new Vector2(ImGui.GetContentRegionAvail().X - iconButtonSize.X - (ImGui.GetStyle().WindowPadding.X * 2), iconButtonSize.Y);
+            var cursor = ImGui.GetCursorPos();
+            var sizeVec = new Vector2(ImGui.GetContentRegionAvail().X - iconButtonSize.X - (ImGui.GetStyle().WindowPadding.X * 2), iconButtonSize.Y);
 
-        var percentage = progress / (float)total;
-        var label = string.Format("{0:P} Complete ({1} / {2})", percentage, progress, total);
-        var labelSize = ImGui.CalcTextSize(label);
+            var percentage = progress / (float)total;
+            var label = string.Format("{0:P} Complete ({1} / {2})", percentage, progress, total);
+            var labelSize = ImGui.CalcTextSize(label);
 
-        using var _ = ImRaii.PushColor(ImGuiCol.PlotHistogram, Config.BarColour);
-        ImGui.ProgressBar(percentage, sizeVec, "");
+            using var _ = ImRaii.PushColor(ImGuiCol.PlotHistogram, Config.BarColour);
+            ImGui.ProgressBar(percentage, sizeVec, "");
 
-        ImGui.SetCursorPos(new Vector2(cursor.X + sizeVec.X - labelSize.X - 4, cursor.Y));
-        ImGuiEx.TextV(label);
+            ImGui.SetCursorPos(new Vector2(cursor.X + sizeVec.X - labelSize.X - 4, cursor.Y));
+            ImGuiEx.TextV(label);
+        }
+        catch (Exception e) { e.Log(); }
     }
 }

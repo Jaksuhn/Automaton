@@ -17,7 +17,7 @@ namespace Automaton.Features.Actions;
 internal class AutoQueue : Feature
 {
     public override string Name => "Auto Queue";
-    public override string Description => "";
+    public override string Description => "Auto queue into a pre-checked duty with light auto leave functionality.";
     public override FeatureType FeatureType => FeatureType.Actions;
     public override bool isDebug => true;
 
@@ -29,6 +29,7 @@ internal class AutoQueue : Feature
     {
         public List<string> peopleToCheckFor = [ ];
         public bool leaveIfAllArentPresent;
+        public bool leaveIfNoneArePresent;
     }
 
     protected override DrawConfigDelegate DrawConfigTree => (ref bool hasChanged) =>
@@ -43,7 +44,16 @@ internal class AutoQueue : Feature
             }
         }
         catch { }
-        if (ImGui.Checkbox("Leave if all members are not present", ref Config.leaveIfAllArentPresent)) hasChanged = true;
+        if (ImGui.Checkbox("Leave if all members are not present", ref Config.leaveIfAllArentPresent))
+        {
+            Config.leaveIfNoneArePresent = false;
+            hasChanged = true;
+        }
+        if (ImGui.Checkbox("Leave if none of the members are present", ref Config.leaveIfNoneArePresent))
+        {
+            Config.leaveIfAllArentPresent = false;
+            hasChanged = true;
+        }
         try
         {
             foreach (var person in peoples)
