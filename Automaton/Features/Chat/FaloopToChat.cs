@@ -22,9 +22,7 @@ namespace Automaton.Features.Chat;
 internal class FaloopToChat : Feature
 {
     public override string Name => "Echo Faloop";
-
     public override string Description => "Prints out faloop marks in chat. Requires sign in.";
-
     public override FeatureType FeatureType => FeatureType.ChatFeature;
 
     public Configs MainConfig { get; private set; }
