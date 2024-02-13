@@ -27,7 +27,6 @@ public unsafe class ClickToMove : Feature
     {
         base.Disable();
         Svc.Framework.Update -= MoveTo;
-        movement.Dispose();
     }
 
     private bool isPressed = false;

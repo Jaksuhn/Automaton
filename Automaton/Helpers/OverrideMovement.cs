@@ -1,8 +1,6 @@
-using Dalamud.Hooking;
-using Dalamud.Utility.Signatures;
 using ECommons.DalamudServices;
+using ECommons.EzHookManager;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
-using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
@@ -20,22 +18,22 @@ public unsafe struct PlayerMoveControllerFlyInput
     [FieldOffset(0x15)] public byte HaveBackwardOrStrafe;
 }
 
-public unsafe class OverrideMovement : IDisposable
+public unsafe class OverrideMovement
 {
     public bool Enabled
     {
-        get => _rmiWalkHook.IsEnabled;
+        get => RMIWalkHook.IsEnabled;
         set
         {
             if (value)
             {
-                _rmiWalkHook.Enable();
-                _rmiFlyHook.Enable();
+                RMIWalkHook.Enable();
+                RMIFlyHook.Enable();
             }
             else
             {
-                _rmiWalkHook.Disable();
-                _rmiFlyHook.Disable();
+                RMIWalkHook.Disable();
+                RMIFlyHook.Disable();
             }
         }
     }
@@ -45,29 +43,23 @@ public unsafe class OverrideMovement : IDisposable
     public float Precision = 0.01f;
 
     private delegate void RMIWalkDelegate(void* self, float* sumLeft, float* sumForward, float* sumTurnLeft, byte* haveBackwardOrStrafe, byte* a6, byte bAdditiveUnk);
-    [Signature("E8 ?? ?? ?? ?? 80 7B 3E 00 48 8D 3D")]
-    private readonly Hook<RMIWalkDelegate> _rmiWalkHook = null!;
+    [EzHook("E8 ?? ?? ?? ?? 80 7B 3E 00 48 8D 3D", false)]
+    private readonly EzHook<RMIWalkDelegate> RMIWalkHook = null!;
 
     private delegate void RMIFlyDelegate(void* self, PlayerMoveControllerFlyInput* result);
-    [Signature("E8 ?? ?? ?? ?? 0F B6 0D ?? ?? ?? ?? B8")]
-    private readonly Hook<RMIFlyDelegate> _rmiFlyHook = null!;
+    [EzHook("E8 ?? ?? ?? ?? 0F B6 0D ?? ?? ?? ?? B8", false)]
+    private readonly EzHook<RMIFlyDelegate> RMIFlyHook = null!;
 
     public OverrideMovement()
     {
-        Svc.Hook.InitializeFromAttributes(this);
-        Svc.Log.Information($"RMIWalk address: 0x{_rmiWalkHook.Address:X}");
-        Svc.Log.Information($"RMIFly address: 0x{_rmiFlyHook.Address:X}");
-    }
-
-    public void Dispose()
-    {
-        _rmiWalkHook.Dispose();
-        _rmiFlyHook.Dispose();
+        EzSignatureHelper.Initialize(this);
+        Svc.Log.Information($"RMIWalk address: 0x{RMIWalkHook.Address:X}");
+        Svc.Log.Information($"RMIFly address: 0x{RMIFlyHook.Address:X}");
     }
 
     private void RMIWalkDetour(void* self, float* sumLeft, float* sumForward, float* sumTurnLeft, byte* haveBackwardOrStrafe, byte* a6, byte bAdditiveUnk)
     {
-        _rmiWalkHook.Original(self, sumLeft, sumForward, sumTurnLeft, haveBackwardOrStrafe, a6, bAdditiveUnk);
+        RMIWalkHook.Original(self, sumLeft, sumForward, sumTurnLeft, haveBackwardOrStrafe, a6, bAdditiveUnk);
         // TODO: we really need to introduce some extra checks that PlayerMoveController::readInput does - sometimes it skips reading input, and returning something non-zero breaks stuff...
         if (bAdditiveUnk == 0 && (IgnoreUserInput || (*sumLeft == 0 && *sumForward == 0)) && DirectionToDestination(false) is var relDir && relDir != null)
         {
@@ -79,7 +71,7 @@ public unsafe class OverrideMovement : IDisposable
 
     private void RMIFlyDetour(void* self, PlayerMoveControllerFlyInput* result)
     {
-        _rmiFlyHook.Original(self, result);
+        RMIFlyHook.Original(self, result);
         // TODO: we really need to introduce some extra checks that PlayerMoveController::readInput does - sometimes it skips reading input, and returning something non-zero breaks stuff...
         if ((IgnoreUserInput || (result->Forward == 0 && result->Left == 0 && result->Up == 0)) && DirectionToDestination(true) is var relDir && relDir != null)
         {
