@@ -7,7 +7,7 @@ using ImGuiNET;
 using System.Numerics;
 using System.Windows.Forms;
 
-namespace Automaton.Features.Experiments;
+namespace Automaton.Features.Other;
 
 public unsafe class ClickToMove : Feature
 {

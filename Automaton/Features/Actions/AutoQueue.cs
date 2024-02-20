@@ -19,7 +19,6 @@ internal class AutoQueue : Feature
     public override string Name => "Auto Queue";
     public override string Description => "Auto queue into a pre-checked duty with light auto leave functionality.";
     public override FeatureType FeatureType => FeatureType.Actions;
-    public override bool isDebug => true;
 
     private delegate void AbandonDuty(bool a1);
     private AbandonDuty _abandonDuty;

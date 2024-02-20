@@ -8,6 +8,7 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Utility.Signatures;
 using ECommons;
 using ECommons.DalamudServices;
+using ECommons.EzHookManager;
 using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
@@ -36,12 +37,8 @@ internal unsafe class AchievementTracker : Feature
     private DateTime lastCallTime;
 
     public delegate void ReceiveAchievementProgressDelegate(Achievement* achievement, uint id, uint current, uint max);
-    [Signature(
-        "C7 81 ?? ?? ?? ?? ?? ?? ?? ?? 89 91 ?? ?? ?? ?? 44 89 81",
-        UseFlags = SignatureUseFlags.Hook,
-        DetourName = nameof(ReceiveAchievementProgressDetour)
-    )]
-    public Hook<ReceiveAchievementProgressDelegate> ReceiveAchievementProgressHook = null!;
+    [EzHook("C7 81 ?? ?? ?? ?? ?? ?? ?? ?? 89 91 ?? ?? ?? ?? 44 89 81")]
+    public EzHook<ReceiveAchievementProgressDelegate> ReceiveAchievementProgressHook = null!;
 
     public Configs Config { get; private set; }
     public class Configs : FeatureConfig
@@ -87,12 +84,6 @@ internal unsafe class AchievementTracker : Feature
         base.Enable();
         Config = LoadConfig<Configs>() ?? new Configs();
         achvSheet = Svc.Data.GetExcelSheet<Lumina.Excel.GeneratedSheets.Achievement>();
-        overlay = new Overlays(this);
-        overlay.ShowCloseButton = true;
-        overlay.IsOpen = false;
-
-        Svc.Hook.InitializeFromAttributes(this);
-        ReceiveAchievementProgressHook.Enable();
 
         if (Svc.Commands.Commands.ContainsKey(Command))
         {
@@ -108,6 +99,13 @@ internal unsafe class AchievementTracker : Feature
 
             registeredCommands.Add(Command);
         }
+
+        EzSignatureHelper.Initialize(this);
+        ReceiveAchievementProgressHook.Enable();
+
+        overlay = new Overlays(this);
+        overlay.ShowCloseButton = true;
+        overlay.IsOpen = false;
     }
 
     public override void Disable()
@@ -115,7 +113,6 @@ internal unsafe class AchievementTracker : Feature
         base.Disable();
         SaveConfig(Config);
         P.Ws.RemoveWindow(overlay);
-        ReceiveAchievementProgressHook.Dispose();
 
         foreach (var c in registeredCommands)
         {
@@ -155,7 +152,7 @@ internal unsafe class AchievementTracker : Feature
     {
         try
         {
-            Svc.Log.Info($"received achievement {id} with progress {current} / {max}");
+            Svc.Log.Debug($"{nameof(ReceiveAchievementProgressDetour)}: [{id}] {current} / {max}");
             foreach (var achv in Config.Achievements)
             {
                 if (achv.ID == id)
@@ -227,7 +224,8 @@ internal unsafe class AchievementTracker : Feature
     {
         try
         {
-            foreach (var achv in Config.Achievements)
+            var copy = Config.Achievements;
+            foreach (var achv in copy)
             {
                 if (Config.AutoRemoveCompleted && achv.Completed)
                 {
@@ -250,11 +248,11 @@ internal unsafe class AchievementTracker : Feature
                 ImGui.Columns(1);
             }
         }
-        catch (InvalidOperationException) { }
+        catch (Exception e) { e.Log(); }
     }
 
     // https://github.com/KazWolfe/CollectorsAnxiety/blob/bf48a4b0681e5f70fb67e3b1cb22b4565ecfcc02/CollectorsAnxiety/Util/ImGuiUtil.cs#L10
-    private void DrawProgressBar(int progress, int total, int height = 25, bool parseColors = false)
+    private void DrawProgressBar(int progress, int total)
     {
         try
         {

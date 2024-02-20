@@ -87,6 +87,7 @@ internal class MainWindow : Window
                             foreach (var feature in P.Features)
                             {
                                 if (feature.FeatureType is FeatureType.Commands or FeatureType.Disabled) continue;
+                                if (feature.isDebug && !Config.showDebugFeatures) continue;
 
                                 if (feature.Description.Contains(searchString, StringComparison.CurrentCultureIgnoreCase) ||
                                     feature.Name.Contains(searchString, StringComparison.CurrentCultureIgnoreCase))
