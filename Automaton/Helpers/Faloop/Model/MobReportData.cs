@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -20,7 +20,7 @@ public class MobReportData
     public uint WorldId { get; set; }
 
     [JsonPropertyName("zoneInstance")]
-    public int? ZoneInstance { get; set; }
+    public int ZoneInstance { get; set; }
 
     public class Spawn
     {
