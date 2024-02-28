@@ -1,11 +1,9 @@
 using Automaton.FeaturesSetup;
 using Automaton.UI;
 using Dalamud.Game.Command;
-using Dalamud.Hooking;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Utility.Signatures;
 using ECommons;
 using ECommons.DalamudServices;
 using ECommons.EzHookManager;
@@ -28,7 +26,7 @@ internal unsafe class AchievementTracker : Feature
     public static string Command => "/atracker";
     private readonly List<string> registeredCommands = [];
 
-    private Overlays overlay;
+    private BasicWindow window;
 
     private ExcelSheet<Lumina.Excel.GeneratedSheets.Achievement> achvSheet;
     private Lumina.Excel.GeneratedSheets.Achievement selectedAchievement;
@@ -103,16 +101,14 @@ internal unsafe class AchievementTracker : Feature
         EzSignatureHelper.Initialize(this);
         ReceiveAchievementProgressHook.Enable();
 
-        overlay = new Overlays(this);
-        overlay.ShowCloseButton = true;
-        overlay.IsOpen = false;
+        window = new BasicWindow(this);
     }
 
     public override void Disable()
     {
         base.Disable();
         SaveConfig(Config);
-        P.Ws.RemoveWindow(overlay);
+        P.Ws.RemoveWindow(window);
 
         foreach (var c in registeredCommands)
         {
@@ -121,14 +117,11 @@ internal unsafe class AchievementTracker : Feature
         registeredCommands.Clear();
     }
 
-    protected virtual void OnCommand(string _, string args) => overlay.IsOpen = !overlay.IsOpen;
+    protected virtual void OnCommand(string _, string args) => window.IsOpen = !window.IsOpen;
 
-    public override bool DrawCondition => Player.Available;
-
-    public override void Draw()
+    public override void DrawBasic()
     {
         if (!Player.Available) return;
-        overlay.ShowCloseButton = true;
 
         try
         {

@@ -60,8 +60,7 @@ public abstract class BaseFeature
 
     public static readonly SeString PandoraPayload = new SeString(new UIForegroundPayload(32)).Append($"{SeIconChar.BoxedLetterP.ToIconString()}{SeIconChar.BoxedLetterA.ToIconString()}{SeIconChar.BoxedLetterN.ToIconString()}{SeIconChar.BoxedLetterD.ToIconString()}{SeIconChar.BoxedLetterO.ToIconString()}{SeIconChar.BoxedLetterR.ToIconString()}{SeIconChar.BoxedLetterA.ToIconString()} ").Append(new UIForegroundPayload(0));
     public virtual void Draw() { }
-
-    public virtual bool DrawCondition { get; protected set; } = true;
+    public virtual void DrawBasic() { }
 
     public virtual bool Ready { get; protected set; }
 
