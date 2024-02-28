@@ -119,23 +119,19 @@ internal unsafe class AchievementTracker : Feature
 
     protected virtual void OnCommand(string _, string args) => window.IsOpen = !window.IsOpen;
 
-    public override void DrawBasic()
+    public override void Draw()
     {
         if (!Player.Available) return;
 
         try
         {
-            if (ImGui.Begin($"{nameof(AchievementTracker)}"))
-            {
-                DrawAchievementSearch();
+            DrawAchievementSearch();
 
-                ImGui.Spacing();
-                ImGui.Separator();
-                ImGui.Spacing();
+            ImGui.Spacing();
+            ImGui.Separator();
+            ImGui.Spacing();
 
-                DrawTracker();
-            }
-            ImGui.End();
+            DrawTracker();
         }
         catch (Exception e)
         {

@@ -1,5 +1,6 @@
 using Automaton.FeaturesSetup;
 using Dalamud.Interface.Windowing;
+using ECommons.DalamudServices;
 using System.Numerics;
 
 namespace Automaton.UI;
@@ -11,7 +12,6 @@ internal class BasicWindow : Window
         Feature = t;
         SizeConstraints = new WindowSizeConstraints
         {
-            MinimumSize = new Vector2(375, 330),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
         P.Ws.AddWindow(this);
@@ -21,5 +21,7 @@ internal class BasicWindow : Window
     {
 
     }
-    public override void Draw() => Feature.DrawBasic();
+    public override void Draw() => Feature.Draw();
+
+    public override bool DrawConditions() => Svc.ClientState.IsLoggedIn;
 }
