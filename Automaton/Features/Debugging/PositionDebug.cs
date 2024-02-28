@@ -58,6 +58,8 @@ public unsafe class PositionDebug : DebugHelper
             ImGui.SameLine();
             DrawPositionModButtons("z");
 
+            ImGui.Text($"Rotation: {Svc.ClientState.LocalPlayer.Rotation * (180 / Math.PI)}");
+
             if (ImGui.Checkbox("No Clip Mode", ref noclip))
             {
                 if (noclip)

@@ -23,5 +23,5 @@ internal class Overlays : Window
 
     public override void Draw() => Feature.Draw();
 
-    public override bool DrawConditions() => Feature.Enabled;
+    public override bool DrawConditions() => Feature.Enabled && Feature.DrawCondition;
 }

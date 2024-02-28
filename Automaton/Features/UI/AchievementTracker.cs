@@ -123,6 +123,8 @@ internal unsafe class AchievementTracker : Feature
 
     protected virtual void OnCommand(string _, string args) => overlay.IsOpen = !overlay.IsOpen;
 
+    public override bool DrawCondition => Player.Available;
+
     public override void Draw()
     {
         if (!Player.Available) return;
@@ -256,8 +258,7 @@ internal unsafe class AchievementTracker : Feature
     {
         try
         {
-            using var group = ImRaii.Group();
-            if (!group) return;
+            ImGui.BeginGroup();
 
             var cursor = ImGui.GetCursorPos();
             var sizeVec = new Vector2(ImGui.GetContentRegionAvail().X - iconButtonSize.X - (ImGui.GetStyle().WindowPadding.X * 2), iconButtonSize.Y);
@@ -271,6 +272,8 @@ internal unsafe class AchievementTracker : Feature
 
             ImGui.SetCursorPos(new Vector2(cursor.X + sizeVec.X - labelSize.X - 4, cursor.Y));
             ImGuiEx.TextV(label);
+
+            ImGui.EndGroup();
         }
         catch (Exception e) { e.Log(); }
     }
