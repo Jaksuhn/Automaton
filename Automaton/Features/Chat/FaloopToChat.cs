@@ -335,7 +335,7 @@ internal class FaloopToChat : Feature
             {
                 new TextPayload($"{SeIconChar.Cross.ToIconString()}"),
                 GetRankIcon(rank),
-                new TextPayload($" {mob.Singular.RawString}"),
+                new TextPayload($" {mob.Singular.RawString} "),
                 new IconPayload(BitmapFontIcon.CrossWorld),
                 new TextPayload($"{(GetRankConfig(rank).EnableDeathTimestamp ? $"{world.Name} {NumberHelper.FormatTimeSpan(death.StartedAt)}": world.Name)}"),
             }),
