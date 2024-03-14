@@ -1,7 +1,7 @@
 using Automaton.FeaturesSetup;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons.DalamudServices;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using ECommons.GameFunctions;
 using ImGuiNET;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,8 +50,17 @@ public class GMAlert : Feature
     {
         if (Svc.ClientState.LocalPlayer == null) return;
 
-        foreach (var player in Svc.Objects.OfType<PlayerCharacter>().Where(pc => pc.ObjectId != 0xE000000))
-            if (((Character*)player.Address)->CharacterData.OnlineStatus is <= 3 and > 0 && !sent)
+        var gms = Svc.Objects.OfType<PlayerCharacter>().Where(pc => pc.ObjectId != 0xE000000 && pc.Character()->CharacterData.OnlineStatus is <= 3 and > 0);
+
+        if (!gms.Any())
+        {
+            sent = false;
+            return;
+        }
+
+        foreach (var player in gms)
+        {
+            if (!sent)
             {
                 if (!Config.History.TryGetValue(player.Name.TextValue, out var value))
                     Config.History.Add(player.Name.TextValue, 1);
@@ -66,9 +75,7 @@ public class GMAlert : Feature
                 ECommons.Automation.Chat.Instance.SendMessage("/visland stop");
                 if (Config.KillGameIfFound)
                     ECommons.Automation.Chat.Instance.SendMessage("/xlkill");
-                return;
             }
-
-        sent = false;
+        }
     }
 }
