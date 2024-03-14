@@ -1,8 +1,13 @@
 using Automaton.FeaturesSetup;
 using Automaton.IPC;
+using Dalamud.Interface.Components;
+using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
+using ECommons;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
+using ECommons.DalamudServices;
 
 namespace Automaton.Features.Experiments;
 
@@ -13,48 +18,97 @@ internal class CommandOnCondition : Feature
     public override FeatureType FeatureType => FeatureType.Disabled;
 
     public Configs Config { get; private set; }
-    public override bool UseAutoConfig => false;
     public class Configs : FeatureConfig
     {
-        [FeatureConfigOption("Sets")]
-        public List<CommandCondition> CommandConditions { get; set; } = [];
+        public List<CommandCondition> CommandConditions = [];
+    }
+
+    protected override DrawConfigDelegate DrawConfigTree => (ref bool hasChanged) =>
+    {
+        try
+        {
+            if (ImGui.Button("Add Set"))
+            {
+                Config.CommandConditions.Add(new CommandCondition());
+                hasChanged = true;
+            }
+            var copy = Config.CommandConditions;
+            foreach (var preset in copy)
+            {
+                ImGui.PushID(preset.Guid);
+
+                DrawPreset(preset);
+                ImGui.SameLine();
+                if (ImGuiComponents.IconButton($"###{preset.Guid}", FontAwesomeIcon.Trash))
+                {
+                    Config.CommandConditions.Remove(preset);
+                    hasChanged = true;
+                }
+                var cmd = string.Empty;
+                if (ImGui.InputTextWithHint($"###{preset.Guid}", "Command", ref cmd, 100))
+                {
+                    preset.Command = !cmd.StartsWith("/") ? $"/{cmd}" : cmd;
+                    hasChanged = true;
+                }
+
+                ImGui.PopID();
+            }
+        }
+        catch (Exception e) { e.Log(); }
+    };
+
+    public class CommandCondition()
+    {
+        public string Guid { get; } = System.Guid.NewGuid().ToString();
+        public string Command { get; set; }
+        public int ConditionSet = -1;
+        public bool HasRun;
+        public bool CheckConditionSet() => QoLBarIPC.QoLBarEnabled && QoLBarIPC.CheckConditionSet(ConditionSet);
     }
 
     public override void Enable()
     {
         Config = LoadConfig<Configs>() ?? new Configs();
+        Svc.Framework.Update += CheckSets;
         base.Enable();
     }
 
     public override void Disable()
     {
         SaveConfig(Config);
+        Svc.Framework.Update -= CheckSets;
         base.Disable();
     }
 
-    [Serializable]
-    public class CommandCondition(string name = "Unnamed Set")
+    private void CheckSets(IFramework framework)
     {
-        public string Name { get; set; } = name;
-        public string Command { get; set; }
-        public int ConditionSet = -1;
-
-        public bool CheckConditionSet() => ConditionSet < 0 || (QoLBarIPC.QoLBarEnabled && QoLBarIPC.CheckConditionSet(ConditionSet));
+        //foreach (var preset in Config.CommandConditions)
+        //{
+        //    if (preset.CheckConditionSet())
+        //    {
+        //        preset.HasRun = true;
+        //        ECommons.Automation.Chat.Instance.ExecuteCommand(preset.Command);
+        //    }
+        //    else
+        //        preset.HasRun = false;
+        //}
     }
 
     public void DrawPreset(CommandCondition preset)
     {
-        var qolBarEnabled = QoLBarIPC.QoLBarEnabled;
-        var conditionSets = qolBarEnabled ? QoLBarIPC.QoLBarConditionSets : [];
-        var display = preset.ConditionSet >= 0
-            ? preset.ConditionSet < conditionSets.Length
-            ? $"[{preset.ConditionSet + 1}] {conditionSets[preset.ConditionSet]}"
-            : (preset.ConditionSet + 1).ToString()
-            : "None";
-
-        if (ImGui.BeginCombo("Condition Set", display))
+        try
         {
-            if (ImGui.Selectable("None##ConditionSet", preset.ConditionSet < 0))
+            var qolBarEnabled = QoLBarIPC.QoLBarEnabled;
+            var conditionSets = qolBarEnabled ? QoLBarIPC.QoLBarConditionSets : [];
+            var display = preset.ConditionSet >= 0
+                ? preset.ConditionSet < conditionSets.Length
+                ? $"[{preset.ConditionSet + 1}] {conditionSets[preset.ConditionSet]}"
+                : (preset.ConditionSet + 1).ToString()
+                : "None";
+
+            using var combo = ImRaii.Combo($"Conditon Set###{preset.Guid}", display);
+            if (!combo) return;
+            if (ImGui.Selectable($"None##ConditionSet{preset.Guid}", preset.ConditionSet < 0))
             {
                 preset.ConditionSet = -1;
                 SaveConfig(Config);
@@ -68,14 +122,7 @@ internal class CommandOnCondition : Feature
                     preset.ConditionSet = i;
                     SaveConfig(Config);
                 }
-
-            ImGui.EndCombo();
         }
+        catch (Exception e) { e.Log(); }
     }
-
-    protected override DrawConfigDelegate DrawConfigTree => (ref bool hasChanged) =>
-    {
-        foreach (var preset in Config.CommandConditions)
-            DrawPreset(preset);
-    };
 }

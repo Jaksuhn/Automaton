@@ -123,7 +123,7 @@ public static class CoordinatesHelper
         }
 
         var n = 41 / (map.SizeFactor / 100.0);
-        var loc = location.Location.Split(new[] { ',' }, 2)
+        var loc = location.Location.Split([','], 2)
             .Select(int.Parse)
             .Select(x => (x / 2048.0 * n) + 1)
             .Select(x => Math.Round(x, 1))
@@ -134,6 +134,19 @@ public static class CoordinatesHelper
 
         var instanceIcon = GetInstanceIcon(instance);
         return instanceIcon != default ? mapLink.Append(instanceIcon) : mapLink;
+    }
+
+    public static (int, int) GetCoordinatesFromPoiID(int zonePoiId, FaloopSession session)
+    {
+        var location = session.EmbedData.ZoneLocations.FirstOrDefault(x => x.Id == zonePoiId);
+        if (location == default)
+        {
+            Svc.Log.Debug("CreateMapLink: location == null");
+            return default;
+        }
+
+        var loc = location.Location.Split([','], 2).Select(int.Parse).ToList();
+        return (loc[0], loc[1]);
     }
 
     private static TextPayload? GetInstanceIcon(int? instance)

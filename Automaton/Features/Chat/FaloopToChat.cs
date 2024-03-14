@@ -6,15 +6,18 @@ using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using ECommons;
 using ECommons.DalamudServices;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using SocketIOClient;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Automaton.Features.Chat;
@@ -288,6 +291,9 @@ internal class FaloopToChat : Feature
             At = spawn.Timestamp,
         });
 
+        //var loc = CoordinatesHelper.GetCoordinatesFromPoiID(spawn.ZonePoiIds.First(), session);
+        //var linkPayload = Svc.PluginInterface.AddChatLinkHandler(0, TaskTeleport(world.Name, spawn.ZoneId, loc));
+
         var payloads = new List<Payload>
         {
             new TextPayload($"{SeIconChar.BoxedPlus.ToIconString()}"),
@@ -305,12 +311,16 @@ internal class FaloopToChat : Feature
             new TextPayload($"{(GetRankConfig(rank).EnableSpawnTimestamp ? $"{world.Name} {NumberHelper.FormatTimeSpan(spawn.Timestamp)}": world.Name)}"),
         });
 
-        Svc.Chat.Print(new XivChatEntry
+        try
         {
-            Name = spawn.Reporters?.FirstOrDefault()?.Name ?? "Faloop",
-            Message = new SeString(payloads),
-            Type = Enum.GetValues<XivChatType>()[channel],
-        });
+            Svc.Chat.Print(new XivChatEntry
+            {
+                Name = spawn.Reporters?.FirstOrDefault()?.Name ?? "Faloop",
+                Message = new SeString(payloads),
+                Type = Enum.GetValues<XivChatType>()[channel],
+            });
+        }
+        catch (EndOfStreamException ex) { ex.Log($"shit's fucked in {nameof(OnSpawnMobReport)}"); }
     }
 
     private void OnDeathMobReport(MobReportData data, BNpcName mob, World world, int channel, string rank, bool skipOrphanReport)
@@ -328,20 +338,165 @@ internal class FaloopToChat : Feature
             return;
         }
 
-        Svc.Chat.Print(new XivChatEntry
+        try
         {
-            Name = "Faloop",
-            Message = new SeString(new List<Payload>
+            Svc.Chat.Print(new XivChatEntry
             {
-                new TextPayload($"{SeIconChar.Cross.ToIconString()}"),
-                GetRankIcon(rank),
-                new TextPayload($" {mob.Singular.RawString} "),
-                new IconPayload(BitmapFontIcon.CrossWorld),
-                new TextPayload($"{(GetRankConfig(rank).EnableDeathTimestamp ? $"{world.Name} {NumberHelper.FormatTimeSpan(death.StartedAt)}": world.Name)}"),
-            }),
-            Type = Enum.GetValues<XivChatType>()[channel],
-        });
+                Name = "Faloop",
+                Message = new SeString(new List<Payload>
+                {
+                    new TextPayload($"{SeIconChar.Cross.ToIconString()}"),
+                    GetRankIcon(rank),
+                    new DalamudLinkPayload(),
+                    new TextPayload($" {mob.Singular.RawString} "),
+                    new IconPayload(BitmapFontIcon.CrossWorld),
+                    new TextPayload($"{(GetRankConfig(rank).EnableDeathTimestamp ? $"{world.Name} {NumberHelper.FormatTimeSpan(death.StartedAt)}": world.Name)}"),
+                }),
+                Type = Enum.GetValues<XivChatType>()[channel],
+            });
+        }
+        catch (EndOfStreamException ex) { ex.Log($"shit's fucked in {nameof(OnDeathMobReport)}"); }
     }
+
+    // https://github.com/huntsffxiv/huntalerts/blob/main/HuntAlerts/Helpers/Utilities.cs
+    //private static CancellationTokenSource CancellationTokenSource;
+    //private static bool IsTaskRunning = false;
+    //private static async void TaskTeleport(Lumina.Text.SeString world, uint startLocation, (int, int) zone)
+    //{
+    //    if (IsTaskRunning)
+    //    {
+    //        CancellationTokenSource.Cancel(); // Cancel the current task if running
+    //        IsTaskRunning = false;
+    //        return;
+    //    }
+
+    //    CancellationTokenSource = new CancellationTokenSource();
+    //    var token = CancellationTokenSource.Token;
+    //    IsTaskRunning = true;
+
+    //    try
+    //    {
+    //        var hastoserverTransfer = false;
+    //        var currentworldName = "";
+    //        currentworldName = Svc.ClientState.LocalPlayer.CurrentWorld.GameData.Name;
+
+    //        if (lifestreamEnabled && currentworldName != world)
+    //        {
+    //            if (currentworldName != world)
+    //            {
+    //                hastoserverTransfer = true;
+    //                // Execute initial command
+    //                Svc.Commands.ProcessCommand($"/li {world}");
+    //            }
+    //        }
+    //        else
+    //        {
+    //            if (currentworldName != world)
+    //            {
+    //                Svc.Chat.Print("Can't teleport to hunt world without the Lifestream plugin being enabled as you are off world.");
+    //                return;
+    //            }
+    //        }
+
+    //        if (teleporterEnabled)
+    //        {
+    //            // Start loop
+    //            var startTime = DateTime.Now;
+    //            while (!token.IsCancellationRequested && (DateTime.Now - startTime).TotalSeconds <= 720)
+    //            {
+
+    //                // Check character's current world and logged in status here
+    //                // if condition met, break loop and run another command
+    //                if (Svc.ClientState.IsLoggedIn && Svc.ClientState.LocalPlayer != null)
+    //                {
+    //                    currentworldName = Svc.ClientState.LocalPlayer.CurrentWorld.GameData.Name;
+    //                    Svc.Log.Verbose($"Player is logged in. Currentworld: " + currentworldName);
+
+    //                    if (currentworldName == world)
+    //                    {
+    //                        var targetableStartTime = DateTime.Now;
+
+    //                        // Loop until the player is targetable or until canceled
+    //                        while (!token.IsCancellationRequested && (DateTime.Now - targetableStartTime).TotalSeconds <= 60) // Inner loop timeout (e.g., 60 seconds)
+    //                        {
+    //                            if (Svc.ClientState.LocalPlayer?.IsTargetable == true)
+    //                            {
+    //                                // Player is targetable, execute the command
+    //                                // Code to execute when the button is pressed
+    //                                if (startLocation is not "invalid" and not "")
+    //                                {
+    //                                    Svc.Log.Verbose($"Player is on hunt world, starting teleport to hunt location. Currentworld: " + currentworldName + "StartLocation: " + startLocation);
+    //                                    if (hastoserverTransfer == true)
+    //                                    {
+    //                                        await Task.Delay(2000, token); // wait 2 seconds to start teleport
+    //                                    }
+
+    //                                    // Check and replace start location if a city is passed in
+    //                                    if (startLocation.ToLower().Contains("limsa")) { startLocation = "Limsa"; }
+    //                                    if (startLocation.ToLower().Contains("gridania")) { startLocation = "gridania"; }
+    //                                    if (startLocation.ToLower().Contains("ul'dah") || startLocation.ToLower().Contains("uldah")) { startLocation = "ul'dah"; }
+
+    //                                    Svc.Commands.ProcessCommand($"/tp {startLocation}");
+
+    //                                    if (openmaponArrival == true && locationCoords != "")
+    //                                    {
+    //                                        Svc.Log.Verbose("Open map on arrival is enabled and coords exist");
+    //                                        var flagtargetableStartTime = DateTime.Now;
+    //                                        while (!token.IsCancellationRequested && (DateTime.Now - flagtargetableStartTime).TotalSeconds <= 60) // Inner loop timeout (e.g., 60 seconds)
+    //                                        {
+
+    //                                            var territoryType = Svc.ClientState.TerritoryType;
+    //                                            var territoryName = Svc.Data.GetExcelSheet<TerritoryType>()
+    //                                                                 .GetRow(territoryType)?.PlaceName.Value?.Name.ToString();
+
+    //                                            Svc.Log.Verbose($"In Loop waiting on targetable and location match. Current Zone: {territoryName} | Destination Zone: {zone}");
+
+    //                                            if ((Svc.ClientState.LocalPlayer?.IsTargetable == true) && (territoryName == zone))
+    //                                            {
+    //                                                await Task.Delay(500, token);
+    //                                                Svc.Log.Verbose($"Opening map and flagging coordinates");
+    //                                                FlagOnMap(locationCoords, zone);
+    //                                                return;
+    //                                            }
+    //                                            await Task.Delay(1000, token); // wait 2 seconds to start teleport
+    //                                        }
+    //                                    }
+    //                                    else
+    //                                    {
+    //                                        return;
+    //                                    }
+    //                                }
+    //                                else if (zone != "invalid")
+    //                                {
+    //                                    Svc.Log.Verbose($"Player is on hunt world, starting teleport to hunt location. Currentworld: " + currentworldName + "StartZone: " + zone);
+    //                                    Svc.Commands.ProcessCommand($"/tpm {zone}");
+    //                                    return;
+    //                                }
+    //                            }
+
+    //                            // Wait a bit before checking again
+    //                            await Task.Delay(1000, token); // Check every second, for example
+    //                        }
+    //                    }
+    //                }
+    //                else
+    //                {
+    //                    Svc.Log.Verbose($"Player is still transfering");
+    //                }
+
+    //                await Task.Delay(5000, token); // Wait for 5 seconds
+    //            }
+    //        }
+    //    }
+    //    catch (TaskCanceledException)
+    //    {
+    //        // Handle cancellation
+    //    }
+    //    finally
+    //    {
+    //        IsTaskRunning = false;
+    //    }
+    //}
 
     private static void OnAny(string name, SocketIOResponse response) => Svc.Log.Debug($"{nameof(OnAny)} Event {name} = {response}");
 
