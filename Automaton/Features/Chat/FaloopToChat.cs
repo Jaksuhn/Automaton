@@ -265,97 +265,71 @@ internal class FaloopToChat : Feature
         switch (data.Action)
         {
             case "spawn" when config.EnableSpawnReport:
-                OnSpawnMobReport(data, mob, world, config.Channel, mobData.Rank);
+                OnSpawnMobReport(new MobSpawnEvent(data, mob, world, mobData.Rank), config.Channel);
                 Svc.Log.Verbose($"{nameof(OnMobReport)}: {OnSpawnMobReport}");
                 break;
             case "death" when config.EnableDeathReport:
-                OnDeathMobReport(data, mob, world, config.Channel, mobData.Rank, config.SkipOrphanReport);
+                OnDeathMobReport(new MobDeathEvent(data, mob, world, mobData.Rank), config.Channel, config.SkipOrphanReport);
                 Svc.Log.Verbose($"{nameof(OnMobReport)}: {OnDeathMobReport}");
                 break;
         }
     }
 
-    private void OnSpawnMobReport(MobReportData data, BNpcName mob, World world, int channel, string rank)
+    private void OnSpawnMobReport(MobSpawnEvent ev, int channel)
     {
-        var spawn = data.Data.Deserialize<MobReportData.Spawn>();
-        if (spawn == default)
-        {
-            Svc.Log.Debug($"{nameof(OnSpawnMobReport)}: {nameof(spawn)} == null");
-            return;
-        }
-
         SpawnHistories.Add(new SpawnHistory
         {
-            MobId = data.MobId,
-            WorldId = data.WorldId,
-            At = spawn.Timestamp,
+            MobId = ev.Data.MobId,
+            WorldId = ev.Data.WorldId,
+            At = ev.Spawn.Timestamp,
         });
-
-        //var loc = CoordinatesHelper.GetCoordinatesFromPoiID(spawn.ZonePoiIds.First(), session);
-        //var linkPayload = Svc.PluginInterface.AddChatLinkHandler(0, TaskTeleport(world.Name, spawn.ZoneId, loc));
 
         var payloads = new List<Payload>
         {
             new TextPayload($"{SeIconChar.BoxedPlus.ToIconString()}"),
-            GetRankIcon(rank),
-            new TextPayload($" {mob.Singular.RawString} "),
+            GetRankIcon(ev.Rank),
+            new TextPayload($" {ev.Mob.Singular.RawString} "),
         };
 
-        var mapLink = CoordinatesHelper.CreateMapLink(spawn.ZoneId, spawn.ZonePoiIds.First(), data.ZoneInstance, session);
+        var mapLink = CoordinatesHelper.CreateMapLink(ev.Spawn.ZoneId, ev.Spawn.ZonePoiIds.First(), ev.Data.ZoneInstance, session);
         if (mapLink != default)
             payloads.AddRange(mapLink.Payloads);
 
         payloads.AddRange(new Payload[]
         {
             new IconPayload(BitmapFontIcon.CrossWorld),
-            new TextPayload($"{(GetRankConfig(rank).EnableSpawnTimestamp ? $"{world.Name} {NumberHelper.FormatTimeSpan(spawn.Timestamp)}": world.Name)}"),
+            new TextPayload($"{(GetRankConfig(ev.Rank).EnableSpawnTimestamp ? $"{ev.World.Name} {NumberHelper.FormatTimeSpan(ev.Spawn.Timestamp)}": ev.World.Name)}"),
         });
 
-        try
+        Svc.Chat.Print(new XivChatEntry
         {
-            Svc.Chat.Print(new XivChatEntry
-            {
-                Name = spawn.Reporters?.FirstOrDefault()?.Name ?? "Faloop",
-                Message = new SeString(payloads),
-                Type = Enum.GetValues<XivChatType>()[channel],
-            });
-        }
-        catch (EndOfStreamException ex) { ex.Log($"shit's fucked in {nameof(OnSpawnMobReport)}"); }
+            Name = ev.Spawn.Reporters?.FirstOrDefault()?.Name ?? "Faloop",
+            Message = new SeString(payloads),
+            Type = Enum.GetValues<XivChatType>()[channel],
+        });
     }
 
-    private void OnDeathMobReport(MobReportData data, BNpcName mob, World world, int channel, string rank, bool skipOrphanReport)
+    private void OnDeathMobReport(MobDeathEvent ev, int channel, bool skipOrphanReport)
     {
-        var death = data.Data.Deserialize<MobReportData.Death>();
-        if (death == default)
-        {
-            Svc.Log.Debug($"{nameof(OnDeathMobReport)}: {nameof(death)} == null");
-            return;
-        }
-
-        if (skipOrphanReport && SpawnHistories.RemoveAll(x => x.MobId == data.MobId && x.WorldId == data.WorldId) == 0)
+        if (skipOrphanReport && SpawnHistories.RemoveAll(x => x.MobId == ev.Data.MobId && x.WorldId == ev.Data.WorldId) == 0)
         {
             Svc.Log.Debug($"{nameof(OnDeathMobReport)}: {nameof(skipOrphanReport)}");
             return;
         }
 
-        try
+        Svc.Chat.Print(new XivChatEntry
         {
-            Svc.Chat.Print(new XivChatEntry
-            {
-                Name = "Faloop",
-                Message = new SeString(new List<Payload>
+            Name = "Faloop",
+            Message = new SeString(new List<Payload>
                 {
                     new TextPayload($"{SeIconChar.Cross.ToIconString()}"),
-                    GetRankIcon(rank),
-                    new DalamudLinkPayload(),
-                    new TextPayload($" {mob.Singular.RawString} "),
+                    GetRankIcon(ev.Rank),
+                    new TextPayload($" {ev.Mob.Singular.RawString} "),
                     new IconPayload(BitmapFontIcon.CrossWorld),
-                    new TextPayload($"{(GetRankConfig(rank).EnableDeathTimestamp ? $"{world.Name} {NumberHelper.FormatTimeSpan(death.StartedAt)}": world.Name)}"),
+                    new TextPayload($"{(GetRankConfig(ev.Rank).EnableDeathTimestamp ? $"{ev.World.Name} {NumberHelper.FormatTimeSpan(ev.Death.StartedAt)}": ev.World.Name)}"),
                 }),
-                Type = Enum.GetValues<XivChatType>()[channel],
-            });
-        }
-        catch (EndOfStreamException ex) { ex.Log($"shit's fucked in {nameof(OnDeathMobReport)}"); }
+            Type = Enum.GetValues<XivChatType>()[channel],
+        });
     }
 
     // https://github.com/huntsffxiv/huntalerts/blob/main/HuntAlerts/Helpers/Utilities.cs
