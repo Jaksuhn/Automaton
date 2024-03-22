@@ -1,4 +1,5 @@
 using Automaton.FeaturesSetup;
+using Automaton.Helpers;
 using Automaton.UI;
 using Dalamud.Game.Command;
 using Dalamud.Interface;
@@ -31,7 +32,6 @@ internal unsafe class AchievementTracker : Feature
     private ExcelSheet<Lumina.Excel.GeneratedSheets.Achievement> achvSheet;
     private Lumina.Excel.GeneratedSheets.Achievement selectedAchievement;
     internal static string Search = string.Empty;
-    private Vector2 iconButtonSize = ImGuiHelpers.GetButtonSize(FontAwesomeIcon.Trash.ToIconString());
     private DateTime lastCallTime;
 
     public delegate void ReceiveAchievementProgressDelegate(Achievement* achievement, uint id, uint current, uint max);
@@ -230,7 +230,7 @@ internal unsafe class AchievementTracker : Feature
                 ImGui.NextColumn();
                 DrawProgressBar((int)achv.CurrentProgress, (int)achv.MaxProgress);
                 ImGui.SameLine();
-                ImGui.SetCursorPosX(ImGui.GetContentRegionMax().X - iconButtonSize.X - ImGui.GetStyle().WindowPadding.X);
+                ImGui.SetCursorPosX(ImGui.GetContentRegionMax().X - Misc.IconUnitWidth() - ImGui.GetStyle().WindowPadding.X);
                 if (ImGuiComponents.IconButton((int)achv.ID, FontAwesomeIcon.Trash))
                 {
                     Config.Achievements.Remove(achv);
@@ -250,7 +250,7 @@ internal unsafe class AchievementTracker : Feature
             ImGui.BeginGroup();
 
             var cursor = ImGui.GetCursorPos();
-            var sizeVec = new Vector2(ImGui.GetContentRegionAvail().X - iconButtonSize.X - (ImGui.GetStyle().WindowPadding.X * 2), iconButtonSize.Y);
+            var sizeVec = new Vector2(ImGui.GetContentRegionAvail().X - Misc.IconUnitWidth() - (ImGui.GetStyle().WindowPadding.X * 2), Misc.IconUnitHeight());
 
             var percentage = progress / (float)total;
             var label = string.Format("{0:P} Complete ({1} / {2})", percentage, progress, total);
