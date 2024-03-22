@@ -69,57 +69,59 @@ internal class FaloopToChat : Feature
 
     protected override DrawConfigDelegate DrawConfigTree => (ref bool hasChanged) =>
     {
-        ImGui.InputText("Faloop Username", ref MainConfig.FaloopUsername, 32);
-        ImGui.InputText("Faloop Password", ref MainConfig.FaloopPassword, 128);
+        if (ImGui.InputText("Faloop Username", ref MainConfig.FaloopUsername, 32)) hasChanged = true;
+        if (ImGui.InputText("Faloop Password", ref MainConfig.FaloopPassword, 128)) hasChanged = true;
         if (ImGui.Button("Save & Connect")) Connect();
         ImGui.SameLine();
         if (ImGui.Button("Emit mock payload")) EmitMockData();
         ImGui.SameLine();
         if (ImGui.Button("Kill Connection")) socket.Dispose();
 
-        DrawPerRankConfig("Rank S", RankS);
-        DrawPerRankConfig("Rank A", RankA);
-        DrawPerRankConfig("Rank B", RankB);
-        DrawPerRankConfig("Fate", Fate);
+        if (DrawPerRankConfig("Rank S", RankS)) hasChanged = true;
+        if (DrawPerRankConfig("Rank A", RankA)) hasChanged = true;
+        if (DrawPerRankConfig("Rank B", RankB)) hasChanged = true;
+        if (DrawPerRankConfig("Fate", Fate)) hasChanged = true;
     };
 
-    private void DrawPerRankConfig(string label, Configs rankConfig)
+    private bool DrawPerRankConfig(string label, Configs rankConfig)
     {
+        var changed = false;
         if (ImGui.CollapsingHeader(label))
         {
             ImGui.Indent();
-            ImGui.Combo($"Channel##{label}", ref rankConfig.Channel, channels, channels.Length);
-            ImGui.Combo($"Jurisdiction##{label}", ref rankConfig.Jurisdiction, jurisdictions, jurisdictions.Length);
+            if (ImGui.Combo($"Channel##{label}", ref rankConfig.Channel, channels, channels.Length)) changed = true;
+            if (ImGui.Combo($"Jurisdiction##{label}", ref rankConfig.Jurisdiction, jurisdictions, jurisdictions.Length)) changed = true;
 
             ImGui.Text("Expansions");
             ImGui.Indent();
             foreach (var patchVersion in Enum.GetValues<MajorPatch>())
             {
                 ref var value = ref CollectionsMarshal.GetValueRefOrAddDefault(rankConfig.MajorPatches, patchVersion, out _);
-                ImGui.Checkbox(Enum.GetName(patchVersion), ref value);
+                if (ImGui.Checkbox(Enum.GetName(patchVersion), ref value)) changed = true;
             }
             ImGui.Unindent();
             ImGui.NewLine();
 
-            ImGui.Checkbox($"Report Spawns##{label}", ref rankConfig.EnableSpawnReport);
+            if (ImGui.Checkbox($"Report Spawns##{label}", ref rankConfig.EnableSpawnReport)) changed = true;
             if (rankConfig.EnableSpawnReport)
             {
                 ImGui.Indent();
-                ImGui.Checkbox($"Display Spawn Timestamp##{label}", ref rankConfig.EnableSpawnTimestamp);
+                if (ImGui.Checkbox($"Display Spawn Timestamp##{label}", ref rankConfig.EnableSpawnTimestamp)) changed = true;
                 ImGui.Unindent();
             }
-            ImGui.Checkbox($"Report Deaths##{label}", ref rankConfig.EnableDeathReport);
+            if (ImGui.Checkbox($"Report Deaths##{label}", ref rankConfig.EnableDeathReport)) changed = true;
             if (rankConfig.EnableDeathReport)
             {
                 ImGui.Indent();
-                ImGui.Checkbox($"Display Death Timestamp##{label}", ref rankConfig.EnableDeathTimestamp);
+                if (ImGui.Checkbox($"Display Death Timestamp##{label}", ref rankConfig.EnableDeathTimestamp)) changed = true;
                 ImGui.Unindent();
             }
-            ImGui.Checkbox($"Disable Reporting While in Duty##{label}", ref rankConfig.DisableInDuty);
+            if (ImGui.Checkbox($"Disable Reporting While in Duty##{label}", ref rankConfig.DisableInDuty)) changed = true;
 
-            ImGui.Checkbox($"Skip Orphan Report##{label}", ref rankConfig.SkipOrphanReport);
+            if (ImGui.Checkbox($"Skip Orphan Report##{label}", ref rankConfig.SkipOrphanReport)) changed = true;
             ImGui.Unindent();
         }
+        return changed;
     }
 
     public override void Enable()
