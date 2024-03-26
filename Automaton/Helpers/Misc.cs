@@ -1,4 +1,5 @@
 using Dalamud.Interface;
+using ECommons.Reflection;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
@@ -27,6 +28,8 @@ public static class Misc
 
         throw new Exception("https://tenor.com/view/8032213");
     }
+
+    public static bool HasPlugin(string name) => DalamudReflector.TryGetDalamudPlugin(name, out var _, false, true);
 
     public static float IconUnitHeight() => ImGuiHelpers.GetButtonSize(FontAwesomeIcon.Trash.ToIconString()).Y;
     public static float IconUnitWidth() => ImGuiHelpers.GetButtonSize(FontAwesomeIcon.Trash.ToIconString()).X;

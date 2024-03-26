@@ -1,8 +1,8 @@
 using Automaton.FeaturesSetup;
 using Automaton.Helpers;
+using Automaton.IPC;
 using ECommons;
 using ECommons.DalamudServices;
-using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
 using System.Numerics;
 using System.Windows.Forms;
@@ -17,15 +17,25 @@ public unsafe class ClickToMove : Feature
 
     private readonly OverrideMovement movement = new();
 
+    public Configs Config { get; private set; }
+    public override bool UseAutoConfig => true;
+    public class Configs : FeatureConfig
+    {
+        [FeatureConfigOption("Pathfind", HelpText = "Requires vnavmesh to be installed.")]
+        public bool Pathfind = false;
+    }
+
     public override void Enable()
     {
         base.Enable();
+        Config = LoadConfig<Configs>() ?? new Configs();
         Svc.Framework.Update += MoveTo;
     }
 
     public override void Disable()
     {
         base.Disable();
+        SaveConfig(Config);
         Svc.Framework.Update -= MoveTo;
     }
 
@@ -53,6 +63,17 @@ public unsafe class ClickToMove : Feature
                 {
                     var mousePos = ImGui.GetIO().MousePos;
                     Svc.GameGui.ScreenToWorld(mousePos, out var pos, 100000f);
+                    if (Config.Pathfind)
+                    {
+                        if (!NavmeshIPC.PathIsRunning())
+                            NavmeshIPC.PathfindAndMoveTo(pos, false);
+                        else
+                        {
+                            NavmeshIPC.PathStop();
+                            NavmeshIPC.PathfindAndMoveTo(pos, false);
+                        }
+                        return;
+                    }
                     movement.Enabled = true;
                     movement.DesiredPosition = destination = pos;
                 }
