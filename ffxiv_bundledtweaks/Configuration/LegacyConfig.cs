@@ -13,7 +13,9 @@ internal sealed class LegacyConfig : IPluginConfiguration {
     public int Version { get; set; }
     public ObservableCollection<string> EnabledTweaks = [];
     public LegacyTweakConfigs Tweaks = new();
+#pragma warning disable CS0649
     public bool ShowDebug;
+#pragma warning restore CS0649
 }
 
 internal sealed class LegacyTweakConfigs {

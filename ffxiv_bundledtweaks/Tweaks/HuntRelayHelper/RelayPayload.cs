@@ -1,11 +1,10 @@
-﻿using ComplexTweaks.Tweaks;
-using Dalamud.Game.Text;
+﻿using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Lumina.Excel.Sheets;
 using System.IO;
 
-namespace ComplexTweaks.Utilities;
+namespace ComplexTweaks.Tweaks;
 
 public sealed class RelayPayload(MapLinkPayload mapLink, uint worldId, uint? instance, uint relayType, uint originChannel) : DalamudLinkPayload {
     private const byte EmbeddedInfoTypeByte = (byte)(EmbeddedInfoType.DalamudLink + 4);
