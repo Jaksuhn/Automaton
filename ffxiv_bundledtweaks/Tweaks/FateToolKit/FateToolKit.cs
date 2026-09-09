@@ -1,3 +1,8 @@
+using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
+using Dalamud.Interface.Components;
+using Dalamud.Interface.Utility.Raii;
+
 namespace ComplexTweaks.Tweaks;
 
 public enum FateSortCriteria {
@@ -20,12 +25,13 @@ public class FateToolKitConfig {
     [IntConfig] public int MaxDuration = 900;
     [IntConfig] public int MinTimeRemaining = 120;
     [IntConfig] public int MaxProgress = 90;
-    [IntConfig(Min = 1, Max = 100, Description = "Skip FATEs below this level")] public int MinLevel = 1;
-    [IntConfig(Min = 1, Max = 100, Description = "Skip FATEs above this level")] public int MaxLevel = 100;
-    [BoolConfig] public bool SwapZones = true;
-
+    [IntConfig(Min = 1, Max = 100)] public int MinLevel = 1;
+    [IntConfig(Min = 1, Max = 100)] public int MaxLevel = 100;
+    [StringConfig(Description = "Available tokens: {Level}, {Name}, {Id}, {Progress}, {TimeRemaining}, {Distance}, {State}")]
     public string DisplayNameFormat = "[{Level}] {Name}";
-    public Vector4 BarColour = new(0.404f, 0.259f, 0.541f, 1f);
+    [BoolConfig(Description = "Doesn't apply to grind modes")] public bool SwapZones = true;
+    [ColorConfig] public Vector4 BarColour = new(0.404f, 0.259f, 0.541f, 1f);
+
     public Dictionary<FateType, HashSet<uint>> Blacklist = [];
     public HashSet<PublicEvent.FateRule> BlacklistedRules = [];
     public List<FateSortOrder> SortOrder =
@@ -56,7 +62,7 @@ public class FateToolKitConfig {
 [Requires(Ipc.Navmesh | Ipc.BossMod | Ipc.TextAdvance)]
 public class FateToolKit : Tweak<FateToolKitConfig, FateToolKitWindow>, IFateGrindRunState {
     public override string Name => "Fate Tool Kit (Date With Destiny)";
-    public override string Description => "Fate tracker with additional fate automations. This is a WIP v3 of Date With Destiny.";
+    public override string Description => "Fate tracker with additional fate automations.";
 
     private const int MinTimeToPrioritise = 240;
     private static readonly CommandRouter<FateToolKit> Router = new(
@@ -260,6 +266,95 @@ public class FateToolKit : Tweak<FateToolKitConfig, FateToolKitWindow>, IFateGri
     public void ToggleRunning() {
         RunUntilCompleted = null;
         Running ^= true;
+    }
+
+    protected override void DrawCustomConfig() {
+        ImGui.DrawSection("Blacklisted Rules");
+
+        var rules = Enum.GetValues<PublicEvent.FateRule>().Where(r => r is not PublicEvent.FateRule.None).ToArray();
+        var columns = 3;
+        if (ImGui.BeginTable("###BlacklistedRules", columns, ImGuiTableFlags.SizingStretchProp)) {
+            for (var i = 0; i < rules.Length; i++) {
+                if (i % columns == 0)
+                    ImGui.TableNextRow();
+                ImGui.TableNextColumn();
+                ImGui.CollectionCheckbox(rules[i].ToString(), rules[i], Config.BlacklistedRules);
+            }
+            ImGui.EndTable();
+        }
+
+        ImGui.DrawSection("Priority Order");
+        ImGui.TextColoredWrapped(Colors.Grey, "Order used when selecting the next FATE to complete.");
+
+        var sortOrder = Config.SortOrder.ToList();
+        for (var i = 0; i < sortOrder.Count; i++) {
+            using var id = ImRaii.PushId($"sort_{i}");
+            var item = sortOrder[i];
+            var criteria = item.Criteria;
+
+            var handleSize = new Vector2(ImGui.GetFrameHeight());
+            ImGui.Button($"##Drag{i}", handleSize);
+
+            ImGui.DragDropSource(i, "FATE_SORT_ITEM"u8, criteria.ToString().Replace("_", " "));
+            ImGui.DragDropTarget(i, "FATE_SORT_ITEM"u8, sortOrder.Count, (sourceIndex, insertIndex) => {
+                var dragged = sortOrder[sourceIndex];
+                sortOrder.RemoveAt(sourceIndex);
+                if (sourceIndex < insertIndex)
+                    insertIndex--;
+                sortOrder.Insert(insertIndex, dragged);
+                Config.SortOrder = sortOrder;
+            });
+
+            ImGui.TooltipOnHover("Drag to change priority order");
+            ImGui.SameLine();
+
+            ImGui.SetNextItemWidth(200);
+            using (var critCombo = ImRaii.Combo($"###Criteria{i}", criteria.ToString().Replace("_", " "))) {
+                if (critCombo) {
+                    foreach (var crit in Enum.GetValues<FateSortCriteria>()) {
+                        if (ImGui.Selectable(crit.ToString().Replace("_", " "), crit == criteria)) {
+                            item.Criteria = crit;
+                            Config.SortOrder[i] = item;
+                        }
+                    }
+                }
+            }
+
+            ImGui.SameLine();
+            var arrowIcon = item.Descending ? FontAwesomeIcon.ArrowDown : FontAwesomeIcon.ArrowUp;
+            if (ImGuiComponents.IconButton($"###Dir{i}", arrowIcon)) {
+                item.Descending = !item.Descending;
+                Config.SortOrder[i] = item;
+            }
+            ImGui.TooltipOnHover(item.Descending ? "Descending (highest first)" : "Ascending (lowest first)");
+
+            ImGui.SameLine();
+            if (ImGuiComponents.IconButton($"###Remove{i}", FontAwesomeIcon.Trash)) {
+                sortOrder.RemoveAt(i);
+                Config.SortOrder = sortOrder;
+                i--;
+            }
+            else
+                ImGui.TooltipOnHover("Remove this sort criteria");
+        }
+
+        if (ImGui.Button("Add Sort Criteria"))
+            ImGui.OpenPopup("###AddSortCriteria");
+
+        using (var popup = ImRaii.Popup("###AddSortCriteria")) {
+            if (popup) {
+                foreach (var crit in Enum.GetValues<FateSortCriteria>()) {
+                    if (ImGui.Selectable(crit.ToString().Replace("_", " "))) {
+                        sortOrder.Add(new FateSortOrder { Criteria = crit, Descending = true });
+                        Config.SortOrder = sortOrder;
+                    }
+                }
+            }
+        }
+
+        ImGui.SameLine();
+        if (ImGui.Button("Reset to Default"))
+            Config.SortOrder = new FateToolKitConfig().SortOrder;
     }
 
     [CommandHandler(["/dwd", "/vfate"], "Opens the FATE tracker")]
