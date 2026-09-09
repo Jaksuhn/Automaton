@@ -20,11 +20,14 @@ public class FateToolKitConfig {
     [IntConfig] public int MaxDuration = 900;
     [IntConfig] public int MinTimeRemaining = 120;
     [IntConfig] public int MaxProgress = 90;
+    [IntConfig(Min = 1, Max = 100, Description = "Skip FATEs below this level")] public int MinLevel = 1;
+    [IntConfig(Min = 1, Max = 100, Description = "Skip FATEs above this level")] public int MaxLevel = 100;
     [BoolConfig] public bool SwapZones = true;
 
     public string DisplayNameFormat = "[{Level}] {Name}";
     public Vector4 BarColour = new(0.404f, 0.259f, 0.541f, 1f);
     public Dictionary<FateType, HashSet<uint>> Blacklist = [];
+    public HashSet<PublicEvent.FateRule> BlacklistedRules = [];
     public List<FateSortOrder> SortOrder =
     [
         new() { Criteria = FateSortCriteria.HasBonusWithTwist, Descending = true },
@@ -39,7 +42,6 @@ public class FateToolKitConfig {
 /*
  * TODO:
  * identify fate chains and wait around for the next // hacked together. Needs some RE if the client even knows this
- * config: blacklist fate types
  * gemstone spending
  * more dynamic pull sizes. Like if fates have a ton of enemies, they're generally low health and you could just pull them all
  * better handling of new fates spawning on top of you
@@ -274,9 +276,6 @@ public class FateToolKit : Tweak<FateToolKitConfig, FateToolKitWindow>, IFateGri
         }
     }
 
-    internal bool IsBlacklisted(PublicEvent f)
-        => Config.Blacklist.TryGetValue(f.FateType, out var set) && set.Contains(f.Id);
-
     public void ToggleBlacklist(PublicEvent f) {
         if (!Config.Blacklist.TryGetValue(f.FateType, out var set))
             Config.Blacklist[f.FateType] = set = [];
@@ -285,32 +284,60 @@ public class FateToolKit : Tweak<FateToolKitConfig, FateToolKitWindow>, IFateGri
             set.Remove(f.Id);
     }
 
-    public bool FateConditions(PublicEvent f)
-        => f.Duration <= Config.MaxDuration
-        && f.Progress <= Config.MaxProgress
-        && (f.TimeRemaining < 0 || f.TimeRemaining > Config.MinTimeRemaining)
-        && !IsBlacklisted(f)
-        && !f.IsPending;
+    public bool FateConditions(PublicEvent f) => EvaluateFateConditions(f);
 
     public (bool IsEligible, List<string> FailedConditions) GetFateConditionDetails(PublicEvent f) {
         var failed = new List<string>();
+        return (EvaluateFateConditions(f, failed), failed);
+    }
 
-        if (f.Duration > Config.MaxDuration)
-            failed.Add($"Duration {f.Duration}s > MaxDuration {Config.MaxDuration}s");
+    private bool EvaluateFateConditions(PublicEvent f, List<string>? failures = null) {
+        var collect = failures is not null;
+        var anyFailed = false;
 
-        if (f.Progress > Config.MaxProgress)
-            failed.Add($"Progress {f.Progress}% > MaxProgress {Config.MaxProgress}%");
+        if (f.Duration > Config.MaxDuration) {
+            if (!collect) return false;
+            failures!.Add($"Duration {f.Duration}s > MaxDuration {Config.MaxDuration}s");
+            anyFailed = true;
+        }
 
-        if (f.TimeRemaining >= 0 && f.TimeRemaining <= Config.MinTimeRemaining)
-            failed.Add($"TimeRemaining {f.TimeRemaining:F0}s <= MinTimeRemaining {Config.MinTimeRemaining}s");
+        if (f.Progress > Config.MaxProgress) {
+            if (!collect) return false;
+            failures!.Add($"Progress {f.Progress}% > MaxProgress {Config.MaxProgress}%");
+            anyFailed = true;
+        }
 
-        if (IsBlacklisted(f))
-            failed.Add("Blacklisted");
+        if (f.TimeRemaining >= 0 && f.TimeRemaining <= Config.MinTimeRemaining) {
+            if (!collect) return false;
+            failures!.Add($"TimeRemaining {f.TimeRemaining:F0}s <= MinTimeRemaining {Config.MinTimeRemaining}s");
+            anyFailed = true;
+        }
 
-        if (f.IsPending)
-            failed.Add("Pending (not yet active / not on map)");
+        if (Config.Blacklist.TryGetValue(f.FateType, out var set) && set.Contains(f.Id)) {
+            if (!collect) return false;
+            failures!.Add($"Blacklisted id {f.Id}");
+            anyFailed = true;
+        }
 
-        return (failed.Count == 0, failed);
+        if (Config.BlacklistedRules.Contains(f.Rule)) {
+            if (!collect) return false;
+            failures!.Add($"Blacklisted rule ({f.Rule})");
+            anyFailed = true;
+        }
+
+        if (f.Level < Config.MinLevel || f.Level > Config.MaxLevel) {
+            if (!collect) return false;
+            failures!.Add($"Level {f.Level} outside [{Config.MinLevel}, {Config.MaxLevel}]");
+            anyFailed = true;
+        }
+
+        if (f.IsPending) {
+            if (!collect) return false;
+            failures!.Add("Pending (not yet active / not on map)");
+            anyFailed = true;
+        }
+
+        return !anyFailed;
     }
 
     public IEnumerable<(PublicEvent Fate, bool IsAvailable)> GetOrderedFates() {

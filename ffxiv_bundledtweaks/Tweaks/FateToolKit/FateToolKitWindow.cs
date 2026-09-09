@@ -7,6 +7,7 @@ using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using FFXIVClientStructs.FFXIV.Client.Enums;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
@@ -145,14 +146,12 @@ public class FateToolKitWindow : MinimisableWindow {
 
             using (var buttonStyle = ImRaii.PushStyle(ImGuiStyleVar.ButtonTextAlign, new Vector2(0, 0.5f)))
             using (var color = ImRaii.PushColor(ImGuiCol.Button, 0).Push(ImGuiCol.ButtonHovered, ImGui.GetColorU32(ImGuiCol.ButtonHovered)).Push(ImGuiCol.ButtonActive, ImGui.GetColorU32(ImGuiCol.ButtonActive))) {
-                var isBlacklisted = _tweak.IsBlacklisted(fate);
-
                 if (fate.HasBonus) {
                     ImGui.Image(ITextureProvider.Get().GetFromGameIcon(new Dalamud.Interface.Textures.GameIconLookup(65001)).GetWrapOrEmpty().Handle, new Vector2(ImGui.IconUnitHeight()));
                     ImGui.SameLine(0f, 0f);
                 }
 
-                using (var nameCol = ImRaii.PushColor(ImGuiCol.Text, isAvailable && !isBlacklisted ? (uint)Color.White : Colors.Grey3)) {
+                using (var nameCol = ImRaii.PushColor(ImGuiCol.Text, isAvailable ? (uint)Color.White : Colors.Grey3)) {
                     if (ImGui.Button(displayName, new Vector2(
                         fate.HasBonus
                             ? Math.Max(1f, nameWidth - ImGui.IconUnitWidth())
@@ -169,7 +168,7 @@ public class FateToolKitWindow : MinimisableWindow {
                 if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
                     _tweak.ToggleBlacklist(fate);
 
-                ImGui.TooltipOnHover(BuildFateTooltip(fate, displayName, isBlacklisted));
+                ImGui.TooltipOnHover(BuildFateTooltip(fate, displayName));
             }
 
             ImGui.SameLine();
@@ -218,7 +217,37 @@ public class FateToolKitWindow : MinimisableWindow {
         ImGui.Button(text);
     }
 
-    private void DrawSettings() {
+    private unsafe void DrawSettings() {
+        ImGui.TextColored(new Vector4(0.8f, 0.8f, 1f, 1f), "Level Filter");
+        ImGui.Spacing();
+        ImGui.TextWrapped("Skip FATEs outside this level range");
+        ImGui.Spacing();
+
+        ImGui.TextV("Min Level:");
+        var max = PlayerState.Instance()->MaxLevel;
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(100f);
+        if (ImGui.DragInt("###MinLevel", ref _tweak.Config.MinLevel, 0.1f, 1, max))
+            _tweak.Config.MinLevel = Math.Clamp(_tweak.Config.MinLevel, 1, _tweak.Config.MaxLevel);
+
+        ImGui.SameLine();
+        ImGui.TextV("Max Level:");
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(100f);
+        if (ImGui.DragInt("###MaxLevel", ref _tweak.Config.MaxLevel, 0.1f, 1, max))
+            _tweak.Config.MaxLevel = Math.Clamp(_tweak.Config.MaxLevel, _tweak.Config.MinLevel, max);
+
+        ImGui.SpacedSeparator();
+
+        ImGui.TextColored(new Vector4(0.8f, 0.8f, 1f, 1f), "Blacklisted Rules");
+        ImGui.Spacing();
+
+        foreach (var rule in Enum.GetValues<PublicEvent.FateRule>().Where(r => r != PublicEvent.FateRule.None)) {
+            ImGui.CollectionCheckbox(rule.ToString(), rule, _tweak.Config.BlacklistedRules);
+        }
+
+        ImGui.SpacedSeparator();
+
         ImGui.TextColored(new Vector4(0.8f, 0.8f, 1f, 1f), "Priority Order Configuration");
         ImGui.Spacing();
         ImGui.TextWrapped("Configure the order in which fates are prioritized. The order shown here is the order used by AvailableFates when selecting which fate to complete next.");
@@ -318,7 +347,7 @@ public class FateToolKitWindow : MinimisableWindow {
         ImGui.SpacedSeparator();
     }
 
-    private string BuildFateTooltip(PublicEvent fate, string displayName, bool isBlacklisted) {
+    private string BuildFateTooltip(PublicEvent fate, string displayName) {
         var sb = new StringBuilder();
 
         sb.AppendLine($"Display: {displayName}");
@@ -345,8 +374,6 @@ public class FateToolKitWindow : MinimisableWindow {
 
             sb.AppendLine($"{prop.Name}: {value}");
         }
-
-        sb.AppendLine($"Blacklist: {(isBlacklisted ? "Yes" : "No")}");
 
         var (isEligible, failedConditions) = _tweak.GetFateConditionDetails(fate);
         sb.AppendLine($"Will be automated? {isEligible}");
